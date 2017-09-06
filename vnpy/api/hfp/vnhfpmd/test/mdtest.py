@@ -5,7 +5,7 @@ from time import sleep
 
 from PyQt4 import QtGui
 
-from vnctpmd import *
+from vnhfpmd import *
 
 
 #----------------------------------------------------------------------
@@ -32,85 +32,37 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
-        super(TestMdApi, self).__init__()
-        
+        super(TestMdApi, self).__init__() 
+    
     #----------------------------------------------------------------------
     @simple_log    
-    def onFrontConnected(self):
-        """服务器连接"""
+    def onClientClosed(self, client, n):
+        print("Client Closed")
         pass
     
     #----------------------------------------------------------------------
     @simple_log    
-    def onFrontDisconnected(self, n):
-        """服务器断开"""
-        print n
+    def onClientConnected(self, client):
+        print("Client Connected")
+        pass
         
     #----------------------------------------------------------------------
     @simple_log    
-    def onHeartBeatWarning(self, n):
-        """心跳报警"""
-        print n
+    def onClientDisConnected(self, client, n):
+        print("Client DisConnected")
+        pass
     
     #----------------------------------------------------------------------
     @simple_log    
-    def onRspError(self, error, n, last):
-        """错误"""
-        print_dict(error)
+    def onClienthandshaked(self, client, IsSuccess, index, code):
+        print("Client HandSharked")
+        pass
     
     @simple_log 
     #----------------------------------------------------------------------
-    def onRspUserLogin(self, data, error, n, last):
-        """登陆回报"""
+    def onQuotationInfo(self, client, data):
+        print("Receiving Quotation")
         print_dict(data)
-        print_dict(error)
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRspUserLogout(self, data, error, n, last):
-        """登出回报"""
-        print_dict(data)
-        print_dict(error)
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRspSubMarketData(self, data, error, n, last):
-        """订阅合约回报"""
-        print_dict(data)
-        print_dict(error)
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRspUnSubMarketData(self, data, error, n, last):
-        """退订合约回报"""
-        print_dict(data)
-        print_dict(error)    
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRtnDepthMarketData(self, data):
-        """行情推送"""
-        print_dict(data)
-    
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRspSubForQuoteRsp(self, data, error, n, last):
-        """订阅合约回报"""
-        print_dict(data)
-        print_dict(error)
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRspUnSubForQuoteRsp(self, data, error, n, last):
-        """退订合约回报"""
-        print_dict(data)
-        print_dict(error)    
-        
-    #----------------------------------------------------------------------
-    @simple_log    
-    def onRtnForQuoteRsp(self, data):
-        """行情推送"""
-        print_dict(data)    
 
 
 #----------------------------------------------------------------------
@@ -125,23 +77,23 @@ def main():
     api = TestMdApi()
     
     # 在C++环境中创建MdApi对象，传入参数是希望用来保存.con文件的地址
-    api.createFtdcMdApi('')
+    api.createHFPMdApi()
     
     # 注册前置机地址
-    api.registerFront("tcp://qqfz-md1.ctp.shcifco.com:32313")
+    #api.registerFront("tcp://qqfz-md1.ctp.shcifco.com:32313")
     
     # 初始化api，连接前置机
     api.init()
     sleep(0.5)
     
     # 登陆
-    loginReq = {}                           # 创建一个空字典
-    loginReq['UserID'] = ''                 # 参数作为字典键值的方式传入
-    loginReq['Password'] = ''               # 键名和C++中的结构体成员名对应
-    loginReq['BrokerID'] = ''    
-    reqid = reqid + 1                       # 请求数必须保持唯一性
-    i = api.reqUserLogin(loginReq, 1)
-    sleep(0.5)
+    #loginReq = {}                           # 创建一个空字典
+    #loginReq['UserID'] = ''                 # 参数作为字典键值的方式传入
+    #loginReq['Password'] = ''               # 键名和C++中的结构体成员名对应
+    #loginReq['BrokerID'] = ''    
+    #reqid = reqid + 1                       # 请求数必须保持唯一性
+    #i = api.reqUserLogin(loginReq, 1)
+    #sleep(0.5)
     
     ## 登出，测试出错（无此功能）
     #reqid = reqid + 1
@@ -163,10 +115,10 @@ def main():
     #i = api.unSubscribeMarketData('IF1505')
     
     # 订阅询价，测试通过
-    i = api.subscribeForQuoteRsp('IO1504-C-3900')
+    #i = api.subscribeForQuoteRsp('IO1504-C-3900')
     
     # 退订询价，测试通过
-    i = api.unSubscribeForQuoteRsp('IO1504-C-3900')
+    #i = api.unSubscribeForQuoteRsp('IO1504-C-3900')
     
     # 连续运行，用于输出行情
     app.exec_()

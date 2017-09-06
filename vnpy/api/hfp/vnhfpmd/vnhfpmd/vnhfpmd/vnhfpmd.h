@@ -138,17 +138,19 @@ void getStr(dict d, string key, char* value);
 ///C++ SPI的回调函数方法实现
 ///-------------------------------------------------------------------------------------
 
-void OnClientClosed(CLIENT client, hfp::close_type type);
+
 //API的继承实现
 class MdApi 
 {
 private:
 	//CThostFtdcMdApi* api;				//API对象
 	thread *task_thread;				//工作线程指针（向python中推送数据）
-	ConcurrentQueue<Task> task_queue;	//任务队列
 	CLIENT clientSeq;
+	CLIENT tradeSeq;
 
 public:
+	static ConcurrentQueue<Task> task_queue;	//任务队列
+
 	MdApi()
 	{
 		function0<void> f = boost::bind(&MdApi::processTask, this);
@@ -164,23 +166,91 @@ public:
 	//API回调函数
 	//-------------------------------------------------------------------------------------
 
-	void OnClientClosed(CLIENT client, hfp::close_type type);
+	static void MdApi::OnClientClosed(CLIENT client, hfp::close_type type)
+	{
+		Task task = Task();
+		task.task_name = ONCLIENTCLOSED;
+		task.task_data = type;
+		MdApi::task_queue.push(task);
+	}
 
-	void OnClientConnected(CLIENT client);
+	static void  MdApi::OnClientConnected(CLIENT client)
+	{
+		Task task = Task();
+		task.task_name = ONCLIENTCONNECTED;
+		MdApi::task_queue.push(task);
+	}
 
-	void OnClientDisConnected(CLIENT client, int code);
+	static void MdApi::OnClientDisConnected(CLIENT client, int code)
+	{
+		Task task = Task();
+		task.task_name = ONCLIENTDISCONNECTED;
+		task.task_data = code;
+		MdApi::task_queue.push(task);
+	}
 
-	void OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code);
-		
-	void OnQuotationInfo(CLIENT client, quotation_data& data);
+	static void MdApi::OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
+	{
+		Task task = Task();
+		task.task_name = ONCLIENTHANDSHAKED;
+		task.task_error = IsSuccess;
+		task.task_id = index;
+		task.task_data = *code;
+		MdApi::task_queue.push(task);
+	}
 
-	
+	static void MdApi::OnQuotationInfo(CLIENT client, quotation_data& data)
+	{
+		Task task = Task();
+		task.task_name = ONQUOTATIONINFO;
+		task.task_data = data;
+		MdApi::task_queue.push(task);
+	}
 
 	//-------------------------------------------------------------------------------------
 	//task：任务
 	//-------------------------------------------------------------------------------------
 
-	void processTask();
+	//void processTask();
+
+
+	void processTask()
+	{
+		while (1)
+		{
+			Task task = MdApi::task_queue.wait_and_pop();
+
+			switch (task.task_name)
+			{
+			case ONCLIENTCLOSED:
+			{
+				this->processClientClosed(task);
+				break;
+			}
+			case ONCLIENTCONNECTED:
+			{
+				this->processClientConnected(task);
+				break;
+			}
+			case ONCLIENTDISCONNECTED:
+			{
+				this->processClientDisConnected(task);
+				break;
+			}
+			case ONCLIENTHANDSHAKED:
+			{
+				this->processClienthandshaked(task);
+				break;
+			}
+			case ONQUOTATIONINFO:
+			{
+				this->processQuotationInfo(task);
+				break;
+			}
+			};
+		}
+	};
+
 
 	void processClientClosed(Task task);
 
@@ -215,12 +285,34 @@ public:
 	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	void createHFPMdApi();
+	//void createHFPMdApi();
+	void createHFPMdApi()
+	{
+		clientSeq = client("3A0A64012D1084AF793F1BB1FDE2B4CB",
+			"71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV",
+			true,
+			hfp::client_type::quotation);//测试
+
+		//设置回调函数
+		setkeepalive(clientSeq, true, 5000, 5000);
+		setonconnected(clientSeq, MdApi::OnClientConnected);
+		setonconnectfail(clientSeq, MdApi::OnClientDisConnected);
+		setonclosed(clientSeq, MdApi::OnClientClosed);
+		setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
+		setonquotation(clientSeq, MdApi::OnQuotationInfo);
+
+	};
+
+	void init();
+
+	void connectMdFront(string mdFrontAddress, int mdPort);
+
+	void connectTradeFront(string tradeFrontAddress, int tradePort);
 
 	/*
 	void release();
 
-	void init();
+	
 
 	int join();
 
@@ -228,7 +320,7 @@ public:
 
 	string getTradingDay();
 
-	void registerFront(string pszFrontAddress);
+	
 
 	int subscribeMarketData(string instrumentID);
 

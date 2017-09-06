@@ -79,57 +79,19 @@ void getChar(dict d, string key, char *value)
 ///-------------------------------------------------------------------------------------
 
 
-void  MdApi::OnClientClosed(CLIENT client, hfp::close_type type)
-{
-	Task task = Task();
-	task.task_name = ONCLIENTCLOSED;
-	task.task_data = type;
-	this->task_queue.push(task);
-}
 
-void  MdApi::OnClientConnected(CLIENT client)
-{
-	Task task = Task();
-	task.task_name = ONCLIENTCONNECTED;
-	this->task_queue.push(task);
-}
-
-void  MdApi::OnClientDisConnected(CLIENT client, int code)
-{
-	Task task = Task();
-	task.task_name = ONCLIENTDISCONNECTED;
-	task.task_data = code;
-	this->task_queue.push(task);
-}
-
-void  MdApi::OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
-{
-	Task task = Task();
-	task.task_name = ONCLIENTHANDSHAKED;
-	task.task_error = IsSuccess;
-	task.task_id = index;
-	task.task_data = *code;
-	this->task_queue.push(task);
-}
-
-void  MdApi::OnQuotationInfo(CLIENT client, quotation_data& data)
-{
-	Task task = Task();
-	task.task_name = ONQUOTATIONINFO;
-	task.task_data = data;
-	this->task_queue.push(task);
-}
 
 
 ///-------------------------------------------------------------------------------------
 ///工作线程从队列中取出数据，转化为python对象后，进行推送
 ///-------------------------------------------------------------------------------------
 
+/*
 void MdApi::processTask()
 {
 	while (1)
 	{
-		Task task = this->task_queue.wait_and_pop();
+		Task task = MdApi::task_queue.wait_and_pop();
 
 		switch (task.task_name)
 		{
@@ -161,6 +123,7 @@ void MdApi::processTask()
 		};
 	}
 };
+*/
 
 void MdApi::processClientClosed(Task task)
 {
@@ -207,8 +170,10 @@ void MdApi::processQuotationInfo(Task task)
 ///主动函数
 ///-------------------------------------------------------------------------------------
 
+/*
 void MdApi::createHFPMdApi()
 {
+	MdApi::task_queue.empty();
 	clientSeq = client("3A0A64012D1084AF793F1BB1FDE2B4CB",
 		"71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV",
 		true,
@@ -216,21 +181,33 @@ void MdApi::createHFPMdApi()
 
 	//设置回调函数
 	setkeepalive(clientSeq, true, 5000, 5000);
-	setonconnected(clientSeq, this->OnClientConnected));
-	setonconnectfail(clientSeq, this->OnClientDisConnected);
-	setonclosed(clientSeq, this->OnClientClosed);
-	setonhandshaked(clientSeq, this->OnClienthandshaked);//握手
-	setonquotation(clientSeq, this->OnQuotationInfo);
+	setonconnected(clientSeq, MdApi::OnClientConnected);
+	setonconnectfail(clientSeq, MdApi::OnClientDisConnected);
+	setonclosed(clientSeq, MdApi::OnClientClosed);
+	setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
+	setonquotation(clientSeq, MdApi::OnQuotationInfo);
 	
 };
+*/
+
+void MdApi::init()
+{
+	//连接
+	connect(clientSeq, "58.215.39.218", 5566);//测试
+}
+
+
+void MdApi::connectMdFront(string mdFrontAddress, int mdPort)
+{
+	connect(clientSeq, (char*)mdFrontAddress.c_str(), mdPort);
+}
+
+void MdApi::connectTradeFront(string tradeFrontAddress, int tradePort)
+{
+	connect(clientSeq, (char*)tradeFrontAddress.c_str(), tradePort);
+}
 
 /*
-
-void MdApi::registerFront(string pszFrontAddress)
-{
-	this->api->RegisterFront((char*)pszFrontAddress.c_str());
-};
-
 int MdApi::subscribeMarketData(string instrumentID)
 {
 	char* buffer = (char*)instrumentID.c_str();
