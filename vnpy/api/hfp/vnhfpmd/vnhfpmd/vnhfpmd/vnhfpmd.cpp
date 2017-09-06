@@ -349,6 +349,7 @@ BOOST_PYTHON_MODULE(vnhfpmd)
 
 	class_<MdApiWrap, boost::noncopyable>("MdApi")
 		.def("createHFPMdApi", &MdApiWrap::createHFPMdApi)
+		.def("init", &MdApiWrap::init)
 		.def("onClientClosed", pure_virtual(&MdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&MdApiWrap::onClientConnected))
 		.def("onClientDisConnected", pure_virtual(&MdApiWrap::onClientDisConnected))

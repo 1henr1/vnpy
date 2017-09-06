@@ -138,6 +138,7 @@ void getStr(dict d, string key, char* value);
 ///C++ SPI的回调函数方法实现
 ///-------------------------------------------------------------------------------------
 
+ConcurrentQueue<Task> task_queue;	//任务队列
 
 //API的继承实现
 class MdApi 
@@ -149,7 +150,7 @@ private:
 	CLIENT tradeSeq;
 
 public:
-	static ConcurrentQueue<Task> task_queue;	//任务队列
+	
 
 	MdApi()
 	{
@@ -171,14 +172,14 @@ public:
 		Task task = Task();
 		task.task_name = ONCLIENTCLOSED;
 		task.task_data = type;
-		MdApi::task_queue.push(task);
+		task_queue.push(task);
 	}
 
 	static void  MdApi::OnClientConnected(CLIENT client)
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTCONNECTED;
-		MdApi::task_queue.push(task);
+		task_queue.push(task);
 	}
 
 	static void MdApi::OnClientDisConnected(CLIENT client, int code)
@@ -186,7 +187,7 @@ public:
 		Task task = Task();
 		task.task_name = ONCLIENTDISCONNECTED;
 		task.task_data = code;
-		MdApi::task_queue.push(task);
+		task_queue.push(task);
 	}
 
 	static void MdApi::OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
@@ -196,7 +197,7 @@ public:
 		task.task_error = IsSuccess;
 		task.task_id = index;
 		task.task_data = *code;
-		MdApi::task_queue.push(task);
+		task_queue.push(task);
 	}
 
 	static void MdApi::OnQuotationInfo(CLIENT client, quotation_data& data)
@@ -204,7 +205,7 @@ public:
 		Task task = Task();
 		task.task_name = ONQUOTATIONINFO;
 		task.task_data = data;
-		MdApi::task_queue.push(task);
+		task_queue.push(task);
 	}
 
 	//-------------------------------------------------------------------------------------
@@ -218,7 +219,7 @@ public:
 	{
 		while (1)
 		{
-			Task task = MdApi::task_queue.wait_and_pop();
+			Task task = task_queue.wait_and_pop();
 
 			switch (task.task_name)
 			{

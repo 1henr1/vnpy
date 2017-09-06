@@ -55,7 +55,7 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     @simple_log    
     def onClienthandshaked(self, client, IsSuccess, index, code):
-        print("Client HandSharked")
+        print("Client HandShaked")
         pass
     
     @simple_log 
