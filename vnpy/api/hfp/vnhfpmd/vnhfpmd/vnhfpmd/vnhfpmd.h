@@ -139,6 +139,7 @@ void getStr(dict d, string key, char* value);
 ///-------------------------------------------------------------------------------------
 
 ConcurrentQueue<Task> task_queue;	//任务队列
+FILE *fp;
 
 //API的继承实现
 class MdApi 
@@ -172,6 +173,7 @@ public:
 		Task task = Task();
 		task.task_name = ONCLIENTCLOSED;
 		task.task_data = type;
+		task.task_id = client;
 		task_queue.push(task);
 	}
 
@@ -179,6 +181,7 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTCONNECTED;
+		task.task_id = client;
 		task_queue.push(task);
 	}
 
@@ -286,7 +289,6 @@ public:
 	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	//void createHFPMdApi();
 	void createHFPMdApi()
 	{
 		clientSeq = client("3A0A64012D1084AF793F1BB1FDE2B4CB",
@@ -294,12 +296,15 @@ public:
 			true,
 			hfp::client_type::quotation);//测试
 
+		//fp = fopen("debug.txt", "w");
+		//fprintf(fp,"%s:%d   clientSeq=%d \n", __FUNCTION__, __LINE__, clientSeq);
+		//fflush(fp);
 		//设置回调函数
 		setkeepalive(clientSeq, true, 5000, 5000);
 		setonconnected(clientSeq, MdApi::OnClientConnected);
-		setonconnectfail(clientSeq, MdApi::OnClientDisConnected);
-		setonclosed(clientSeq, MdApi::OnClientClosed);
-		setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
+		//setonconnectfail(clientSeq, MdApi::OnClientDisConnected);
+		//setonclosed(clientSeq, MdApi::OnClientClosed);
+		//setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
 		setonquotation(clientSeq, MdApi::OnQuotationInfo);
 
 	};

@@ -12,7 +12,8 @@ from vnhfpmd import *
 def print_dict(d):
     """按照键值打印一个字典"""
     for key,value in d.items():
-        print key + ':' + str(value)
+        print key + ':' + str(value),
+    print
         
         
 #----------------------------------------------------------------------
@@ -43,7 +44,7 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     @simple_log    
     def onClientConnected(self, client):
-        print("Client Connected")
+        print(client, "Client Connected")
         pass
         
     #----------------------------------------------------------------------
@@ -61,7 +62,6 @@ class TestMdApi(MdApi):
     @simple_log 
     #----------------------------------------------------------------------
     def onQuotationInfo(self, client, data):
-        print("Receiving Quotation")
         print_dict(data)
 
 

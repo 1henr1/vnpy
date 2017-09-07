@@ -135,7 +135,8 @@ void MdApi::processClientClosed(Task task)
 void MdApi::processClientConnected(Task task)
 {
 	PyLock lock;
-	this->onClientConnected(0);
+	int id = task.task_id;
+	this->onClientConnected(id);
 }
 
 void MdApi::processClientDisConnected(Task task)
@@ -157,10 +158,34 @@ void MdApi::processClienthandshaked(Task task)
 void MdApi::processQuotationInfo(Task task)
 {
 	PyLock lock;
-	quotation_data quota_data = any_cast<quotation_data>(task.task_data);
+	quotation_data quotaData = any_cast<quotation_data>(task.task_data);
 	dict marketdata;
-	marketdata["time"] = quota_data.datetime;
-	marketdata["open"] = quota_data.open;
+
+	marketdata["seq"]  = quotaData.seq;//流水号
+	marketdata["datetime"] = quotaData.datetime;//发生时间(秒)
+	marketdata["contract_id"] = (string)quotaData.contract_id;//合约编码
+	marketdata["contract_name"] = (string)quotaData.contract_name;//合约名称
+	marketdata["marketId"] = (string)quotaData.marketId;//市场编码
+	marketdata["open"] = quotaData.open;//开盘价
+	marketdata["high"] = quotaData.high;//最高价
+	marketdata["low"] = quotaData.low;//最低价
+	marketdata["new"] = quotaData._new;//最新价
+	marketdata["last_close"] = quotaData.last_close;//昨日收盘价
+	marketdata["average"] = quotaData.average;//均价
+	marketdata["total_volume"] = quotaData.total_volume;//总成交量
+	marketdata["total_amount"] = quotaData.total_amount;//总成交额
+	marketdata["subs_volume"] = quotaData.subs_volume;//总持仓量
+	marketdata["cur_volume"] = quotaData.cur_volume;//现量
+	marketdata["type"] = quotaData.type;//行情类型 1-集合竞价申报,2-集合竞价成交,3-申报,4-成交
+	marketdata["down_limit"] = quotaData.down_limit;//最低限价
+	marketdata["up_limit"] = quotaData.up_limit;//最高限价
+	marketdata["balance_price"] = quotaData.balance_price;//盈亏计算价
+	marketdata["updown_base"] = quotaData.updown_base;//涨跌幅基准价
+	marketdata["last_subs_volume"] = quotaData.last_subs_volume;//昨日持仓
+	marketdata["buy1_price"] = quotaData.buy_price[0];//买价
+	marketdata["buy1_volume"] = quotaData.buy_volume[0];//买量
+	marketdata["sell1_price"] = quotaData.sell_price[0];//卖价
+	marketdata["sell1_volume"] = quotaData.sell_volume[0];//卖量
 
 	this->onQuotationInfo(0, marketdata);
 }
