@@ -129,21 +129,20 @@ void MdApi::processClientClosed(Task task)
 {
 	PyLock lock;
 	int type = any_cast<int>(task.task_data);
-	this->onClientClosed(0, type);
+	this->onClientClosed(type);
 }
 
 void MdApi::processClientConnected(Task task)
 {
 	PyLock lock;
-	int id = task.task_id;
-	this->onClientConnected(id);
+	this->onClientConnected();
 }
 
 void MdApi::processClientDisConnected(Task task)
 {
 	PyLock lock;
 	int code = any_cast<int>(task.task_data);
-	this->onClientDisConnected(0, code);
+	this->onClientDisConnected(code);
 }
 
 void MdApi::processClienthandshaked(Task task)
@@ -152,7 +151,7 @@ void MdApi::processClienthandshaked(Task task)
 	bool IsSuccess = any_cast<bool>(task.task_error);
 	int index = task.task_id;
 	string code = any_cast<string>(task.task_data);
-	this->onClienthandshaked(0, IsSuccess, index, code);
+	this->onClienthandshaked(IsSuccess, index, code);
 }
 
 void MdApi::processQuotationInfo(Task task)
@@ -182,27 +181,22 @@ void MdApi::processQuotationInfo(Task task)
 	marketdata["balance_price"] = quotaData.balance_price;//盈亏计算价
 	marketdata["updown_base"] = quotaData.updown_base;//涨跌幅基准价
 	marketdata["last_subs_volume"] = quotaData.last_subs_volume;//昨日持仓
-	marketdata["buy1_price"] = quotaData.buy_price[0];//买价
-	marketdata["buy1_volume"] = quotaData.buy_volume[0];//买量
-	marketdata["sell1_price"] = quotaData.sell_price[0];//卖价
-	marketdata["sell1_volume"] = quotaData.sell_volume[0];//卖量
+	marketdata["buy_price_1"] = quotaData.buy_price[0];//买价
+	marketdata["buy_volume_1"] = quotaData.buy_volume[0];//买量
+	marketdata["sell_price_1"] = quotaData.sell_price[0];//卖价
+	marketdata["sell_volume_1"] = quotaData.sell_volume[0];//卖量
 
-	this->onQuotationInfo(0, marketdata);
+	this->onQuotationInfo(marketdata);
 }
 
 
 ///-------------------------------------------------------------------------------------
 ///主动函数
 ///-------------------------------------------------------------------------------------
-
-/*
-void MdApi::createHFPMdApi()
+void MdApi::createHFPMdApi(string id, string license)
 {
-	MdApi::task_queue.empty();
-	clientSeq = client("3A0A64012D1084AF793F1BB1FDE2B4CB",
-		"71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV",
-		true,
-		hfp::client_type::quotation);//测试
+	//创建客户端
+	clientSeq = client(id.c_str(), license.c_str(), true, hfp::client_type::quotation);//测试
 
 	//设置回调函数
 	setkeepalive(clientSeq, true, 5000, 5000);
@@ -211,9 +205,8 @@ void MdApi::createHFPMdApi()
 	setonclosed(clientSeq, MdApi::OnClientClosed);
 	setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
 	setonquotation(clientSeq, MdApi::OnQuotationInfo);
-	
+
 };
-*/
 
 void MdApi::init()
 {
@@ -303,12 +296,12 @@ int MdApi::reqUserLogout(dict req, int nRequestID)
 
 struct MdApiWrap : MdApi, wrapper < MdApi >
 {
-	virtual void onClientClosed(int client, int type)
+	virtual void onClientClosed(int type)
 	{
 		//以下的try...catch...可以实现捕捉python环境中错误的功能，防止C++直接出现原因未知的崩溃
 		try
 		{
-			this->get_override("onClientClosed")(client, type);
+			this->get_override("onClientClosed")(type);
 		}
 		catch (error_already_set const &)
 		{
@@ -316,11 +309,11 @@ struct MdApiWrap : MdApi, wrapper < MdApi >
 		}
 	};
 
-	virtual void onClientConnected(int client)
+	virtual void onClientConnected()
 	{
 		try
 		{
-			this->get_override("onClientConnected")(client);
+			this->get_override("onClientConnected")();
 		}
 		catch (error_already_set const &)
 		{
@@ -328,11 +321,11 @@ struct MdApiWrap : MdApi, wrapper < MdApi >
 		}
 	};
 
-	virtual void onClientDisConnected(int client, int code)
+	virtual void onClientDisConnected(int code)
 	{
 		try
 		{
-			this->get_override("onClientDisConnected")(client, code);
+			this->get_override("onClientDisConnected")(code);
 		}
 		catch (error_already_set const &)
 		{
@@ -340,11 +333,11 @@ struct MdApiWrap : MdApi, wrapper < MdApi >
 		}
 	};
 
-	virtual void onClienthandshaked(int client, bool IsSuccess, int index, string code)
+	virtual void onClienthandshaked(bool IsSuccess, int index, string code)
 	{
 		try
 		{
-			this->get_override("onClienthandshaked")(client, IsSuccess, index, code);
+			this->get_override("onClienthandshaked")(IsSuccess, index, code);
 		}
 		catch (error_already_set const &)
 		{
@@ -352,11 +345,11 @@ struct MdApiWrap : MdApi, wrapper < MdApi >
 		}
 	};
 
-	virtual void onQuotationInfo(int client, dict data)
+	virtual void onQuotationInfo(dict data)
 	{
 		try
 		{
-			this->get_override("onQuotationInfo")(client, data);
+			this->get_override("onQuotationInfo")(data);
 		}
 		catch (error_already_set const &)
 		{

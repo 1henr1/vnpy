@@ -139,7 +139,7 @@ void getStr(dict d, string key, char* value);
 ///-------------------------------------------------------------------------------------
 
 ConcurrentQueue<Task> task_queue;	//任务队列
-FILE *fp;
+FILE *fp = fopen("debug.txt", "w");
 
 //API的继承实现
 class MdApi 
@@ -148,7 +148,6 @@ private:
 	//CThostFtdcMdApi* api;				//API对象
 	thread *task_thread;				//工作线程指针（向python中推送数据）
 	CLIENT clientSeq;
-	CLIENT tradeSeq;
 
 public:
 	
@@ -168,24 +167,22 @@ public:
 	//API回调函数
 	//-------------------------------------------------------------------------------------
 
-	static void MdApi::OnClientClosed(CLIENT client, hfp::close_type type)
+	static void OnClientClosed(CLIENT client, hfp::close_type type)
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTCLOSED;
 		task.task_data = type;
-		task.task_id = client;
 		task_queue.push(task);
 	}
 
-	static void  MdApi::OnClientConnected(CLIENT client)
+	static void OnClientConnected(CLIENT client)
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTCONNECTED;
-		task.task_id = client;
 		task_queue.push(task);
 	}
 
-	static void MdApi::OnClientDisConnected(CLIENT client, int code)
+	static void OnClientDisConnected(CLIENT client, int code)
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTDISCONNECTED;
@@ -193,17 +190,17 @@ public:
 		task_queue.push(task);
 	}
 
-	static void MdApi::OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
+	static void OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
 	{
 		Task task = Task();
 		task.task_name = ONCLIENTHANDSHAKED;
 		task.task_error = IsSuccess;
 		task.task_id = index;
-		task.task_data = *code;
+		task.task_data = (code == nullptr) ? "" : (string)code;
 		task_queue.push(task);
 	}
 
-	static void MdApi::OnQuotationInfo(CLIENT client, quotation_data& data)
+	static void OnQuotationInfo(CLIENT client, quotation_data& data)
 	{
 		Task task = Task();
 		task.task_name = ONQUOTATIONINFO;
@@ -214,10 +211,6 @@ public:
 	//-------------------------------------------------------------------------------------
 	//task：任务
 	//-------------------------------------------------------------------------------------
-
-	//void processTask();
-
-
 	void processTask()
 	{
 		while (1)
@@ -266,48 +259,21 @@ public:
 
 	void processQuotationInfo(Task task);
 
+	virtual void onClientClosed(int type) {};
 
-	//-------------------------------------------------------------------------------------
-	//data：回调函数的数据字典
-	//error：回调函数的错误字典
-	//id：请求id
-	//last：是否为最后返回
-	//i：整数
-	//-------------------------------------------------------------------------------------
+	virtual void onClientConnected() {};
 
-	virtual void onClientClosed(int client, int type) {};
+	virtual void onClientDisConnected(int code) {};
 
-	virtual void onClientConnected(int client) {};
+	virtual void onClienthandshaked(bool IsSuccess, int index, string code) {};
 
-	virtual void onClientDisConnected(int client, int code) {};
-
-	virtual void onClienthandshaked(int client, bool IsSuccess, int index, string code) {};
-
-	virtual void onQuotationInfo(int client, dict data) {};
+	virtual void onQuotationInfo(dict data) {};
 
 	//-------------------------------------------------------------------------------------
 	//req:主动函数的请求字典
 	//-------------------------------------------------------------------------------------
 
-	void createHFPMdApi()
-	{
-		clientSeq = client("3A0A64012D1084AF793F1BB1FDE2B4CB",
-			"71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV",
-			true,
-			hfp::client_type::quotation);//测试
-
-		//fp = fopen("debug.txt", "w");
-		//fprintf(fp,"%s:%d   clientSeq=%d \n", __FUNCTION__, __LINE__, clientSeq);
-		//fflush(fp);
-		//设置回调函数
-		setkeepalive(clientSeq, true, 5000, 5000);
-		setonconnected(clientSeq, MdApi::OnClientConnected);
-		//setonconnectfail(clientSeq, MdApi::OnClientDisConnected);
-		//setonclosed(clientSeq, MdApi::OnClientClosed);
-		//setonhandshaked(clientSeq, MdApi::OnClienthandshaked);//握手
-		setonquotation(clientSeq, MdApi::OnQuotationInfo);
-
-	};
+	void createHFPMdApi(string id, string license);
 
 	void init();
 
@@ -315,29 +281,7 @@ public:
 
 	void connectTradeFront(string tradeFrontAddress, int tradePort);
 
-	/*
-	void release();
-
-	
-
-	int join();
-
-	int exit();
-
-	string getTradingDay();
-
-	
-
-	int subscribeMarketData(string instrumentID);
-
-	int unSubscribeMarketData(string instrumentID);
-
-	int subscribeForQuoteRsp(string instrumentID);
-
-	int unSubscribeForQuoteRsp(string instrumentID);
-
 	int reqUserLogin(dict req, int nRequestID);
 
 	int reqUserLogout(dict req, int nRequestID);
-	*/
 };

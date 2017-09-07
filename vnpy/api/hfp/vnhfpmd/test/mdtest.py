@@ -37,32 +37,30 @@ class TestMdApi(MdApi):
     
     #----------------------------------------------------------------------
     @simple_log    
-    def onClientClosed(self, client, n):
-        print("Client Closed")
+    def onClientClosed(self, n):
         pass
     
     #----------------------------------------------------------------------
     @simple_log    
-    def onClientConnected(self, client):
-        print(client, "Client Connected")
+    def onClientConnected(self):
         pass
         
     #----------------------------------------------------------------------
     @simple_log    
     def onClientDisConnected(self, client, n):
-        print("Client DisConnected")
         pass
     
     #----------------------------------------------------------------------
     @simple_log    
-    def onClienthandshaked(self, client, IsSuccess, index, code):
-        print("Client HandShaked")
+    def onClienthandshaked(self, IsSuccess, index, code):
+        print IsSuccess, index, code
         pass
     
     @simple_log 
     #----------------------------------------------------------------------
-    def onQuotationInfo(self, client, data):
+    def onQuotationInfo(self, data):
         print_dict(data)
+        pass
 
 
 #----------------------------------------------------------------------
@@ -76,8 +74,9 @@ def main():
     # 创建API对象
     api = TestMdApi()
     
-    # 在C++环境中创建MdApi对象，传入参数是希望用来保存.con文件的地址
-    api.createHFPMdApi()
+    # 在C++环境中创建MdApi对象
+    
+    api.createHFPMdApi('3A0A64012D1084AF793F1BB1FDE2B4CB','71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV')
     
     # 注册前置机地址
     #api.registerFront("tcp://qqfz-md1.ctp.shcifco.com:32313")
