@@ -35,21 +35,20 @@ using namespace hfp;
 #define ONLOGINRESPONSE 5
 #define ONLOGOUTPUSH 6
 #define ONMARKETSTATEPUSH 7
-#define ONMARKETSTATEPUSH 8
-#define ONASSOCIATORRESPONSE 9
-#define ONMARKETRESPONSE 10
-#define ONCONTRACTRESPONSE 11
-#define ONACCOUNTRESPONSE 12
-#define ONRECEIPTCOLLECTRESPONSE 13
-#define ONORDERRESPONSE 14
-#define ONQUERYORDERRESPONSE 15
-#define ONCANCELORDERPUSH 16
-#define ONDEALPUSH 17
-#define ONQUERYDEALRESPONSE 18
-#define ONQUERYPOSITIONCOLLECTRESPONSE 19
-#define ONQUERYPOSITIONDETAILRESPONSE 20
-#define ONQUERYDEPOSITINFORESPONSE 21
-#define ONQUERYFEEINFORESPONSE 22
+#define ONASSOCIATORRESPONSE 8
+#define ONMARKETRESPONSE 9
+#define ONCONTRACTRESPONSE 10
+#define ONACCOUNTRESPONSE 11
+#define ONRECEIPTCOLLECTRESPONSE 12
+#define ONORDERRESPONSE 13
+#define ONQUERYORDERRESPONSE 14
+#define ONCANCELORDERPUSH 15
+#define ONDEALPUSH 16
+#define ONQUERYDEALRESPONSE 17
+#define ONQUERYPOSITIONCOLLECTRESPONSE 18
+#define ONQUERYPOSITIONDETAILRESPONSE 19
+#define ONQUERYDEPOSITINFORESPONSE 20
+#define ONQUERYFEEINFORESPONSE 21
 
 
 ///-------------------------------------------------------------------------------------
@@ -156,7 +155,10 @@ void getStr(dict d, string key, char* value);
 ///-------------------------------------------------------------------------------------
 
 ConcurrentQueue<Task> task_queue;	//任务队列
+
+#ifdef _DEBUG
 FILE *fp = fopen("debug.txt", "w");
+#endif
 
 //API的继承实现
 class TdApi
@@ -166,7 +168,6 @@ private:
 	CLIENT clientSeq;
 
 public:
-
 
 	TdApi()
 	{
@@ -218,18 +219,34 @@ public:
 
 	static void OnLoginResponse(CLIENT client, response& rsp, const char* code)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONLOGINRESPONSE;
 		task.task_data = rsp;
 		task_queue.push(task);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	}
 
 	static void OnLogoutPush(CLIENT client, outtype& type)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONLOGOUTPUSH;
 		task.task_data = type;
 		task_queue.push(task);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	}
 
 	static void OnMarketStatePush(CLIENT client, const char* id, const char* instumentcode, market_state& marketstate)
@@ -350,26 +367,113 @@ public:
 
 			switch (task.task_name)
 			{
-			case ONCLIENTCLOSED:
-			{
-				this->processClientClosed(task);
-				break;
-			}
-			case ONCLIENTCONNECTED:
-			{
-				this->processClientConnected(task);
-				break;
-			}
-			case ONCLIENTDISCONNECTED:
-			{
-				this->processClientDisConnected(task);
-				break;
-			}
-			case ONCLIENTHANDSHAKED:
-			{
-				this->processClienthandshaked(task);
-				break;
-			}
+				case ONCLIENTCLOSED:
+				{
+					this->processClientClosed(task);
+					break;
+				}
+				case ONCLIENTCONNECTED:
+				{
+					this->processClientConnected(task);
+					break;
+				}
+				case ONCLIENTDISCONNECTED:
+				{
+					this->processClientDisConnected(task);
+					break;
+				}
+				case ONCLIENTHANDSHAKED:
+				{
+					this->processClienthandshaked(task);
+					break;
+				}
+				case ONLOGINRESPONSE:
+				{
+					this->processLoginResponse(task);
+					break;
+				}
+				case ONLOGOUTPUSH:
+				{
+					this->processLogoutPush(task);
+					break;
+				}
+				/*
+				case ONMARKETSTATEPUSH:
+				{
+					this->processMarketStatePush(task);
+					break;
+				}
+				case ONASSOCIATORRESPONSE:
+				{
+					this->processAssociatorResponse(task);
+					break;
+				}
+				case ONMARKETRESPONSE:
+				{
+					this->processMarketResponse(task);
+					break;
+				}
+				case ONCONTRACTRESPONSE:
+				{
+					this->processContractResponse(task);
+					break;
+				}
+				case ONACCOUNTRESPONSE:
+				{
+					this->processAccountResponse(task);
+					break;
+				}
+				case ONRECEIPTCOLLECTRESPONSE:
+				{
+					this->processReceiptcollectResponse(task);
+					break;
+				}
+				case ONORDERRESPONSE:
+				{
+					this->processOrderResponse(task);
+					break;
+				}
+				case ONQUERYORDERRESPONSE:
+				{
+					this->processQueryorderResponse(task);
+					break;
+				}
+				case ONCANCELORDERPUSH:
+				{
+					this->processCancelorderPush(task);
+					break;
+				}
+				case ONDEALPUSH:
+				{
+					this->processDealPush(task);
+					break;
+				}
+				case ONQUERYDEALRESPONSE:
+				{
+					this->processQuerydealResponse(task);
+					break;
+				}
+				case ONQUERYPOSITIONCOLLECTRESPONSE:
+				{
+					this->processQueryPositioncollectResponse(task);
+					break;
+				}
+				case ONQUERYPOSITIONDETAILRESPONSE:
+				{
+					this->processQueryPositiondetailResponse(task);
+					break;
+				}
+				case ONQUERYDEPOSITINFORESPONSE:
+				{
+					this->processQueryDepositinfoResponse(task);
+					break;
+				}
+				case ONQUERYFEEINFORESPONSE:
+				{
+					this->processQueryfeeinfoResponse(task);
+					break;
+				}
+				*/
 			};
 		}
 	};
@@ -383,7 +487,43 @@ public:
 
 	void processClienthandshaked(Task task);
 
-	void processQuotationInfo(Task task);
+	void processLoginResponse(Task task);
+
+	void processLogoutPush(Task task);
+
+	void processMarketStatePush(Task task);
+
+	void processAssociatorResponse(Task task);
+
+	void processMarketResponse(Task task);
+
+	void processContractResponse(Task task);
+
+	void processAccountResponse(Task task);
+
+	void processReceiptcollectResponse(Task task);
+
+	void processOrderResponse(Task task);
+
+	void processQueryorderResponse(Task task);
+
+	void processCancelorderPush(Task task);
+
+	void processDealPush(Task task);
+
+	void processQuerydealResponse(Task task);
+
+	void processQueryPositioncollectResponse(Task task);
+
+	void processQueryPositiondetailResponse(Task task);
+
+	void processQueryDepositinfoResponse(Task task);
+
+	void processQueryfeeinfoResponse(Task task);
+
+	//-------------------------------------------------------------------------------------
+	//与python的对接,以下函数会被python端重载
+	//-------------------------------------------------------------------------------------
 
 	virtual void onClientClosed(int type) {};
 
@@ -393,7 +533,40 @@ public:
 
 	virtual void onClienthandshaked(bool IsSuccess, int index, string code) {};
 
-	virtual void onQuotationInfo(dict data) {};
+	virtual void onLoginResponse(dict rsp) {};
+
+	virtual void onLogoutPush(int outtype) {};
+
+	virtual void onMarketStatePush(const char* id, const char* instumentcode, market_state& marketstate) {};
+
+	virtual void onAssociatorResponse(response& rsp, associator& asso) {};
+
+	virtual void onMarketResponse(response& rsp, const market* marketinfo, unsigned int number) {};
+
+	virtual void onContractResponse(response& rsp, const contract* contactinfo, unsigned int number) {};
+
+	virtual void onAccountResponse(response& rsp, const account* accountinfo, unsigned int num) {};
+
+	virtual void onReceiptcollectResponse(response& rsp, const receipt_collect* receiptcollect, unsigned int num) {};
+
+	virtual void onOrderResponse(response& rsp, order_res& orderresponse) {};
+
+	virtual void onQueryorderResponse(response& rsp, order* queryorder, unsigned int num) {};
+
+	virtual void onCancelorderPush(cancel_order_push& cancelpush) {};
+
+	virtual void onDealPush(deal& dealinfo) {};
+
+	virtual void onQuerydealResponse(response& rsp, deal* dealinfo, unsigned int num) {};
+
+	virtual void onQueryPositioncollectResponse(response& rsp, position_collect* poscollect, unsigned int num) {};
+
+	virtual void onQueryPositiondetailResponse(response& rsp, position_detail* posdetail, unsigned int len) {};
+
+	virtual void onQueryDepositinfoResponse(response& rsp, deposit_info* depositinfo, unsigned int num) {};
+
+	virtual void onQueryfeeinfoResponse(response& rsp, fee_info * feeinfo, unsigned int num) {};
+
 
 	//-------------------------------------------------------------------------------------
 	//req:主动函数的请求字典
@@ -401,15 +574,13 @@ public:
 
 	void createHFPTdApi(string id, string license);
 
-	void init();
-
 	void connectTradeFront(string tradeFrontAddress, int tradePort);
 
-	int reqUserLogin(dict req, int nRequestID);
+	SEQ reqUserLogin(dict req);
 
-	int reqUserLogout(dict req, int nRequestID);
+	SEQ reqUserLogout();
 
-	long long getservertime(CLIENT client);
+	long long reqServertime();
 
 	SEQ associator_request(CLIENT);
 };

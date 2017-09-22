@@ -108,41 +108,41 @@ void TdApi::processClienthandshaked(Task task)
 	this->onClienthandshaked(IsSuccess, index, code);
 }
 
-void TdApi::processQuotationInfo(Task task)
+void TdApi::processLoginResponse(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
-	quotation_data quotaData = any_cast<quotation_data>(task.task_data);
-	dict marketdata;
-
-	marketdata["seq"]  = quotaData.seq;//流水号
-	marketdata["datetime"] = quotaData.datetime;//发生时间(秒)
-	marketdata["contract_id"] = (string)quotaData.contract_id;//合约编码
-	marketdata["contract_name"] = (string)quotaData.contract_name;//合约名称
-	marketdata["marketId"] = (string)quotaData.marketId;//市场编码
-	marketdata["open"] = quotaData.open;//开盘价
-	marketdata["high"] = quotaData.high;//最高价
-	marketdata["low"] = quotaData.low;//最低价
-	marketdata["new"] = quotaData._new;//最新价
-	marketdata["last_close"] = quotaData.last_close;//昨日收盘价
-	marketdata["average"] = quotaData.average;//均价
-	marketdata["total_volume"] = quotaData.total_volume;//总成交量
-	marketdata["total_amount"] = quotaData.total_amount;//总成交额
-	marketdata["subs_volume"] = quotaData.subs_volume;//总持仓量
-	marketdata["cur_volume"] = quotaData.cur_volume;//现量
-	marketdata["type"] = quotaData.type;//行情类型 1-集合竞价申报,2-集合竞价成交,3-申报,4-成交
-	marketdata["down_limit"] = quotaData.down_limit;//最低限价
-	marketdata["up_limit"] = quotaData.up_limit;//最高限价
-	marketdata["balance_price"] = quotaData.balance_price;//盈亏计算价
-	marketdata["updown_base"] = quotaData.updown_base;//涨跌幅基准价
-	marketdata["last_subs_volume"] = quotaData.last_subs_volume;//昨日持仓
-	marketdata["buy_price_1"] = quotaData.buy_price[0];//买价
-	marketdata["buy_volume_1"] = quotaData.buy_volume[0];//买量
-	marketdata["sell_price_1"] = quotaData.sell_price[0];//卖价
-	marketdata["sell_volume_1"] = quotaData.sell_volume[0];//卖量
-
-	this->onQuotationInfo(marketdata);
+	response rsp = any_cast<response>(task.task_data);
+	dict ploginResponse;
+	ploginResponse["success"] = rsp.success;
+	ploginResponse["errcode"] = rsp.errcode;
+	ploginResponse["errdesc"] = rsp.errdesc;
+	ploginResponse["sequence"] = rsp.sequence;
+	this->onLoginResponse(ploginResponse);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 }
 
+void TdApi::processLogoutPush(Task task)
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	PyLock lock;
+	outtype type = any_cast<outtype>(task.task_data);
+	int ptype = type;
+	this->onLogoutPush(ptype);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+}
 
 ///-------------------------------------------------------------------------------------
 ///主动函数
@@ -178,55 +178,56 @@ void TdApi::createHFPTdApi(string id, string license)
 	setonqueryfeeinfo_response(clientSeq, TdApi::OnQueryfeeinfoResponse);
 };
 
-void TdApi::init()
-{
-	//连接
-	connect(clientSeq, "58.215.39.218", 5566);//测试
-}
-
-
 void TdApi::connectTradeFront(string tradeFrontAddress, int tradePort)
 {
 	connect(clientSeq, (char*)tradeFrontAddress.c_str(), tradePort);
 }
 
-long long TdApi::getservertime(CLIENT client)
+SEQ TdApi::reqUserLogin(dict req)
 {
-	return 0;
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	char userID[100];
+	char password[100];
+	getStr(req, "userID", userID);
+	getStr(req, "password", password);
+#ifdef _DEBUG
+	fprintf(fp, "userID=%s   password=%s \n", userID, password);
+	fflush(fp);
+#endif
+	return login_request(clientSeq, userID, password, NULL, "ch-ZN", "4", NULL);
+}
+
+SEQ TdApi::reqUserLogout()
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	SEQ logoutSeq =  logout_request(clientSeq);
+#ifdef _DEBUG
+	fprintf(fp, "logout seq = %ld \n", logoutSeq);
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	return logoutSeq;
 }
 
 
-/*
-int TdApi::reqUserLogin(dict req, int nRequestID)
+long long TdApi::reqServertime()
 {
-	CThostFtdcReqUserLoginField myreq = CThostFtdcReqUserLoginField();
-	memset(&myreq, 0, sizeof(myreq));
-	getStr(req, "MacAddress", myreq.MacAddress);
-	getStr(req, "UserProductInfo", myreq.UserProductInfo);
-	getStr(req, "UserID", myreq.UserID);
-	getStr(req, "TradingDay", myreq.TradingDay);
-	getStr(req, "InterfaceProductInfo", myreq.InterfaceProductInfo);
-	getStr(req, "BrokerID", myreq.BrokerID);
-	getStr(req, "ClientIPAddress", myreq.ClientIPAddress);
-	getStr(req, "OneTimePassword", myreq.OneTimePassword);
-	getStr(req, "ProtocolInfo", myreq.ProtocolInfo);
-	getStr(req, "Password", myreq.Password);
-	int i = this->api->ReqUserLogin(&myreq, nRequestID);
-	return i;
-};
-
-int TdApi::reqUserLogout(dict req, int nRequestID)
-{
-	CThostFtdcUserLogoutField myreq = CThostFtdcUserLogoutField();
-	memset(&myreq, 0, sizeof(myreq));
-	getStr(req, "UserID", myreq.UserID);
-	getStr(req, "BrokerID", myreq.BrokerID);
-	int i = this->api->ReqUserLogout(&myreq, nRequestID);
-	return i;
-};
-
-*/
-
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	return getservertime(clientSeq);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+}
 
 
 ///-------------------------------------------------------------------------------------
@@ -284,11 +285,24 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 		}
 	};
 
-	virtual void onQuotationInfo(dict data)
+
+	virtual void onLoginResponse(dict data)
 	{
 		try
 		{
-			this->get_override("onQuotationInfo")(data);
+			this->get_override("onLoginResponse")(data);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onLogoutPush(int outtype)
+	{
+		try
+		{
+			this->get_override("onLogoutPush")(outtype);
 		}
 		catch (error_already_set const &)
 		{
@@ -300,18 +314,23 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 };
 
 
-BOOST_PYTHON_MODULE(vnhfpmd)
+BOOST_PYTHON_MODULE(vnhfptd)
 {
 	PyEval_InitThreads();	//导入时运行，保证先创建GIL
 
 	class_<TdApiWrap, boost::noncopyable>("TdApi")
 		.def("createHFPTdApi", &TdApiWrap::createHFPTdApi)
-		.def("init", &TdApiWrap::init)
-		.def("connectMdFront",&TdApiWrap::connectMdFront)
+		.def("connectTradeFront",&TdApiWrap::connectTradeFront)
+		.def("reqUserLogin",&TdApiWrap::reqUserLogin)
+		.def("reqUserLogout",&TdApiWrap::reqUserLogout)
+		.def("reqServertime",&TdApiWrap::reqServertime)
+
 		.def("onClientClosed", pure_virtual(&TdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&TdApiWrap::onClientConnected))
 		.def("onClientDisConnected", pure_virtual(&TdApiWrap::onClientDisConnected))
 		.def("onClienthandshaked", pure_virtual(&TdApiWrap::onClienthandshaked))
-		.def("onQuotationInfo", pure_virtual(&TdApiWrap::onQuotationInfo))
+		.def("onLoginResponse", pure_virtual(&TdApiWrap::onLoginResponse))
+		.def("onLogoutPush", pure_virtual(&TdApiWrap::onLogoutPush))
+
 		;
 };

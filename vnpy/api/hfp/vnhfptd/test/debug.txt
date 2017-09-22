@@ -1,0 +1,9 @@
+Entering TdApi::reqUserLogin:189 
+userID=800261   password=800261 
+Entering TdApi::OnLoginResponse:223 
+Leaving TdApi::OnLoginResponse:231 
+Entering TdApi::processLoginResponse:114 
+Leaving TdApi::processLoginResponse:126 
+Entering TdApi::reqUserLogout:206 
+logout seq = 2048736768 
+Leaving TdApi::reqUserLogout:212 
