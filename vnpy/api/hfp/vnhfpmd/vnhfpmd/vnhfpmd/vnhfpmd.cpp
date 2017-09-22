@@ -217,7 +217,7 @@ void MdApi::init()
 
 void MdApi::connectMdFront(string mdFrontAddress, int mdPort)
 {
-	connect(clientSeq, (char*)mdFrontAddress.c_str(), mdPort);
+	connect(clientSeq, mdFrontAddress.c_str(), mdPort);
 }
 
 void MdApi::connectTradeFront(string tradeFrontAddress, int tradePort)
@@ -368,6 +368,7 @@ BOOST_PYTHON_MODULE(vnhfpmd)
 	class_<MdApiWrap, boost::noncopyable>("MdApi")
 		.def("createHFPMdApi", &MdApiWrap::createHFPMdApi)
 		.def("init", &MdApiWrap::init)
+		.def("connectMdFront",&MdApiWrap::connectMdFront)
 		.def("onClientClosed", pure_virtual(&MdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&MdApiWrap::onClientConnected))
 		.def("onClientDisConnected", pure_virtual(&MdApiWrap::onClientDisConnected))

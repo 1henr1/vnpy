@@ -75,14 +75,13 @@ def main():
     api = TestMdApi()
     
     # 在C++环境中创建MdApi对象
-    
     api.createHFPMdApi('3A0A64012D1084AF793F1BB1FDE2B4CB','71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV')
     
     # 注册前置机地址
-    #api.registerFront("tcp://qqfz-md1.ctp.shcifco.com:32313")
+    api.connectMdFront("58.215.39.218", 5566)
     
     # 初始化api，连接前置机
-    api.init()
+    #api.init()
     sleep(0.5)
     
     # 登陆
