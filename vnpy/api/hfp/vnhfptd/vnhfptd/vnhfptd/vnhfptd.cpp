@@ -73,6 +73,7 @@ void getChar(dict d, string key, char *value)
 	}
 };
 
+#define ToString(str) (str == nullptr ? "" : (string)str)
 
 ///-------------------------------------------------------------------------------------
 ///C++的回调函数将数据保存到队列中
@@ -245,6 +246,207 @@ void TdApi::processReceiptcollectResponse(Task task)
 	this->onReceiptcollectResponse(pdict);
 }
 
+void TdApi::processOrderResponse(Task task)
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	order_res item = any_cast<order_res>(task.task_data);
+	dict pdict;
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["ordertime"] = item.ordertime;//报单时间
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["isbuy"] = item.isbuy;//是否买
+	pdict["offsetflag"] = (int)item.offsetflag;//开平仓标记
+	pdict["ordertype"] = (int)item.ordertype;//报单类型
+	pdict["isdeposit"] = item.isdeposit;//是否定金
+	pdict["price"] = item.price;//价格
+	pdict["qty"] = item.qty;//数量
+	pdict["leftqty"] = item.leftqty;//剩余数量
+	pdict["operatorid"] = ToString(item.operatorid);//下单操作员
+	pdict["validate"] = item.validate;//有效期
+	this->onOrderResponse(prsp, pdict);
+#ifdef _DEBUG
+	fprintf(fp, "Leaving %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+}
+
+void TdApi::processQueryorderResponse(Task task)
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	order item = any_cast<order>(task.task_data);
+	dict pdict;
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["ordertime"] = item.ordertime;//报单时间
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["isbuy"] = item.isbuy;//是否买
+	pdict["offsetflag"] = (int)item.offsetflag;//开平仓标记
+	pdict["ordertype"] = (int)item.ordertype;//报单类型
+	pdict["isdeposit"] = item.isdeposit;//是否定金
+	pdict["price"] = item.price;//价格
+	pdict["qty"] = item.qty;//数量
+	pdict["leftqty"] = item.leftqty;//剩余数量
+	pdict["operatorid"] = ToString(item.operatorid);//下单操作员
+	pdict["validate"] = item.validate;//有效期
+	pdict["state"] = item.state;//报单状态
+	pdict["canceloperator"] = ToString(item.canceloperator);//撤单操作员
+	pdict["canceltime"] = item.canceltime;//撤单时间
+	pdict["cancelqty"] = item.cancelqty;//撤单数量
+	this->onQueryorderResponse(prsp, pdict);
+
+}
+
+void TdApi::processCancelorderPush(Task task)
+{
+	PyLock lock;
+	cancel_order_push item = any_cast<cancel_order_push>(task.task_data);
+	dict pdict;
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["canceltime"] = item.canceltime;//撤单时间
+	pdict["qty"] = item.qty;//撤单数量
+	pdict["operatorid"] = ToString(item.operatorid);//撤单操作员
+	this->onCancelorderPush(pdict);
+}
+
+void TdApi::processCancelorderResponse(Task task)
+{
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	cancel_order_res item = any_cast<cancel_order_res>(task.task_data);
+	dict pdict;
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["canceltime"] = item.canceltime;//撤单时间
+	this->onCancelorderResponse(prsp, pdict);
+}
+
+void TdApi::processDealPush(Task task)
+{
+	PyLock lock;
+	deal item = any_cast<deal>(task.task_data);
+	dict pdict;
+	pdict["dealid"] = ToString(item.dealid);//成交单号
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["isbuy"] = item. isbuy;//是否买
+	pdict["offsetflag"] = item.offsetflag;//开平仓标记
+	pdict["dealtype"] = item.dealtype;//成交类型
+	pdict["operatetype"] = item.operatetype;//操作类型
+	pdict["price"] = item.price;//成交价
+	pdict["qty"] = item.qty;//成交量
+	pdict["isdeposit"] = item.isdeposit;//是否定金
+	pdict["deposit"] = item.deposit;//定金金额(应收)
+	pdict["poundage"] = item.poundage;//手续费
+	pdict["open_cost"] = item.open_cost;//开仓成本
+	pdict["balance"] = item.balance;//平仓盈亏
+	pdict["spread"] = item.spread;//平仓价差
+	pdict["detailid"] = ToString(item.detailid);//持仓明细号
+	pdict["dealtime"] = item.dealtime;//成交时间
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["occpdif"] = item.occpdif;//总实收保证金的变化量（对应资金account->occp字段）,成交回报中该字段有效，查询返回成交信息中该字段为0
+	this->onDealPush(pdict);
+}
+
+void TdApi::processQuerydealResponse(Task task)
+{
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	deal item = any_cast<deal>(task.task_data);
+	dict pdict;
+	pdict["dealid"] = ToString(item.dealid);//成交单号
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["isbuy"] = item. isbuy;//是否买
+	pdict["offsetflag"] = item.offsetflag;//开平仓标记
+	pdict["dealtype"] = item.dealtype;//成交类型
+	pdict["operatetype"] = item.operatetype;//操作类型
+	pdict["price"] = item.price;//成交价
+	pdict["qty"] = item.qty;//成交量
+	pdict["isdeposit"] = item.isdeposit;//是否定金
+	pdict["deposit"] = item.deposit;//定金金额(应收)
+	pdict["poundage"] = item.poundage;//手续费
+	pdict["open_cost"] = item.open_cost;//开仓成本
+	pdict["balance"] = item.balance;//平仓盈亏
+	pdict["spread"] = item.spread;//平仓价差
+	pdict["detailid"] = ToString(item.detailid);//持仓明细号
+	pdict["dealtime"] = item.dealtime;//成交时间
+	pdict["orderid"] = ToString(item.orderid);//报单编码
+	pdict["occpdif"] = item.occpdif;//总实收保证金的变化量（对应资金account->occp字段）,成交回报中该字段有效，查询返回成交信息中该字段为0
+	this->onQuerydealResponse(prsp, pdict);
+}
+
+void TdApi::processQueryPositioncollectResponse(Task task)
+{
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	position_collect item = any_cast<position_collect>(task.task_data);
+	dict pdict;
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["isbuy"] = item.isbuy;//是否买持仓
+	pdict["isdeposit"] = item.isdeposit;//是否定金持仓
+	pdict["totalqty"] = item.totalqty;//总持仓量
+	pdict["totalqtytoday"] = item.totalqtytoday;//今仓总持仓量
+	pdict["totalcost"] = item.totalcost;//总持仓成本
+	pdict["avlbqty"] = item.avlbqty;//可用持仓
+	pdict["avlbqtytoday"] = item.avlbqtytoday;//今仓可用持仓
+	pdict["deposit"] = item.deposit;//总定金
+	pdict["frzord"] = item.frzord;//报单冻结
+	pdict["frzrisk"] = item.frzrisk;//风控冻结
+	pdict["frztoday"] = item.frztoday;//平今冻结
+	pdict["balance"] = item.balance;//持仓价差
+	pdict["opencost"] = item.opencost;//总开仓成本
+	pdict["frzdelivery"] = item.frzdelivery;//交收冻结
+	this->onQueryPositioncollectResponse(prsp, pdict);
+}
+
 ///-------------------------------------------------------------------------------------
 ///主动函数
 ///-------------------------------------------------------------------------------------
@@ -271,6 +473,7 @@ void TdApi::createHFPTdApi(string id, string license)
 	setonorder_response(clientSeq, TdApi::OnOrderResponse);
 	setonqueryorder_response(clientSeq, TdApi::OnQueryorderResponse);
 	setoncancelorder_push(clientSeq, TdApi::OnCancelorderPush);
+	setoncancelorder_response(clientSeq, TdApi::OnCancelorderResponse);
 	setondeal_push(clientSeq, TdApi::OnDealPush);
 	setonquerydeal_response(clientSeq, TdApi::OnQuerydealResponse);
 	setonquerypositioncollect_response(clientSeq, TdApi::OnQueryPositioncollectResponse);
@@ -341,6 +544,41 @@ hfp::SEQ TdApi::reqAccount()
 hfp::SEQ TdApi::reqReceiptcollect()
 {
 	return receiptcollect_request(clientSeq);
+}
+
+hfp::SEQ TdApi::reqOrder(string exchangeID, string instrumentID, string  clientID,
+	bool isBuy, int offset, int ordertype, bool isMargin, int price, int volume)
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fprintf(fp, "exchangeID=%s, instrumentID=%s clientID=%s isBuy=%d offset=%d ordertype=%d isMargin=%d price=%d volume=%d \n",
+		exchangeID.c_str(), instrumentID.c_str(), clientID.c_str(), isBuy, offset, ordertype, isMargin, price, volume);
+	fflush(fp);
+#endif
+	return order_request(clientSeq, exchangeID.c_str(), instrumentID.c_str(), clientID.c_str(),
+		isBuy, (offset_flag)offset, (order_type)ordertype, isMargin, price, volume);
+}
+
+hfp::SEQ TdApi::qryOrder(string sequence)
+{
+	return queryorder_request(clientSeq, sequence.c_str());
+}
+
+hfp::SEQ TdApi::reqCancelorder(string exchangeID, string orderID)
+{
+	return cancelorder_request(clientSeq, exchangeID.c_str(), orderID.c_str());
+}
+
+
+
+hfp::SEQ TdApi::qryDeal(string exchangeID)
+{
+	return queryorder_request(clientSeq, exchangeID.c_str());
+}
+
+hfp::SEQ TdApi::qryPositioncollect(string exchangeID)
+{
+	return querypositioncollect_request(clientSeq, exchangeID.c_str());
 }
 
 ///-------------------------------------------------------------------------------------
@@ -482,6 +720,78 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 			PyErr_Print();
 		}
 	};
+
+	virtual void onOrderResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onOrderResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onQueryorderResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onQueryorderResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onCancelorderPushj(dict pdict)
+	{
+		try
+		{
+			this->get_override("onCancelorderPush")(pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onCancelorderResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onCancelorderResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onQuerydealResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onQuerydealResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onQueryPositioncollectResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onQueryPositioncollectResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
 };
 
 
@@ -499,6 +809,11 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("reqContract",&TdApiWrap::reqContract)
 		.def("reqAccount",&TdApiWrap::reqAccount)
 		.def("reqReceiptcollect",&TdApiWrap::reqReceiptcollect)
+		.def("reqOrder",&TdApiWrap::reqOrder)
+		.def("qryOrder",&TdApiWrap::qryOrder)
+		.def("cancelOrder",&TdApiWrap::reqCancelorder)
+		.def("qryDeal",&TdApiWrap::qryDeal)
+		.def("qryPositioncollect",&TdApiWrap::qryPositioncollect)
 
 		.def("onClientClosed", pure_virtual(&TdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&TdApiWrap::onClientConnected))
@@ -511,6 +826,13 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("onContractResponse", pure_virtual(&TdApiWrap::onContractResponse))
 		.def("onAccountResponse", pure_virtual(&TdApiWrap::onAccountResponse))
 		.def("onReceiptcollectResponse", pure_virtual(&TdApiWrap::onReceiptcollectResponse))
+		.def("onOrderResponse", pure_virtual(&TdApiWrap::onOrderResponse))
+		.def("onQueryorderResponse", pure_virtual(&TdApiWrap::onQueryorderResponse))
+		.def("onCancelorderPush", pure_virtual(&TdApiWrap::onCancelorderPush))
+		.def("onCancelorderResponse", pure_virtual(&TdApiWrap::onCancelorderResponse))
+		.def("onDealPush", pure_virtual(&TdApiWrap::onDealPush))
+		.def("onQuerydealResponse", pure_virtual(&TdApiWrap::onQuerydealResponse))
+		.def("onQueryPositioncollectResponse", pure_virtual(&TdApiWrap::onQueryPositioncollectResponse))
 
 		;
 };

@@ -92,8 +92,16 @@ class TestTdApi(TdApi):
     @simple_log
     def onReceiptcollectResponse(self, ReceiptcollectResponse):
         print_dict(ReceiptcollectResponse)
-        pass      
-
+        pass     
+    
+    @simple_log
+    def onOrderResponse(self, rsp, order):
+        print_dict(rsp)
+        print_dict(order)
+        pass 
+    
+    
+    
 #global variables
 loginSuccess = 0
 
@@ -123,7 +131,7 @@ def main():
     
     
     while (loginSuccess == 0):
-       pass
+        pass
     
     ## 登出, 会出错， 原因未知
     #i = api.reqUserLogout()
@@ -150,20 +158,19 @@ def main():
     #print seq
     
     ## 请求仓单汇总信息 pass
-    seq = api.reqReceiptcollect()
-    print seq
+    #seq = api.reqReceiptcollect()
+    #print seq
        
-    ## 订阅合约，测试通过
-    #i = api.subscribeMarketData('IF1505')
+    ## 下单
+    ##seq = api.Order("001", "Ni1709", "800261", True, 1, 0, True, 8000, 100)
+    #print seq
     
-    ## 退订合约，测试通过
-    #i = api.unSubscribeMarketData('IF1505')
+    ## 查询订单
+    ## api.qryOrder(sequence);
     
-    # 订阅询价，测试通过
-    #i = api.subscribeForQuoteRsp('IO1504-C-3900')
+    ## 撤单
     
-    # 退订询价，测试通过
-    #i = api.unSubscribeForQuoteRsp('IO1504-C-3900')
+   
     
     # 连续运行，用于输出行情
     app.exec_()

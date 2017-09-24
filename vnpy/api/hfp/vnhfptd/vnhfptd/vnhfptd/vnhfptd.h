@@ -43,12 +43,13 @@ using namespace hfp;
 #define ONORDERRESPONSE 13
 #define ONQUERYORDERRESPONSE 14
 #define ONCANCELORDERPUSH 15
-#define ONDEALPUSH 16
-#define ONQUERYDEALRESPONSE 17
-#define ONQUERYPOSITIONCOLLECTRESPONSE 18
-#define ONQUERYPOSITIONDETAILRESPONSE 19
-#define ONQUERYDEPOSITINFORESPONSE 20
-#define ONQUERYFEEINFORESPONSE 21
+#define ONCANCELORDERRESPONSE 16
+#define ONDEALPUSH 17
+#define ONQUERYDEALRESPONSE 18
+#define ONQUERYPOSITIONCOLLECTRESPONSE 19
+#define ONQUERYPOSITIONDETAILRESPONSE 20
+#define ONQUERYDEPOSITINFORESPONSE 21
+#define ONQUERYFEEINFORESPONSE 22
 
 
 ///-------------------------------------------------------------------------------------
@@ -329,13 +330,30 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONORDERRESPONSE;
+		task.task_error = rsp;
+		task.task_data = orderresponse;
 		task_queue.push(task);
 	}
 
 	static void OnQueryorderResponse(CLIENT client, response& rsp, order* queryorder, unsigned int num)
 	{
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONQUERYORDERRESPONSE;
+			task.task_error = rsp;
+			task.task_data = queryorder[i++];
+			task_queue.push(task);
+		}
+	}
+
+	static void OnCancelorderResponse(CLIENT client, response& rsp, cancel_order_res& cancelorderres)
+	{
 		Task task = Task();
-		task.task_name = ONQUERYORDERRESPONSE;
+		task.task_name = ONCANCELORDERRESPONSE;
+		task.task_error = rsp;
+		task.task_data = cancelorderres;
 		task_queue.push(task);
 	}
 
@@ -343,6 +361,7 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONCANCELORDERPUSH;
+		task.task_data = cancelpush;
 		task_queue.push(task);
 	}
 
@@ -350,24 +369,37 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONDEALPUSH;
+		task.task_data = dealinfo;
 		task_queue.push(task);
 	}
 
 	static void OnQuerydealResponse(CLIENT client, response& rsp, deal* dealinfo, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONQUERYDEALRESPONSE;
-		task_queue.push(task);
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONQUERYDEALRESPONSE;
+			task.task_error = rsp;
+			task.task_data = dealinfo[i++];
+			task_queue.push(task);
+		}
 	}
 
 	static void OnQueryPositioncollectResponse(CLIENT client, response& rsp, position_collect* poscollect, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONQUERYPOSITIONCOLLECTRESPONSE;
-		task_queue.push(task);
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONQUERYPOSITIONCOLLECTRESPONSE;
+			task.task_error = rsp;
+			task.task_data = poscollect[i++];
+			task_queue.push(task);
+		}
 	}
 
-	static void OnQueryPositiondetailResponse(CLIENT client, response& rsp, position_detail* posdetail, unsigned int len)
+	static void OnQueryPositiondetailResponse(CLIENT client, response& rsp, position_detail* posdetail, unsigned int num)
 	{
 		Task task = Task();
 		task.task_name = ONQUERYPOSITIONDETAILRESPONSE;
@@ -460,7 +492,6 @@ public:
 					this->processReceiptcollectResponse(task);
 					break;
 				}
-				/*
 				case ONORDERRESPONSE:
 				{
 					this->processOrderResponse(task);
@@ -474,6 +505,11 @@ public:
 				case ONCANCELORDERPUSH:
 				{
 					this->processCancelorderPush(task);
+					break;
+				}
+				case ONCANCELORDERRESPONSE:
+				{
+					this->processCancelorderResponse(task);
 					break;
 				}
 				case ONDEALPUSH:
@@ -491,6 +527,7 @@ public:
 					this->processQueryPositioncollectResponse(task);
 					break;
 				}
+				/*
 				case ONQUERYPOSITIONDETAILRESPONSE:
 				{
 					this->processQueryPositiondetailResponse(task);
@@ -542,6 +579,8 @@ public:
 
 	void processCancelorderPush(Task task);
 
+	void processCancelorderResponse(Task task);
+
 	void processDealPush(Task task);
 
 	void processQuerydealResponse(Task task);
@@ -582,17 +621,19 @@ public:
 
 	virtual void onReceiptcollectResponse(dict pdict) {};
 
-	virtual void onOrderResponse(response& rsp, order_res& orderresponse) {};
+	virtual void onOrderResponse(dict rsp, dict order) {};
 
-	virtual void onQueryorderResponse(response& rsp, order* queryorder, unsigned int num) {};
+	virtual void onQueryorderResponse(dict rsp, dict order) {};
 
-	virtual void onCancelorderPush(cancel_order_push& cancelpush) {};
+	virtual void onCancelorderPush(dict pdict) {};
 
-	virtual void onDealPush(deal& dealinfo) {};
+	virtual void onCancelorderResponse(dict rsp, dict pdict) {};
 
-	virtual void onQuerydealResponse(response& rsp, deal* dealinfo, unsigned int num) {};
+	virtual void onDealPush(dict pdict) {};
 
-	virtual void onQueryPositioncollectResponse(response& rsp, position_collect* poscollect, unsigned int num) {};
+	virtual void onQuerydealResponse(dict rsp, dict pdict) {};
+
+	virtual void onQueryPositioncollectResponse(dict rsp, dict pdict) {};
 
 	virtual void onQueryPositiondetailResponse(response& rsp, position_detail* posdetail, unsigned int len) {};
 
@@ -625,4 +666,13 @@ public:
 
 	SEQ reqReceiptcollect();
 
+	SEQ reqOrder(string, string, string, bool, int, int, bool, int, int);
+
+	SEQ qryOrder(string);
+
+	SEQ reqCancelorder(string, string);
+
+	SEQ qryDeal(string);
+
+	SEQ qryPositioncollect(string);
 };
