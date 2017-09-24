@@ -41,7 +41,7 @@ class TestTdApi(TdApi):
         pass
     
     #----------------------------------------------------------------------
-    @simple_log    
+    @simple_log 
     def onClientConnected(self):
         pass
         
@@ -51,21 +51,46 @@ class TestTdApi(TdApi):
         pass
     
     #----------------------------------------------------------------------
-    @simple_log    
+    @simple_log  
     def onClienthandshaked(self, IsSuccess, index, code):
-        print IsSuccess, index, code
         pass
     
     @simple_log 
     def onLoginResponse(self, rsp):
-        print_dict(rsp)
-        pass
+        global loginSuccess
+        if rsp['success'] == True:
+            loginSuccess = 1
+        else:
+            loginSuccess = 0
+            print(rsp['errdesc'])
     
     @simple_log
     def onLogoutPush(self, outtype):
         print outtype
         pass
+    
+    @simple_log
+    def onMarketStatePush(self, MarketState):
+        #print_dict(MarketState)
+        pass    
+    
+    @simple_log
+    def onMarketResponse(self, MarketResponse):
+        #print_dict(MarketResponse)
+        pass   
+    
+    @simple_log
+    def onContractResponse(self, ContractResponse):
+        #print_dict(ContractResponse)
+        pass    
+    
+    @simple_log
+    def onAccountResponse(self, AccountResponse):
+        print_dict(AccountResponse)
+        pass     
 
+#global variables
+loginSuccess = 0
 
 #----------------------------------------------------------------------
 def main():
@@ -89,21 +114,35 @@ def main():
     loginReq = {}                           # 创建一个空字典
     loginReq['userID'] = '800261'                 # 参数作为字典键值的方式传入
     loginReq['password'] = '800261'               # 键名和C++中的结构体成员名对应
-    i = api.reqUserLogin(loginReq)
-    print(i)
-    sleep(0.5)
+    api.reqUserLogin(loginReq)
     
-    ## 登出
-    i = api.reqUserLogout()
-    sleep(0.5)
     
-    ## 安全退出，测试通过
-    #i = api.exit()
+    while (loginSuccess == 0):
+       pass
     
-    ## 获取交易日，目前输出为空
-    #day = api.getTradingDay()
-    #print 'Trading Day is:' + str(day)
+    ## 登出, 会出错， 原因未知
+    #i = api.reqUserLogout()
     #sleep(0.5)
+    
+    """
+    ## 获取服务器时间
+    time = api.reqServertime()
+    print(time)
+    print 'Server Time is:' + str(time)
+    sleep(0.5)
+    """
+    
+    ## 请求交易所信息  pass
+    #seq = api.reqMarket()
+    #print seq
+    
+    ## 请求合约信息 pass
+    #seq = api.reqContract()
+    #print seq
+    
+    ## 请求账户信息 pass
+    seq = api.reqAccount()
+    print seq
     
     ## 订阅合约，测试通过
     #i = api.subscribeMarketData('IF1505')

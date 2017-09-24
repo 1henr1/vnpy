@@ -253,6 +253,8 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONMARKETSTATEPUSH;
+		task.task_data = instumentcode == nullptr ? ( id == nullptr ? "" : (string)id) : (string)instumentcode;
+		task.task_id = marketstate;
 		task_queue.push(task);
 	}
 
@@ -268,21 +270,41 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONMARKETRESPONSE;
-		task_queue.push(task);
+		if (marketinfo != nullptr)
+		{
+			task.task_data = *marketinfo;
+			task_queue.push(task);
+		}
 	}
 
-	static void OnContractResponse(CLIENT client, response& rsp, const contract* contactinfo, unsigned int number)
+	static void OnContractResponse(CLIENT client, response& rsp, const contract* contactinfo, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONCONTRACTRESPONSE;
-		task_queue.push(task);
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+		unsigned int i = 0;
+		while ( i < num )
+		{
+			Task task = Task();
+			task.task_name = ONCONTRACTRESPONSE;
+			task.task_error = rsp;
+			task.task_data = contactinfo[i++];
+			task_queue.push(task);
+		}
 	}
 
 	static void OnAccountResponse(CLIENT client, response& rsp, const account* accountinfo, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONACCOUNTRESPONSE;
-		task_queue.push(task);
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONACCOUNTRESPONSE;
+			task.task_error = rsp;
+			task.task_data = accountinfo[i++];
+			task_queue.push(task);
+		}
 	}
 
 	static void OnReceiptcollectResponse(CLIENT client, response& rsp, const receipt_collect* receiptcollect, unsigned int num)
@@ -397,17 +419,16 @@ public:
 					this->processLogoutPush(task);
 					break;
 				}
-				/*
 				case ONMARKETSTATEPUSH:
 				{
 					this->processMarketStatePush(task);
 					break;
 				}
-				case ONASSOCIATORRESPONSE:
-				{
-					this->processAssociatorResponse(task);
-					break;
-				}
+				//case ONASSOCIATORRESPONSE:
+				//{
+				//	this->processAssociatorResponse(task);
+				//	break;
+				//}
 				case ONMARKETRESPONSE:
 				{
 					this->processMarketResponse(task);
@@ -423,6 +444,7 @@ public:
 					this->processAccountResponse(task);
 					break;
 				}
+				/*
 				case ONRECEIPTCOLLECTRESPONSE:
 				{
 					this->processReceiptcollectResponse(task);
@@ -537,15 +559,15 @@ public:
 
 	virtual void onLogoutPush(int outtype) {};
 
-	virtual void onMarketStatePush(const char* id, const char* instumentcode, market_state& marketstate) {};
+	virtual void onMarketStatePush(dict pMarketState) {};
 
 	virtual void onAssociatorResponse(response& rsp, associator& asso) {};
 
-	virtual void onMarketResponse(response& rsp, const market* marketinfo, unsigned int number) {};
+	virtual void onMarketResponse(dict pdict) {};
 
-	virtual void onContractResponse(response& rsp, const contract* contactinfo, unsigned int number) {};
+	virtual void onContractResponse(dict pdict) {};
 
-	virtual void onAccountResponse(response& rsp, const account* accountinfo, unsigned int num) {};
+	virtual void onAccountResponse(dict pdict) {};
 
 	virtual void onReceiptcollectResponse(response& rsp, const receipt_collect* receiptcollect, unsigned int num) {};
 
@@ -581,6 +603,12 @@ public:
 	SEQ reqUserLogout();
 
 	long long reqServertime();
+
+	SEQ reqMarket();
+
+	SEQ reqContract();
+
+	SEQ reqAccount();
 
 	SEQ associator_request(CLIENT);
 };
