@@ -86,8 +86,13 @@ class TestTdApi(TdApi):
     
     @simple_log
     def onAccountResponse(self, AccountResponse):
-        print_dict(AccountResponse)
-        pass     
+        #print_dict(AccountResponse)
+        pass   
+    
+    @simple_log
+    def onReceiptcollectResponse(self, ReceiptcollectResponse):
+        print_dict(ReceiptcollectResponse)
+        pass      
 
 #global variables
 loginSuccess = 0
@@ -141,9 +146,13 @@ def main():
     #print seq
     
     ## 请求账户信息 pass
-    seq = api.reqAccount()
-    print seq
+    #seq = api.reqAccount()
+    #print seq
     
+    ## 请求仓单汇总信息 pass
+    seq = api.reqReceiptcollect()
+    print seq
+       
     ## 订阅合约，测试通过
     #i = api.subscribeMarketData('IF1505')
     

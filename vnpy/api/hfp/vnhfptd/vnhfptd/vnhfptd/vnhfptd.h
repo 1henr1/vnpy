@@ -309,9 +309,20 @@ public:
 
 	static void OnReceiptcollectResponse(CLIENT client, response& rsp, const receipt_collect* receiptcollect, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONRECEIPTCOLLECTRESPONSE;
-		task_queue.push(task);
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fprintf(fp, "num = %d \n", num);
+	fflush(fp);
+#endif
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONRECEIPTCOLLECTRESPONSE;
+			task.task_error = rsp;
+			task.task_data = receiptcollect[i++];
+			task_queue.push(task);
+		}
 	}
 
 	static void OnOrderResponse(CLIENT client, response& rsp, order_res& orderresponse)
@@ -444,12 +455,12 @@ public:
 					this->processAccountResponse(task);
 					break;
 				}
-				/*
 				case ONRECEIPTCOLLECTRESPONSE:
 				{
 					this->processReceiptcollectResponse(task);
 					break;
 				}
+				/*
 				case ONORDERRESPONSE:
 				{
 					this->processOrderResponse(task);
@@ -569,7 +580,7 @@ public:
 
 	virtual void onAccountResponse(dict pdict) {};
 
-	virtual void onReceiptcollectResponse(response& rsp, const receipt_collect* receiptcollect, unsigned int num) {};
+	virtual void onReceiptcollectResponse(dict pdict) {};
 
 	virtual void onOrderResponse(response& rsp, order_res& orderresponse) {};
 
@@ -604,11 +615,14 @@ public:
 
 	long long reqServertime();
 
+	//SEQ associator_request(CLIENT);
+
 	SEQ reqMarket();
 
 	SEQ reqContract();
 
 	SEQ reqAccount();
 
-	SEQ associator_request(CLIENT);
+	SEQ reqReceiptcollect();
+
 };

@@ -229,6 +229,22 @@ void TdApi::processAccountResponse(Task task)
 	this->onAccountResponse(pdict);
 }
 
+void TdApi::processReceiptcollectResponse(Task task)
+{
+	PyLock lock;
+	receipt_collect item = any_cast<receipt_collect>(task.task_data);
+	dict pdict;
+	pdict["memberid"] = (string)item.memberid;//会员编码
+	pdict["goodsid"] = (string)item.goodsid;//商品编码
+	pdict["goodsname"] = (string)item.goodsname;//商品名称
+	pdict["totalqty"] = item.totalqty;//总量
+	pdict["avlbqty"] = item.avlbqty;//可用量
+	pdict["frzord"] = item.frzord;//报单冻结量
+	pdict["frzrisk"] = item.frzrisk;//风控冻结量
+	pdict["occp"] = item.occp;//持仓占用量
+	this->onReceiptcollectResponse(pdict);
+}
+
 ///-------------------------------------------------------------------------------------
 ///主动函数
 ///-------------------------------------------------------------------------------------
@@ -303,35 +319,28 @@ SEQ TdApi::reqUserLogout()
 
 long long TdApi::reqServertime()
 {
-#ifdef _DEBUG
-	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
-	fflush(fp);
-#endif
 	return getservertime(clientSeq);
 }
 
 SEQ TdApi::reqMarket()
 {
-#ifdef _DEBUG
-	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
-	fflush(fp);
-#endif
 	return market_request(clientSeq);
 }
 
 
 hfp::SEQ TdApi::reqContract()
 {
-#ifdef _DEBUG
-	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
-	fflush(fp);
-#endif
 	return contract_request(clientSeq);
 }
 
 hfp::SEQ TdApi::reqAccount()
 {
 	return account_request(clientSeq);
+}
+
+hfp::SEQ TdApi::reqReceiptcollect()
+{
+	return receiptcollect_request(clientSeq);
 }
 
 ///-------------------------------------------------------------------------------------
@@ -461,6 +470,18 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 			PyErr_Print();
 		}
 	};
+
+	virtual void onReceiptcollectResponse(dict pdict)
+	{
+		try
+		{
+			this->get_override("onReceiptcollectResponse")(pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
 };
 
 
@@ -477,6 +498,7 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("reqMarket",&TdApiWrap::reqMarket)
 		.def("reqContract",&TdApiWrap::reqContract)
 		.def("reqAccount",&TdApiWrap::reqAccount)
+		.def("reqReceiptcollect",&TdApiWrap::reqReceiptcollect)
 
 		.def("onClientClosed", pure_virtual(&TdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&TdApiWrap::onClientConnected))
@@ -488,6 +510,7 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("onMarketResponse", pure_virtual(&TdApiWrap::onMarketResponse))
 		.def("onContractResponse", pure_virtual(&TdApiWrap::onContractResponse))
 		.def("onAccountResponse", pure_virtual(&TdApiWrap::onAccountResponse))
+		.def("onReceiptcollectResponse", pure_virtual(&TdApiWrap::onReceiptcollectResponse))
 
 		;
 };
