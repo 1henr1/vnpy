@@ -305,15 +305,15 @@ void TdApi::processQueryorderResponse(Task task)
 	pdict["contractid"] = ToString(item.contractid);//合约编码
 	pdict["clientid"] = ToString(item.clientid);//客户编码
 	pdict["isbuy"] = item.isbuy;//是否买
-	pdict["offsetflag"] = (int)item.offsetflag;//开平仓标记
-	pdict["ordertype"] = (int)item.ordertype;//报单类型
+	pdict["offsetflag"] = (int)(item.offsetflag);//开平仓标记
+	pdict["ordertype"] = (int)(item.ordertype);//报单类型
 	pdict["isdeposit"] = item.isdeposit;//是否定金
 	pdict["price"] = item.price;//价格
 	pdict["qty"] = item.qty;//数量
 	pdict["leftqty"] = item.leftqty;//剩余数量
 	pdict["operatorid"] = ToString(item.operatorid);//下单操作员
 	pdict["validate"] = item.validate;//有效期
-	pdict["state"] = item.state;//报单状态
+	pdict["state"] = (int)(item.state);//报单状态
 	pdict["canceloperator"] = ToString(item.canceloperator);//撤单操作员
 	pdict["canceltime"] = item.canceltime;//撤单时间
 	pdict["cancelqty"] = item.cancelqty;//撤单数量
@@ -354,6 +354,10 @@ void TdApi::processCancelorderResponse(Task task)
 
 void TdApi::processDealPush(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	deal item = any_cast<deal>(task.task_data);
 	dict pdict;
@@ -362,9 +366,9 @@ void TdApi::processDealPush(Task task)
 	pdict["contractid"] = ToString(item.contractid);//合约编码
 	pdict["clientid"] = ToString(item.clientid);//客户编码
 	pdict["isbuy"] = item. isbuy;//是否买
-	pdict["offsetflag"] = item.offsetflag;//开平仓标记
-	pdict["dealtype"] = item.dealtype;//成交类型
-	pdict["operatetype"] = item.operatetype;//操作类型
+	pdict["offsetflag"] = (int)(item.offsetflag);//开平仓标记
+	pdict["dealtype"] = (int)(item.dealtype);//成交类型
+	pdict["operatetype"] = (int)(item.operatetype);//操作类型
 	pdict["price"] = item.price;//成交价
 	pdict["qty"] = item.qty;//成交量
 	pdict["isdeposit"] = item.isdeposit;//是否定金
@@ -382,6 +386,10 @@ void TdApi::processDealPush(Task task)
 
 void TdApi::processQuerydealResponse(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	response rsp = any_cast<response>(task.task_error);
 	dict prsp;
@@ -397,9 +405,9 @@ void TdApi::processQuerydealResponse(Task task)
 	pdict["contractid"] = ToString(item.contractid);//合约编码
 	pdict["clientid"] = ToString(item.clientid);//客户编码
 	pdict["isbuy"] = item. isbuy;//是否买
-	pdict["offsetflag"] = item.offsetflag;//开平仓标记
-	pdict["dealtype"] = item.dealtype;//成交类型
-	pdict["operatetype"] = item.operatetype;//操作类型
+	pdict["offsetflag"] = (int)(item.offsetflag);//开平仓标记
+	pdict["dealtype"] = (int)(item.dealtype);//成交类型
+	pdict["operatetype"] = (int)(item.operatetype);//操作类型
 	pdict["price"] = item.price;//成交价
 	pdict["qty"] = item.qty;//成交量
 	pdict["isdeposit"] = item.isdeposit;//是否定金
@@ -561,23 +569,37 @@ hfp::SEQ TdApi::reqOrder(string exchangeID, string instrumentID, string  clientI
 
 hfp::SEQ TdApi::qryOrder(string sequence)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	return queryorder_request(clientSeq, sequence.c_str());
 }
 
 hfp::SEQ TdApi::reqCancelorder(string exchangeID, string orderID)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	return cancelorder_request(clientSeq, exchangeID.c_str(), orderID.c_str());
 }
 
-
-
 hfp::SEQ TdApi::qryDeal(string exchangeID)
 {
-	return queryorder_request(clientSeq, exchangeID.c_str());
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	return querydeal_request(clientSeq, exchangeID.c_str());
 }
 
 hfp::SEQ TdApi::qryPositioncollect(string exchangeID)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	return querypositioncollect_request(clientSeq, exchangeID.c_str());
 }
 
@@ -745,7 +767,7 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 		}
 	};
 
-	virtual void onCancelorderPushj(dict pdict)
+	virtual void onCancelorderPush(dict pdict)
 	{
 		try
 		{
@@ -762,6 +784,18 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 		try
 		{
 			this->get_override("onCancelorderResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onDealPush(dict pdict)
+	{
+		try
+		{
+			this->get_override("onDealPush")(pdict);
 		}
 		catch (error_already_set const &)
 		{

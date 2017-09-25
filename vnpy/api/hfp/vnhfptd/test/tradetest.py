@@ -86,7 +86,7 @@ class TestTdApi(TdApi):
     
     @simple_log
     def onAccountResponse(self, AccountResponse):
-        #print_dict(AccountResponse)
+        print_dict(AccountResponse)
         pass   
     
     @simple_log
@@ -99,6 +99,42 @@ class TestTdApi(TdApi):
         print_dict(rsp)
         print_dict(order)
         pass 
+    
+    @simple_log
+    def onQueryorderResponse(self, rsp, order):
+        print_dict(rsp)
+        print_dict(order)
+        pass
+    
+    @simple_log
+    def onCancelorderPush(self, cancelorder):
+        print_dict(cancelorder)
+        pass
+    
+    @simple_log
+    def onCancelorderResponse(self, rsp, cancelorder):
+        print_dict(rsp)
+        print_dict(cancelorder)
+        pass
+    
+    @simple_log
+    def onDealPush(self, deal):
+        print_dict(deal)
+        pass
+    
+    @simple_log
+    def onQuerydealResponse(self, rsp, deal):
+        print_dict(rsp)
+        print_dict(deal)
+        pass
+    
+    @simple_log
+    def onQueryPositioncollectResponse(self, rsp, position_collect):
+        print_dict(rsp)
+        print_dict(position_collect)
+        pass
+    
+     
     
     
     
@@ -124,6 +160,9 @@ def main():
     sleep(0.5)
     
     # 登陆
+    #880026
+    #800261
+    #800262    
     loginReq = {}                           # 创建一个空字典
     loginReq['userID'] = '800261'                 # 参数作为字典键值的方式传入
     loginReq['password'] = '800261'               # 键名和C++中的结构体成员名对应
@@ -158,19 +197,36 @@ def main():
     #print seq
     
     ## 请求仓单汇总信息 pass
-    #seq = api.reqReceiptcollect()
+    seq = api.reqReceiptcollect()
     #print seq
        
-    ## 下单
-    ##seq = api.Order("001", "Ni1709", "800261", True, 1, 0, True, 8000, 100)
+    ## 下单, 买开
+    #seq = api.reqOrder("001", "Ni1709", "800261", True, 1, 0, True, 7800, 100)
+    #print seq
+    
+    ## 下单, 卖开
+    #seq = api.reqOrder("001", "Ni1709", "800261", False, 1, 0, True, 7800, 100)
+    #print seq
+    
+    ## 下单, 买平
+    #seq = api.reqOrder("001", "Ni1709", "800261", True, 2, 0, True, 7800, 100)
+    #print seq
+    
+    ## 下单, 买平
+    #seq = api.reqOrder("001", "Ni1709", "800261", False, 2, 0, True, 7800, 100)
     #print seq
     
     ## 查询订单
-    ## api.qryOrder(sequence);
+    #api.qryOrder("001")
     
     ## 撤单
+    #seq = api.cancelOrder("001", "O89917092500007592")
     
-   
+    #seq = api.reqAccount()
+    
+    #api.qryDeal("001")
+    
+    #api.qryPositioncollect("001")
     
     # 连续运行，用于输出行情
     app.exec_()

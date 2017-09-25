@@ -1,6 +1,8 @@
-Entering TdApi::reqUserLogin:493 
+Entering TdApi::reqUserLogin:501 
 userID=800261   password=800261 
 Entering TdApi::OnLoginResponse:224 
 Leaving TdApi::OnLoginResponse:232 
 Entering TdApi::processLoginResponse:115 
 Leaving TdApi::processLoginResponse:127 
+Entering TdApi::OnReceiptcollectResponse:314 
+num = 0 
