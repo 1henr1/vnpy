@@ -70,6 +70,12 @@ class TestTdApi(TdApi):
         pass
     
     @simple_log
+    def onAssociatorResponse(self, rsp, info):
+        print_dict(rsp)
+        print_dict(info)
+        pass    
+    
+    @simple_log
     def onMarketStatePush(self, MarketState):
         #print_dict(MarketState)
         pass    
@@ -134,6 +140,12 @@ class TestTdApi(TdApi):
         print_dict(position_collect)
         pass
     
+    @simple_log
+    def onQueryPositiondetailResponse(self, rsp, position_detail):
+        print_dict(rsp)
+        print_dict(position_detail)
+        pass    
+    
      
     
     
@@ -184,6 +196,9 @@ def main():
     sleep(0.5)
     """
     
+    #seq = api.reqAssociator()
+    #print seq
+    
     ## 请求交易所信息  pass
     #seq = api.reqMarket()
     #print seq
@@ -197,7 +212,7 @@ def main():
     #print seq
     
     ## 请求仓单汇总信息 pass
-    seq = api.reqReceiptcollect()
+    #seq = api.reqReceiptcollect()
     #print seq
        
     ## 下单, 买开
@@ -212,7 +227,7 @@ def main():
     #seq = api.reqOrder("001", "Ni1709", "800261", True, 2, 0, True, 7800, 100)
     #print seq
     
-    ## 下单, 买平
+    ## 下单, 卖平
     #seq = api.reqOrder("001", "Ni1709", "800261", False, 2, 0, True, 7800, 100)
     #print seq
     
@@ -227,6 +242,8 @@ def main():
     #api.qryDeal("001")
     
     #api.qryPositioncollect("001")
+    
+    api.qryPositiondetail("001")
     
     # 连续运行，用于输出行情
     app.exec_()

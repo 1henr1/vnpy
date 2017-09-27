@@ -263,8 +263,9 @@ public:
 	{
 		Task task = Task();
 		task.task_name = ONASSOCIATORRESPONSE;
+		task.task_error = rsp;
+		task.task_data = asso;
 		task_queue.push(task);
-
 	}
 
 	static void OnMarketResponse(CLIENT client, response& rsp, const market* marketinfo, unsigned int number)
@@ -401,10 +402,15 @@ public:
 
 	static void OnQueryPositiondetailResponse(CLIENT client, response& rsp, position_detail* posdetail, unsigned int num)
 	{
-		Task task = Task();
-		task.task_name = ONQUERYPOSITIONDETAILRESPONSE;
-		task_queue.push(task);
-
+		unsigned int i = 0;
+		while (i < num)
+		{
+			Task task = Task();
+			task.task_name = ONQUERYPOSITIONDETAILRESPONSE;
+			task.task_error = rsp;
+			task.task_data = posdetail[i++];
+			task_queue.push(task);
+		}
 	}
 
 	static void OnQueryDepositinfoResponse(CLIENT client, response& rsp, deposit_info* depositinfo, unsigned int num)
@@ -467,11 +473,11 @@ public:
 					this->processMarketStatePush(task);
 					break;
 				}
-				//case ONASSOCIATORRESPONSE:
-				//{
-				//	this->processAssociatorResponse(task);
-				//	break;
-				//}
+				case ONASSOCIATORRESPONSE:
+				{
+					this->processAssociatorResponse(task);
+					break;
+				}
 				case ONMARKETRESPONSE:
 				{
 					this->processMarketResponse(task);
@@ -527,12 +533,12 @@ public:
 					this->processQueryPositioncollectResponse(task);
 					break;
 				}
-				/*
 				case ONQUERYPOSITIONDETAILRESPONSE:
 				{
 					this->processQueryPositiondetailResponse(task);
 					break;
 				}
+				/*
 				case ONQUERYDEPOSITINFORESPONSE:
 				{
 					this->processQueryDepositinfoResponse(task);
@@ -611,7 +617,7 @@ public:
 
 	virtual void onMarketStatePush(dict pMarketState) {};
 
-	virtual void onAssociatorResponse(response& rsp, associator& asso) {};
+	virtual void onAssociatorResponse(dict rsp, dict pdict) {};
 
 	virtual void onMarketResponse(dict pdict) {};
 
@@ -635,7 +641,7 @@ public:
 
 	virtual void onQueryPositioncollectResponse(dict rsp, dict pdict) {};
 
-	virtual void onQueryPositiondetailResponse(response& rsp, position_detail* posdetail, unsigned int len) {};
+	virtual void onQueryPositiondetailResponse(dict rsp, dict pdict) {};
 
 	virtual void onQueryDepositinfoResponse(response& rsp, deposit_info* depositinfo, unsigned int num) {};
 
@@ -656,7 +662,7 @@ public:
 
 	long long reqServertime();
 
-	//SEQ associator_request(CLIENT);
+	SEQ reqAssociator();
 
 	SEQ reqMarket();
 
@@ -675,4 +681,6 @@ public:
 	SEQ qryDeal(string);
 
 	SEQ qryPositioncollect(string);
+
+	SEQ qryPositiondetail(string);
 };

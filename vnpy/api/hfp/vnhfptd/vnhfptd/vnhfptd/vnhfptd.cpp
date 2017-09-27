@@ -156,6 +156,38 @@ void TdApi::processMarketStatePush(Task task)
 	this->onMarketStatePush(pMarketState);
 }
 
+void TdApi::processAssociatorResponse(Task task)
+{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	associator item = any_cast<associator>(task.task_data);
+	dict pdict;
+	pdict["id"] = ToString(item.id);//会员编码
+	pdict["fullname"] = ToString(item.fullname);//全称
+	pdict["clientid"] = ToString(item.clientids[0]);//全称
+	pdict["clientsize"] = item.clientsize;//全称
+	pdict["bankid"] = ToString(item.bankid);//银行id (0 无绑定银行;1 工商银行无锡南长支行;2 工商银行;3 农业银行;4 中信银行)
+
+//	dict pclient;
+//	unsigned int i = 0;
+//	while (i < item.clientsize)
+//	{
+//		pclient[to_string(i)] = ToString(item.clientids[i]);
+//		i++;
+//	}
+	this->onAssociatorResponse(prsp, pdict);
+}
+
 void TdApi::processMarketResponse(Task task)
 {
 	PyLock lock;
@@ -455,6 +487,36 @@ void TdApi::processQueryPositioncollectResponse(Task task)
 	this->onQueryPositioncollectResponse(prsp, pdict);
 }
 
+void TdApi::processQueryPositiondetailResponse(Task task)
+{
+	PyLock lock;
+	response rsp = any_cast<response>(task.task_error);
+	dict prsp;
+	prsp["success"] = rsp.success;//请求是否成功
+	prsp["errcode"] = rsp.errcode;//错误码
+	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
+	prsp["sequence"] = rsp.sequence;//请求流水号
+
+	position_detail item = any_cast<position_detail>(task.task_data);
+	dict pdict;
+	pdict["id"] = ToString(item.id);//明细号
+	pdict["clientid"] = ToString(item.clientid);//客户编码
+	pdict["marketid"] = ToString(item.marketid);//交易所id
+	pdict["contractid"] = ToString(item.contractid);//合约编码
+	pdict["isbuy"] = item.isbuy;//是否买持仓
+	pdict["isdeposit"] = item.isdeposit;//是否定金持仓
+	pdict["openprice"] = item.openprice;//开仓价
+	pdict["positionprice"] = item.positionprice;//持仓价
+	pdict["dealqty"] = item.dealqty;//成交数量
+	pdict["leftqty"] = item.leftqty;//剩余数量
+	pdict["istoday"] = item.istoday;//是否今仓
+	pdict["dealtime"] = item.dealtime;//成交时间
+	pdict["frzrisk"] = item.frzrisk;//风控冻结
+	pdict["frzdelivery"] = item.frzdelivery;//交收冻结
+	this->onQueryPositiondetailResponse(prsp, pdict);
+
+}
+
 ///-------------------------------------------------------------------------------------
 ///主动函数
 ///-------------------------------------------------------------------------------------
@@ -533,6 +595,11 @@ long long TdApi::reqServertime()
 	return getservertime(clientSeq);
 }
 
+hfp::SEQ TdApi::reqAssociator()
+{
+	return associator_request(clientSeq);
+}
+
 SEQ TdApi::reqMarket()
 {
 	return market_request(clientSeq);
@@ -603,6 +670,11 @@ hfp::SEQ TdApi::qryPositioncollect(string exchangeID)
 	return querypositioncollect_request(clientSeq, exchangeID.c_str());
 }
 
+hfp::SEQ TdApi::qryPositiondetail(string exchangeID)
+{
+	return querypositiondetail_request(clientSeq, exchangeID.c_str());
+}
+
 ///-------------------------------------------------------------------------------------
 ///Boost.Python封装
 ///-------------------------------------------------------------------------------------
@@ -639,6 +711,18 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 		try
 		{
 			this->get_override("onClientDisConnected")(code);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
+
+	virtual void onAssociatorResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onAssociatorResponse")(rsp, pdict);
 		}
 		catch (error_already_set const &)
 		{
@@ -826,6 +910,18 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 			PyErr_Print();
 		}
 	};
+
+	virtual void onQueryPositiondetailResponse(dict rsp, dict pdict)
+	{
+		try
+		{
+			this->get_override("onQueryPositiondetailResponse")(rsp, pdict);
+		}
+		catch (error_already_set const &)
+		{
+			PyErr_Print();
+		}
+	};
 };
 
 
@@ -839,6 +935,7 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("reqUserLogin",&TdApiWrap::reqUserLogin)
 		.def("reqUserLogout",&TdApiWrap::reqUserLogout)
 		.def("reqServertime",&TdApiWrap::reqServertime)
+		.def("reqAssociator",&TdApiWrap::reqAssociator)
 		.def("reqMarket",&TdApiWrap::reqMarket)
 		.def("reqContract",&TdApiWrap::reqContract)
 		.def("reqAccount",&TdApiWrap::reqAccount)
@@ -848,11 +945,13 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("cancelOrder",&TdApiWrap::reqCancelorder)
 		.def("qryDeal",&TdApiWrap::qryDeal)
 		.def("qryPositioncollect",&TdApiWrap::qryPositioncollect)
+		.def("qryPositiondetail",&TdApiWrap::qryPositiondetail)
 
 		.def("onClientClosed", pure_virtual(&TdApiWrap::onClientClosed))
 		.def("onClientConnected", pure_virtual(&TdApiWrap::onClientConnected))
 		.def("onClientDisConnected", pure_virtual(&TdApiWrap::onClientDisConnected))
 		.def("onClienthandshaked", pure_virtual(&TdApiWrap::onClienthandshaked))
+		.def("onAssociatorResponse", pure_virtual(&TdApiWrap::onAssociatorResponse))
 		.def("onLoginResponse", pure_virtual(&TdApiWrap::onLoginResponse))
 		.def("onLogoutPush", pure_virtual(&TdApiWrap::onLogoutPush))
 		.def("onMarketStatePush", pure_virtual(&TdApiWrap::onMarketStatePush))
@@ -867,6 +966,7 @@ BOOST_PYTHON_MODULE(vnhfptd)
 		.def("onDealPush", pure_virtual(&TdApiWrap::onDealPush))
 		.def("onQuerydealResponse", pure_virtual(&TdApiWrap::onQuerydealResponse))
 		.def("onQueryPositioncollectResponse", pure_virtual(&TdApiWrap::onQueryPositioncollectResponse))
+		.def("onQueryPositiondetailResponse", pure_virtual(&TdApiWrap::onQueryPositiondetailResponse))
 
 		;
 };
