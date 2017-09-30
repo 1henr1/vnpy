@@ -79,45 +79,10 @@ def main():
     
     # 注册前置机地址
     api.connectMdFront("58.215.39.218", 5566)
-    
-    # 初始化api，连接前置机
-    #api.init()
-    sleep(0.5)
-    
-    # 登陆
-    #loginReq = {}                           # 创建一个空字典
-    #loginReq['UserID'] = ''                 # 参数作为字典键值的方式传入
-    #loginReq['Password'] = ''               # 键名和C++中的结构体成员名对应
-    #loginReq['BrokerID'] = ''    
-    #reqid = reqid + 1                       # 请求数必须保持唯一性
-    #i = api.reqUserLogin(loginReq, 1)
-    #sleep(0.5)
-    
-    ## 登出，测试出错（无此功能）
-    #reqid = reqid + 1
-    #i = api.reqUserLogout({}, 1)
-    #sleep(0.5)
-    
-    ## 安全退出，测试通过
-    #i = api.exit()
-    
-    ## 获取交易日，目前输出为空
-    #day = api.getTradingDay()
-    #print 'Trading Day is:' + str(day)
-    #sleep(0.5)
-    
-    ## 订阅合约，测试通过
-    #i = api.subscribeMarketData('IF1505')
-    
-    ## 退订合约，测试通过
-    #i = api.unSubscribeMarketData('IF1505')
-    
-    # 订阅询价，测试通过
-    #i = api.subscribeForQuoteRsp('IO1504-C-3900')
-    
-    # 退订询价，测试通过
-    #i = api.unSubscribeForQuoteRsp('IO1504-C-3900')
-    
+
+    # 请求行情档位
+    #api.reqQuotationLevel()
+
     # 连续运行，用于输出行情
     app.exec_()
     
