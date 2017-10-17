@@ -397,7 +397,7 @@ void TdApi::processDealPush(Task task)
 	pdict["marketid"] = ToString(item.marketid);//交易所id
 	pdict["contractid"] = ToString(item.contractid);//合约编码
 	pdict["clientid"] = ToString(item.clientid);//客户编码
-	pdict["isbuy"] = item. isbuy;//是否买
+	pdict["isbuy"] = item.isbuy;//是否买
 	pdict["offsetflag"] = (int)(item.offsetflag);//开平仓标记
 	pdict["dealtype"] = (int)(item.dealtype);//成交类型
 	pdict["operatetype"] = (int)(item.operatetype);//操作类型

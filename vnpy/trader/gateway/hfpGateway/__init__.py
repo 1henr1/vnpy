@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 from vnpy.trader import vtConstant
-from htpGateway import HfpGateway
+from hfpGateway import HfpGateway
 
 gatewayClass = HfpGateway
 gatewayName = 'HTP'
