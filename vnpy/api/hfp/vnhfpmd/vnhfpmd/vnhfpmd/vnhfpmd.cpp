@@ -127,6 +127,10 @@ void MdApi::processTask()
 
 void MdApi::processClientClosed(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	int type = any_cast<int>(task.task_data);
 	this->onClientClosed(type);
@@ -134,12 +138,20 @@ void MdApi::processClientClosed(Task task)
 
 void MdApi::processClientConnected(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	this->onClientConnected();
 }
 
 void MdApi::processClientDisConnected(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	int code = any_cast<int>(task.task_data);
 	this->onClientDisConnected(code);
@@ -147,6 +159,10 @@ void MdApi::processClientDisConnected(Task task)
 
 void MdApi::processClienthandshaked(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	bool IsSuccess = any_cast<bool>(task.task_error);
 	int index = task.task_id;
@@ -156,6 +172,10 @@ void MdApi::processClienthandshaked(Task task)
 
 void MdApi::processQuotationInfo(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	PyLock lock;
 	quotation_data quotaData = any_cast<quotation_data>(task.task_data);
 	dict marketdata;
@@ -195,6 +215,10 @@ void MdApi::processQuotationInfo(Task task)
 ///-------------------------------------------------------------------------------------
 void MdApi::createHFPMdApi(string id, string license)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	//创建客户端
 	clientSeq = client(id.c_str(), license.c_str(), true, hfp::client_type::quotation);//测试
 
@@ -215,14 +239,19 @@ void MdApi::init()
 }
 
 
-void MdApi::connectMdFront(string mdFrontAddress, int mdPort)
+void MdApi::connectMdFront(string mdFrontAddress, string mdPort)
 {
-	connect(clientSeq, mdFrontAddress.c_str(), mdPort);
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fprintf(fp, "mdFrontAddress=%s  mdPort=%s \n", (char*)mdFrontAddress.c_str(), (char*)mdPort.c_str());
+	fflush(fp);
+#endif
+	connect(clientSeq, mdFrontAddress.c_str(), atoi(mdPort.c_str()));
 }
 
-void MdApi::connectTradeFront(string tradeFrontAddress, int tradePort)
+void MdApi::connectTradeFront(string tradeFrontAddress, string tradePort)
 {
-	connect(clientSeq, (char*)tradeFrontAddress.c_str(), tradePort);
+	connect(clientSeq, (char*)tradeFrontAddress.c_str(), atoi(tradePort.c_str()));
 }
 
 /*

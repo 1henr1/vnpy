@@ -88,6 +88,7 @@ class HfpGateway(VtGateway):
     """HFP接口"""
 
     #----------------------------------------------------------------------
+    @simple_log
     def __init__(self, eventEngine, gatewayName='HFP'):
         """Constructor"""
         super(HfpGateway, self).__init__(eventEngine, gatewayName)
@@ -104,6 +105,7 @@ class HfpGateway(VtGateway):
         self.filePath = getJsonPath(self.fileName, __file__)        
         
     #----------------------------------------------------------------------
+    @simple_log
     def connect(self):
         """连接"""
         try:
@@ -128,7 +130,7 @@ class HfpGateway(VtGateway):
             tdPort = str(setting['tdPort'])
             userID = str(setting['userID'])
             password = str(setting['password'])
-           
+
         except KeyError:
             log = VtLogData()
             log.gatewayName = self.gatewayName
@@ -141,7 +143,7 @@ class HfpGateway(VtGateway):
         self.mdApi.connectMdFront(mdAddress, mdPort)
         
         self.tdApi.createHFPTdApi(tdLicenseID, tdLicenseKey)
-        self.tdApi.connectTradeFront(tdAddress, tdPort)  
+        self.tdApi.connectTradeFront(tdAddress, int(tdPort))
         
         loginReq = {}                           
         loginReq['userID'] = userID               
@@ -271,7 +273,7 @@ class HfpMdApi(MdApi):
         tick.lastPrice = data['new']
         tick.volume = data['cur_volume']
         tick.openInterest = data['subs_volume']
-        tick.time = data["datetime"]
+        tick.time = time.strftime("%H:%M:%S", time.localtime(data["datetime"]))
         tick.date = datetime.now().strftime('%Y%m%d')
         tick.openPrice = data['open']
         tick.highPrice = data['high']

@@ -139,7 +139,7 @@ void getStr(dict d, string key, char* value);
 ///-------------------------------------------------------------------------------------
 
 ConcurrentQueue<Task> task_queue;	//任务队列
-FILE *fp = fopen("debug.txt", "w");
+FILE *fp = fopen("md_debug.txt", "w");
 
 //API的继承实现
 class MdApi 
@@ -169,6 +169,10 @@ public:
 
 	static void OnClientClosed(CLIENT client, hfp::close_type type)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONCLIENTCLOSED;
 		task.task_data = type;
@@ -177,6 +181,10 @@ public:
 
 	static void OnClientConnected(CLIENT client)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONCLIENTCONNECTED;
 		task_queue.push(task);
@@ -184,6 +192,10 @@ public:
 
 	static void OnClientDisConnected(CLIENT client, int code)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONCLIENTDISCONNECTED;
 		task.task_data = code;
@@ -192,6 +204,10 @@ public:
 
 	static void OnClienthandshaked(CLIENT client, bool IsSuccess, int index, const char* code)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONCLIENTHANDSHAKED;
 		task.task_error = IsSuccess;
@@ -202,6 +218,10 @@ public:
 
 	static void OnQuotationInfo(CLIENT client, quotation_data& data)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 		Task task = Task();
 		task.task_name = ONQUOTATIONINFO;
 		task.task_data = data;
@@ -277,9 +297,9 @@ public:
 
 	void init();
 
-	void connectMdFront(string mdFrontAddress, int mdPort);
+	void connectMdFront(string mdFrontAddress, string mdPort);
 
-	void connectTradeFront(string tradeFrontAddress, int tradePort);
+	void connectTradeFront(string tradeFrontAddress, string tradePort);
 
 	int reqUserLogin(dict req, int nRequestID);
 

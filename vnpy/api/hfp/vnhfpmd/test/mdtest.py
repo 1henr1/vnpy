@@ -2,7 +2,7 @@
 
 import sys
 from time import sleep
-
+import time
 from PyQt4 import QtGui
 
 from vnhfpmd import *
@@ -56,10 +56,16 @@ class TestMdApi(MdApi):
         print IsSuccess, index, code
         pass
     
-    @simple_log 
     #----------------------------------------------------------------------
     def onQuotationInfo(self, data):
-        print_dict(data)
+        if data["contract_id"] == "Ni1710":
+            print_dict(data)
+            time_struct = time.localtime(data["datetime"])
+            print(time_struct)
+            print (time.strftime("%H:%M:%S", time_struct))
+            print("localtime")
+            print(time.time())
+            print (time.strftime("%H:%M:%S", time.localtime(time.time())))
         pass
 
 
@@ -78,7 +84,7 @@ def main():
     api.createHFPMdApi('3A0A64012D1084AF793F1BB1FDE2B4CB','71GQ215YTJFWhw3IKaT2GM0Z0HWK6Wb51mP77r1VRH98Ga6kQ+PQ5He8HNkZYrHINorKHq91VJitAiq+VtnC1qSV')
     
     # 注册前置机地址
-    api.connectMdFront("58.215.39.218", 5566)
+    api.connectMdFront("58.215.39.218", "5566")
 
     # 请求行情档位
     #api.reqQuotationLevel()

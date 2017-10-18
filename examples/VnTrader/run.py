@@ -42,7 +42,6 @@ def main():
     # 添加交易接口
     me.addGateway(ctpGateway)
     me.addGateway(oandaGateway)
-    me.addGateway(ibGateway)
     me.addGateway(huobiGateway)
     me.addGateway(okcoinGateway)
     me.addGateway(hfpGateway)
