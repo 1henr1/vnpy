@@ -17,6 +17,11 @@ from vnpy.trader.vtFunction import getJsonPath, getTempPath
 from vnpy.trader.vtConstant import GATEWAYTYPE_FUTURES
 from .language import text
 
+def print_dict(d):
+    """按照键值打印一个字典"""
+    for key,value in d.items():
+        print key + ':' + str(value),
+    print
 
 #----------------------------------------------------------------------
 def simple_log(func):
@@ -36,14 +41,16 @@ def simple_log(func):
 
 # 方向类型映射
 directionMap = {}
-directionMap[DIRECTION_LONG] = "1"
-directionMap[DIRECTION_SHORT] = "0"
+directionMap[DIRECTION_LONG] = True
+directionMap[DIRECTION_SHORT] = False
 directionMapReverse = {v: k for k, v in directionMap.items()}
 
 # 开平类型映射
 offsetMap = {}
-offsetMap[OFFSET_OPEN] = defineDict['open']
-offsetMap[OFFSET_CLOSE] = defineDict['close']
+#offsetMap[OFFSET_OPEN] = defineDict['open']
+#offsetMap[OFFSET_CLOSE] = defineDict['close']
+offsetMap[OFFSET_OPEN] = 1
+offsetMap[OFFSET_CLOSE] = 2
 #offsetMap[OFFSET_CLOSETODAY] = defineDict['THOST_FTDC_OF_CloseToday']
 #offsetMap[OFFSET_CLOSEYESTERDAY] = defineDict['THOST_FTDC_OF_CloseYesterday']
 offsetMapReverse = {v:k for k,v in offsetMap.items()}
@@ -88,7 +95,6 @@ class HfpGateway(VtGateway):
     """HFP接口"""
 
     #----------------------------------------------------------------------
-    @simple_log
     def __init__(self, eventEngine, gatewayName='HFP'):
         """Constructor"""
         super(HfpGateway, self).__init__(eventEngine, gatewayName)
@@ -105,7 +111,6 @@ class HfpGateway(VtGateway):
         self.filePath = getJsonPath(self.fileName, __file__)        
         
     #----------------------------------------------------------------------
-    @simple_log
     def connect(self):
         """连接"""
         try:
@@ -144,11 +149,9 @@ class HfpGateway(VtGateway):
         
         self.tdApi.createHFPTdApi(tdLicenseID, tdLicenseKey)
         self.tdApi.connectTradeFront(tdAddress, int(tdPort))
+
+        self.tdApi.setLoginInfo(userID, password)
         
-        loginReq = {}                           
-        loginReq['userID'] = userID               
-        loginReq['password'] = password            
-        self.tdApi.reqUserLogin(loginReq)        
 
     #----------------------------------------------------------------------
     def sendOrder(self, orderReq):
@@ -236,17 +239,14 @@ class HfpMdApi(MdApi):
         self.subscribedSymbols = set()      # 已订阅合约代码
 
     #----------------------------------------------------------------------
-    @simple_log 
     def onClientClosed(self, n):
         pass
     
     #----------------------------------------------------------------------
-    @simple_log    
     def onClientConnected(self):
         pass
         
     #----------------------------------------------------------------------
-    @simple_log    
     def onClientDisConnected(self, client, n):
         self.connectionStatus = False
         self.gateway.mdConnected = False
@@ -254,13 +254,10 @@ class HfpMdApi(MdApi):
         pass
     
     #----------------------------------------------------------------------
-    @simple_log    
     def onClienthandshaked(self, IsSuccess, index, code):
         self.connectionStatus = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
-        self.login()        
-    
-    @simple_log 
+
     #----------------------------------------------------------------------
     def onQuotationInfo(self, data):
         """行情推送"""
@@ -319,14 +316,20 @@ class HfpTdApi(TdApi):
         self.orderRef = EMPTY_INT           # 订单编号
         self.connectionStatus = False       # 连接状态
         self.loginStatus = False            # 登录状态
-        self.clientID = "800261"        # 客户号
+        self.clientID = EMPTY_STRING        # 客户号
         self.password = EMPTY_STRING        # 密码
         self.address = EMPTY_STRING         # 服务器地址
         self.frontID = EMPTY_INT            # 前置机编号
+        self.marketID = EMPTY_INT            # 前置机编号
         self.posDict = {}
         self.symbolExchangeDict = {}        # 保存合约代码和交易所的印射关系
         self.symbolSizeDict = {}            # 保存合约代码和合约大小的印射关系
+        self.symbolStatusDict = {}          # 保存合约代码和合约状态的印射关系
         self.requireAuthentication = False;
+
+    def setLoginInfo(self, clientID, passwd):
+        self.clientID = clientID
+        self.password = passwd
 
     #----------------------------------------------------------------------
     @simple_log    
@@ -334,7 +337,6 @@ class HfpTdApi(TdApi):
         pass
     
     #----------------------------------------------------------------------
-    @simple_log 
     def onClientConnected(self):
         pass
         
@@ -361,7 +363,7 @@ class HfpTdApi(TdApi):
             self.login()
         pass
 
-    #----------------------------------------------------------------------
+    #--------------------------------------------------------
     @simple_log
     def onLoginResponse(self, rsp):
         """登陆回报"""
@@ -370,6 +372,7 @@ class HfpTdApi(TdApi):
             self.loginStatus = True
             self.gateway.tdConnected = True
             self.writeLog(text.TRADING_SERVER_LOGIN)
+            self.reqMarket()
         else:
             err = VtErrorData()
             err.gatewayName = self.gatewayName
@@ -389,12 +392,13 @@ class HfpTdApi(TdApi):
     def onAssociatorResponse(self, rsp, info):
         pass
     
-    @simple_log
     def onMarketStatePush(self, MarketState):
+        self.symbolStatusDict[MarketState["instrument"]] = MarketState["status"]
         pass
     
     @simple_log
     def onMarketResponse(self, MarketResponse):
+        self.marketID = MarketResponse["id"]
         pass
     
     @simple_log
@@ -409,18 +413,20 @@ class HfpTdApi(TdApi):
     def onReceiptcollectResponse(self, ReceiptcollectResponse):
         pass
 
+
     #----------------------------------------------------------------------
+    @simple_log
     def onOrderResponse(self, rsp, data):
         """发单错误（柜台）"""
         # 推送委托信息
         order = VtOrderData()
         order.gatewayName = self.gatewayName
-        order.symbol = data['InstrumentID']
-        order.exchange = data['MarketID']
+        order.symbol = data['contractid']
+        order.exchange = data['marketid']
         order.vtSymbol = order.symbol
         order.orderID = data['orderid']
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
-        order.direction = data['isbuy']
+        order.direction = directionMapReverse.get(data['isbuy'])
         order.offset = offsetMapReverse.get(data['offsetflag'], OFFSET_UNKNOWN)
         order.status = STATUS_UNKNOWN
         order.price = data['price']
@@ -503,23 +509,36 @@ class HfpTdApi(TdApi):
         pass
 
     #----------------------------------------------------------------------
+    def login(self):
+        """登陆"""
+        loginReq = {}
+        loginReq["userID"] = self.clientID
+        loginReq["password"] = self.password
+        self.reqUserLogin(loginReq)
+
+    #----------------------------------------------------------------------
+    @simple_log
     def sendOrder(self, orderReq):
         """发单"""
-        seq = self.reqOrder("001", orderReq.symbol, self.clientID, orderReq.direction, orderReq.offset,
-                            0, True, orderReq.price, orderReq.volume)
+        seq = self.reqOrder(self.marketID, orderReq.symbol, self.clientID,
+                directionMap[orderReq.direction],
+                offsetMap[orderReq.offset],
+                0, True, int(orderReq.price), orderReq.volume)
 
         # 返回订单号（字符串），便于某些算法进行动态管理
-        vtOrderID = '.'.join([self.gatewayName, seq])
+        vtOrderID = '.'.join([self.gatewayName, str(seq)])
         return vtOrderID
     
     #----------------------------------------------------------------------
+    @simple_log
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
 
     #----------------------------------------------------------------------
+    @simple_log
     def close(self):
         """关闭"""
-        self.exit()
+        ##self.exit()
 
     #----------------------------------------------------------------------
     def writeLog(self, content):

@@ -61,10 +61,6 @@ class TestMdApi(MdApi):
         if data["contract_id"] == "Ni1710":
             print_dict(data)
             time_struct = time.localtime(data["datetime"])
-            print(time_struct)
-            print (time.strftime("%H:%M:%S", time_struct))
-            print("localtime")
-            print(time.time())
             print (time.strftime("%H:%M:%S", time.localtime(time.time())))
         pass
 
