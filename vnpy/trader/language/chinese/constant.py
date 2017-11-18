@@ -66,6 +66,7 @@ EXCHANGE_UNKNOWN = 'UNKNOWN'# 未知交易所
 EXCHANGE_NONE = ''          # 空交易所
 EXCHANGE_HKEX = 'HKEX'      # 港交所
 EXCHANGE_HKFE = 'HKFE'      # 香港期货交易所
+EXCHANGE_WUXI = 'WUXI'      # 香港期货交易所
 
 
 EXCHANGE_SMART = 'SMART'       # IB智能路由（股票、期权）
