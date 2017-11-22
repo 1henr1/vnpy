@@ -1,6 +1,12 @@
-Entering TdApi::reqUserLogin:563 
-userID=800261   password=800261 
+Entering TdApi::reqUserLogin:611 
+userID=800401   password=800401 
 Entering TdApi::OnLoginResponse:224 
 Leaving TdApi::OnLoginResponse:232 
 Entering TdApi::processLoginResponse:115 
 Leaving TdApi::processLoginResponse:127 
+Entering TdApi::qryPositioncollect:715 
+Entering TdApi::reqOrder:676 
+exchangeID=001, instrumentID=Ni1711 clientID=800261 isBuy=1 offset=2 ordertype=0 isMargin=1 price=7400 volume=10 
+Entering TdApi::processAccountResponse:236 
+Entering TdApi::processOrderResponse:284 
+Leaving TdApi::processOrderResponse:313 

@@ -73,7 +73,7 @@ void getChar(dict d, string key, char *value)
 	}
 };
 
-#define ToString(str) (str == nullptr ? "" : (string)str)
+#define ToString(str) ((str) == NULL ? "" : (string)(str))
 
 ///-------------------------------------------------------------------------------------
 ///C++的回调函数将数据保存到队列中
@@ -326,27 +326,75 @@ void TdApi::processQueryorderResponse(Task task)
 	dict prsp;
 	prsp["success"] = rsp.success;//请求是否成功
 	prsp["errcode"] = rsp.errcode;//错误码
+#ifdef _DEBUG
+	fprintf(fp, " errdes=%s    %d \n", rsp.errdesc, __LINE__);
+	fflush(fp);
+#endif
 	prsp["errdesc"] = ToString(rsp.errdesc);//错误描述
 	prsp["sequence"] = rsp.sequence;//请求流水号
 
 	order item = any_cast<order>(task.task_data);
 	dict pdict;
+#ifdef _DEBUG
+	fprintf(fp, " orderid=%s    %d \n", item.orderid, __LINE__);
+	fflush(fp);
+#endif
 	pdict["orderid"] = ToString(item.orderid);//报单编码
 	pdict["ordertime"] = item.ordertime;//报单时间
+#ifdef _DEBUG
+	fprintf(fp, " marketid=%s    %d \n", item.marketid, __LINE__);
+	fflush(fp);
+#endif
 	pdict["marketid"] = ToString(item.marketid);//交易所id
+#ifdef _DEBUG
+	fprintf(fp, " contractid=%s    %d \n", item.contractid, __LINE__);
+	fflush(fp);
+#endif
 	pdict["contractid"] = ToString(item.contractid);//合约编码
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["clientid"] = ToString(item.clientid);//客户编码
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["isbuy"] = item.isbuy;//是否买
 	pdict["offsetflag"] = (int)(item.offsetflag);//开平仓标记
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["ordertype"] = (int)(item.ordertype);//报单类型
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["isdeposit"] = item.isdeposit;//是否定金
 	pdict["price"] = item.price;//价格
 	pdict["qty"] = item.qty;//数量
 	pdict["leftqty"] = item.leftqty;//剩余数量
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["operatorid"] = ToString(item.operatorid);//下单操作员
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["validate"] = item.validate;//有效期
 	pdict["state"] = (int)(item.state);//报单状态
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["canceloperator"] = ToString(item.canceloperator);//撤单操作员
+#ifdef _DEBUG
+	fprintf(fp, "     %s:%d \n", __FUNCTION__, __LINE__);
+	fflush(fp);
+#endif
 	pdict["canceltime"] = item.canceltime;//撤单时间
 	pdict["cancelqty"] = item.cancelqty;//撤单数量
 	this->onQueryorderResponse(prsp, pdict);

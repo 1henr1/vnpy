@@ -8,6 +8,9 @@ from PyQt4 import QtGui
 from vnhfptd import *
 
 
+#global variables
+loginSuccess = 0
+
 #----------------------------------------------------------------------
 def print_dict(d):
     """按照键值打印一个字典"""
@@ -29,7 +32,7 @@ def simple_log(func):
 ########################################################################
 class TestTdApi(TdApi):
     """测试用实例"""
-
+    api = 0
     #----------------------------------------------------------------------
     def __init__(self):
         """Constructor"""
@@ -110,6 +113,7 @@ class TestTdApi(TdApi):
     def onQueryorderResponse(self, rsp, order):
         print_dict(rsp)
         print_dict(order)
+        #self.cancelOrder("001", order["orderid"])
         pass
     
     @simple_log
@@ -150,14 +154,11 @@ class TestTdApi(TdApi):
     
     
     
-#global variables
-loginSuccess = 0
 
 #----------------------------------------------------------------------
 def main():
     """主测试函数，出现堵塞时可以考虑使用sleep"""
-    reqid = 0
-    
+
     # 创建Qt应用对象，用于事件循环
     app = QtGui.QApplication(sys.argv)
 
@@ -176,8 +177,8 @@ def main():
     #800261
     #800262    
     loginReq = {}                           # 创建一个空字典
-    loginReq['userID'] = '800261'                 # 参数作为字典键值的方式传入
-    loginReq['password'] = '800261'               # 键名和C++中的结构体成员名对应
+    loginReq['userID'] = '800401'                 # 参数作为字典键值的方式传入
+    loginReq['password'] = '800401'               # 键名和C++中的结构体成员名对应
     api.reqUserLogin(loginReq)
     
     
@@ -187,7 +188,7 @@ def main():
     ## 登出, 会出错， 原因未知
     #i = api.reqUserLogout()
     #sleep(0.5)
-    
+
     """
     ## 获取服务器时间
     time = api.reqServertime()
@@ -208,23 +209,29 @@ def main():
     #print seq
     
     ## 请求账户信息 pass
-    #seq = api.reqAccount()
+    seq = api.reqAccount()
     #print seq
     
     ## 请求仓单汇总信息 pass
     #seq = api.reqReceiptcollect()
     #print seq
-       
+
+    api.qryPositioncollect("001")
+
     ## 下单, 买开
-    #seq = api.reqOrder("001", "Ni1709", "800261", True, 1, 0, True, 7800, 100)
+    #seq = api.reqOrder("001", "Ni1711", "800261", True, 1, 0, True, 7410, 10)
     #print seq
-    
+
+    ## 查询订单
+    #api.qryOrder("001")
+
     ## 下单, 卖开
-    #seq = api.reqOrder("001", "Ni1709", "800261", False, 1, 0, True, 7800, 100)
+    #seq = api.reqOrder("001", "Ni1711", "800261", False, 1, 0, True, 7410, 10)
     #print seq
-    
+
+
     ## 下单, 买平
-    #seq = api.reqOrder("001", "Ni1709", "800261", True, 2, 0, True, 7800, 100)
+    #seq = api.reqOrder("001", "Ni1711", "800261", True, 2, 0, True, 7400, 10)
     #print seq
     
     ## 下单, 卖平
@@ -241,9 +248,8 @@ def main():
     
     #api.qryDeal("001")
     
-    #api.qryPositioncollect("001")
-    
-    api.qryPositiondetail("001")
+
+    #api.qryPositiondetail("001")
     
     # 连续运行，用于输出行情
     app.exec_()

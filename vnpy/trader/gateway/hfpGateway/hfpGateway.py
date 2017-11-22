@@ -320,7 +320,7 @@ class HfpTdApi(TdApi):
         self.password = EMPTY_STRING        # 密码
         self.address = EMPTY_STRING         # 服务器地址
         self.frontID = EMPTY_INT            # 前置机编号
-        self.marketID = EMPTY_INT            # 前置机编号
+        self.marketID = "001"
         self.posDict = {}
         self.symbolExchangeDict = {}        # 保存合约代码和交易所的印射关系
         self.symbolSizeDict = {}            # 保存合约代码和合约大小的印射关系
@@ -372,7 +372,8 @@ class HfpTdApi(TdApi):
             self.loginStatus = True
             self.gateway.tdConnected = True
             self.writeLog(text.TRADING_SERVER_LOGIN)
-            self.reqMarket()
+            self.qryAccount()
+            self.qryPosition()
         else:
             err = VtErrorData()
             err.gatewayName = self.gatewayName
@@ -406,9 +407,24 @@ class HfpTdApi(TdApi):
         pass
     
     @simple_log
-    def onAccountResponse(self, AccountResponse):
+    def onAccountResponse(self, data):
+        account = VtAccountData()
+        account.gatewayName = self.gatewayName
+        account.accountID = data['memberid']  # 账户代码
+        account.vtAccountID = '.'.join([account.gatewayName, account.accountID])  # 账户在vt中的唯一代码，通常是 Gateway名.账户代码
+
+        # 数值相关
+        account.preBalance = data['avlbfundout']  # 昨日账户结算净值
+        account.balance = data['balance']  # 账户净值
+        account.available = data['avlb']  # 可用资金
+        account.commission = data['poundage']  # 今日手续费
+        account.margin = data['occp']  # 保证金占用
+        account.closeProfit = data['cnybalance']  # 平仓盈亏
+        account.positionProfit = data['funddynamic']  # 持仓盈亏, 暂时用动态权益代替
+
+        self.gateway.onAccount(account)
         pass
-    
+
     @simple_log
     def onReceiptcollectResponse(self, ReceiptcollectResponse):
         pass
@@ -428,7 +444,7 @@ class HfpTdApi(TdApi):
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
         order.direction = directionMapReverse.get(data['isbuy'])
         order.offset = offsetMapReverse.get(data['offsetflag'], OFFSET_UNKNOWN)
-        order.status = STATUS_UNKNOWN
+        order.status = STATUS_NOTTRADED
         order.price = data['price']
         order.totalVolume = data['qty']
         self.gateway.onOrder(order)
@@ -439,10 +455,37 @@ class HfpTdApi(TdApi):
         err.errorID = rsp['errcode']
         err.errorMsg = rsp['errdesc'].decode('gbk')
         self.gateway.onError(err)
+
+        #每次收到rsp都要查询报单状态，因为API设计的很烂
+        self.qryOrder(self.marketID)
         pass
     
     @simple_log
-    def onQueryorderResponse(self, rsp, order):
+    def onQueryorderResponse(self, rsp, data):
+        """报单回报"""
+
+        # 创建报单数据对象
+        order = VtOrderData()
+
+        order.gatewayName = self.gatewayName
+        order.symbol = data['contractid']
+        order.exchange = data['marketid']
+        order.vtSymbol = order.symbol #'.'.join([order.symbol, order.exchange])
+        order.orderID = data['orderid']    # 飞马使用该单一字段维护报单，为字符串
+        order.direction = directionMapReverse.get(data['isbuy'])
+        order.offset = offsetMapReverse.get(data['offsetflag'], OFFSET_UNKNOWN)
+        order.status = statusMapReverse.get(data['state'])
+
+        # 价格、报单量等数值
+        order.price = data['price']
+        order.totalVolume = data['qty']
+        order.tradedVolume = data['qty'] - data['leftqty']
+        order.orderTime = time.strftime("%H:%M:%S", time.localtime(data["ordertime"]))
+        order.cancelTime = time.strftime("%H:%M:%S", time.localtime(data["canceltime"]))
+        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
+
+        # 推送
+        self.gateway.onOrder(order)
         pass
     
     @simple_log
@@ -470,11 +513,7 @@ class HfpTdApi(TdApi):
 
         trade.orderID = data['orderid']
         trade.vtOrderID = '.'.join([self.gatewayName, trade.orderID])
-
-        # 方向
         trade.direction = directionMapReverse.get(data['isbuy'], '')
-
-        # 开平
         trade.offset = offsetMapReverse.get(data['offsetflag'], '')
 
         # 价格、报单量等数值
@@ -491,7 +530,26 @@ class HfpTdApi(TdApi):
         pass
     
     @simple_log
-    def onQueryPositioncollectResponse(self, rsp, position_collect):
+    def onQueryPositioncollectResponse(self, rsp, data):
+
+        position = VtPositionData()
+        position.gatewayName = self.gatewayName
+        # 代码编号相关
+        position.symbol = data['contractid']  # 合约代码
+        position.exchange = data['marketid']  # 交易所代码
+        position.vtSymbol = '.'.join([self.gatewayName, position.symbol])
+
+        # 持仓相关
+        position.direction = directionMapReverse.get(data['isbuy'])
+        position.position = data['totalqty']  # 持仓量
+        position.frozen = data['frzord']  # 冻结数量
+        position.price = data['totalcost'] / data['totalqty'] # 持仓均价
+        position.vtPositionName = '.'.join([position.vtSymbol, position.direction])  # 持仓在vt系统中的唯一代码，通常是vtSymbol.方向
+        position.ydPosition = data['totalqty'] - data['totalqtytoday']  # 昨持仓
+        position.positionProfit = data['balance']  # 持仓盈亏
+
+        self.gateway.onPosition(position)
+
         pass
     
     @simple_log
@@ -501,11 +559,13 @@ class HfpTdApi(TdApi):
     #----------------------------------------------------------------------
     def qryAccount(self):
         """查询账户"""
+        self.reqAccount()
         pass
 
     #----------------------------------------------------------------------
     def qryPosition(self):
         """查询持仓"""
+        self.qryPositioncollect(self.marketID)
         pass
 
     #----------------------------------------------------------------------

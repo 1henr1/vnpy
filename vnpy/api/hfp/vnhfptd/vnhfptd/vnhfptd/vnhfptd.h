@@ -338,6 +338,11 @@ public:
 
 	static void OnQueryorderResponse(CLIENT client, response& rsp, order* queryorder, unsigned int num)
 	{
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__);
+	fprintf(fp, "num = %d \n", num);
+	fflush(fp);
+#endif
 		unsigned int i = 0;
 		while (i < num)
 		{
