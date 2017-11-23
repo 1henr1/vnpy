@@ -105,7 +105,7 @@ class HfpGateway(VtGateway):
         self.mdConnected = False        # 行情API连接状态，登录完成后为True
         self.tdConnected = False        # 交易API连接状态
         
-        self.qryEnabled = False         # 循环查询
+        self.qryEnabled = True         # 循环查询
         
         self.fileName = self.gatewayName + '_connect.json'
         self.filePath = getJsonPath(self.fileName, __file__)        
@@ -172,7 +172,12 @@ class HfpGateway(VtGateway):
     def qryPosition(self):
         """查询持仓"""
         self.tdApi.qryPosition()
-        
+
+    #----------------------------------------------------------------------
+    def qryAllOrder(self):
+        """查询持仓"""
+        self.tdApi.qryAllOrder()
+
     #----------------------------------------------------------------------
     def close(self):
         """关闭"""
@@ -186,7 +191,7 @@ class HfpGateway(VtGateway):
         """初始化连续查询"""
         if self.qryEnabled:
             # 需要循环的查询函数列表
-            self.qryFunctionList = [self.qryAccount, self.qryPosition]
+            self.qryFunctionList = [self.qryAccount, self.qryPosition, self.qryAccount]
             
             self.qryCount = 0           # 查询触发倒计时
             self.qryTrigger = 2         # 查询触发点
@@ -573,6 +578,11 @@ class HfpTdApi(TdApi):
         self.qryPositioncollect(self.marketID)
         pass
 
+    #----------------------------------------------------------------------
+    def qryAllOrder(self):
+        """查询所有报单"""
+        self.qryOrder(self.marketID)
+        pass
     #----------------------------------------------------------------------
     def login(self):
         """登陆"""
