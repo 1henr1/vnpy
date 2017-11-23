@@ -1,11 +1,14 @@
 # encoding: UTF-8
 
 import sys
+import time
 from time import sleep
 
 from PyQt4 import QtGui
 
 from vnhfptd import *
+
+
 
 
 #global variables
@@ -187,16 +190,22 @@ def main():
     
     ## 登出, 会出错， 原因未知
     #i = api.reqUserLogout()
-    #sleep(0.5)
+    sleep(1)
 
-    """
     ## 获取服务器时间
-    time = api.reqServertime()
-    print(time)
-    print 'Server Time is:' + str(time)
-    sleep(0.5)
-    """
-    
+    #Servertime = api.reqServertime()
+    Servertime = time.time()
+    print(Servertime)
+    print(type(Servertime))
+    print 'Server Time is:' + str(Servertime)
+
+
+    #mid = float(1511445339645)
+    mid = 1511445339645
+    print type(mid)
+
+    print( time.strftime("%H:%M:%S", time.localtime(mid / 1000)))
+    #print( time.strftime("%H:%M:%S", time.localtime()))
     #seq = api.reqAssociator()
     #print seq
     
@@ -209,14 +218,14 @@ def main():
     #print seq
     
     ## 请求账户信息 pass
-    seq = api.reqAccount()
+    #seq = api.reqAccount()
     #print seq
     
     ## 请求仓单汇总信息 pass
     #seq = api.reqReceiptcollect()
     #print seq
 
-    api.qryPositioncollect("001")
+    #api.qryPositioncollect("001")
 
     ## 下单, 买开
     #seq = api.reqOrder("001", "Ni1711", "800261", True, 1, 0, True, 7410, 10)

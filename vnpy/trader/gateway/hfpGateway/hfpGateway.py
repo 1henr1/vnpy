@@ -463,7 +463,7 @@ class HfpTdApi(TdApi):
     @simple_log
     def onQueryorderResponse(self, rsp, data):
         """报单回报"""
-
+        print_dict(data)
         # 创建报单数据对象
         order = VtOrderData()
 
@@ -480,8 +480,8 @@ class HfpTdApi(TdApi):
         order.price = data['price']
         order.totalVolume = data['qty']
         order.tradedVolume = data['qty'] - data['leftqty']
-        order.orderTime = time.strftime("%H:%M:%S", time.localtime(data["ordertime"]))
-        order.cancelTime = time.strftime("%H:%M:%S", time.localtime(data["canceltime"]))
+        order.orderTime = time.strftime("%H:%M:%S", time.localtime(data["ordertime"]/1000))
+        order.cancelTime = time.strftime("%H:%M:%S", time.localtime(data["canceltime"]/1000))
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
 
         # 推送
@@ -489,37 +489,38 @@ class HfpTdApi(TdApi):
         pass
     
     @simple_log
-    def onCancelorderPush(self, cancelorder):
+    def onCancelorderPush(self, data):
+        print_dict(data)
         pass
     
     @simple_log
-    def onCancelorderResponse(self, rsp, cancelorder):
+    def onCancelorderResponse(self, rsp, data):
+        print_dict(data)
         pass
     
     @simple_log
     def onDealPush(self, data):
         """成交回报"""
+        print_dict(data)
         # 创建报单数据对象
         trade = VtTradeData()
         trade.gatewayName = self.gatewayName
 
         # 保存代码和报单号
-        trade.symbol = data['InstrumentID']
-        trade.exchange = data['MarketID']
-        trade.vtSymbol = trade.symbol #'.'.join([trade.symbol, trade.exchange])
+        trade.symbol = data['contractid']
+        trade.exchange = data['marketid']
+        trade.vtSymbol = '.'.join([trade.symbol, trade.exchange])
 
         trade.tradeID = data['dealid']
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
-
         trade.orderID = data['orderid']
         trade.vtOrderID = '.'.join([self.gatewayName, trade.orderID])
+
         trade.direction = directionMapReverse.get(data['isbuy'], '')
         trade.offset = offsetMapReverse.get(data['offsetflag'], '')
-
-        # 价格、报单量等数值
         trade.price = data['price']
         trade.volume = data['qty']
-        trade.tradeTime = data['dealtime']
+        trade.tradeTime = time.strftime("%H:%M:%S", time.localtime(data["dealtime"]/1000))
 
         # 推送
         self.gateway.onTrade(trade)
