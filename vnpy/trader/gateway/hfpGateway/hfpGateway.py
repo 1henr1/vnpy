@@ -372,6 +372,7 @@ class HfpTdApi(TdApi):
             self.loginStatus = True
             self.gateway.tdConnected = True
             self.writeLog(text.TRADING_SERVER_LOGIN)
+            self.qryOrder(self.marketID)
             self.qryAccount()
             self.qryPosition()
         else:
@@ -470,10 +471,10 @@ class HfpTdApi(TdApi):
         order.gatewayName = self.gatewayName
         order.symbol = data['contractid']
         order.exchange = data['marketid']
-        order.vtSymbol = order.symbol #'.'.join([order.symbol, order.exchange])
-        order.orderID = data['orderid']    # 飞马使用该单一字段维护报单，为字符串
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
+        order.orderID = data['orderid']
         order.direction = directionMapReverse.get(data['isbuy'])
-        order.offset = offsetMapReverse.get(data['offsetflag'], OFFSET_UNKNOWN)
+        order.offset = offsetMapReverse.get(data['offsetflag'])
         order.status = statusMapReverse.get(data['state'])
 
         # 价格、报单量等数值
@@ -481,7 +482,10 @@ class HfpTdApi(TdApi):
         order.totalVolume = data['qty']
         order.tradedVolume = data['qty'] - data['leftqty']
         order.orderTime = time.strftime("%H:%M:%S", time.localtime(data["ordertime"]/1000))
-        order.cancelTime = time.strftime("%H:%M:%S", time.localtime(data["canceltime"]/1000))
+        if order.status == STATUS_CANCELLED:
+            order.cancelTime = time.strftime("%H:%M:%S", time.localtime(data["canceltime"]/1000))
+        else:
+            order.cancelTime = ""
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
 
         # 推送
