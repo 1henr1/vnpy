@@ -232,7 +232,6 @@ class HfpGateway(VtGateway):
 ########################################################################
 class HfpMdApi(MdApi):
     """HFP行情API实现"""
-
     #----------------------------------------------------------------------
     def __init__(self, gateway):
         """Constructor"""
@@ -240,6 +239,7 @@ class HfpMdApi(MdApi):
         
         self.gateway = gateway                  # gateway对象
         self.gatewayName = gateway.gatewayName  # gateway对象名称
+        self.exchane = "WuXi"
         self.connectionStatus = False       # 连接状态
         self.subscribedSymbols = set()      # 已订阅合约代码
 
@@ -270,8 +270,8 @@ class HfpMdApi(MdApi):
         tick = VtTickData()
         tick.gatewayName = self.gatewayName
         tick.symbol = data['contract_id']
-        tick.exchange = data['marketId']
-        tick.vtSymbol = data["contract_name"]
+        tick.exchange = self.exchange
+        tick.vtSymbol = '.'.join([self.gatewayName, tick.symbol])
         tick.lastPrice = data['new']
         tick.volume = data['cur_volume']
         tick.openInterest = data['subs_volume']
@@ -326,6 +326,7 @@ class HfpTdApi(TdApi):
         self.address = EMPTY_STRING         # 服务器地址
         self.frontID = EMPTY_INT            # 前置机编号
         self.marketID = "001"
+        self.exchange = "WuXi"
         self.posDict = {}
         self.symbolExchangeDict = {}        # 保存合约代码和交易所的印射关系
         self.symbolSizeDict = {}            # 保存合约代码和合约大小的印射关系
@@ -384,7 +385,7 @@ class HfpTdApi(TdApi):
             err = VtErrorData()
             err.gatewayName = self.gatewayName
             err.errorID = rsp['errcode']
-            err.errorMsg = rsp['errdesc'].decode('gbk')
+#            err.errorMsg = rsp['errdesc'].decode('gbk')
             self.gateway.onError(err)
 
     #----------------------------------------------------------------------
@@ -444,8 +445,8 @@ class HfpTdApi(TdApi):
         order = VtOrderData()
         order.gatewayName = self.gatewayName
         order.symbol = data['contractid']
-        order.exchange = data['marketid']
-        order.vtSymbol = order.symbol
+        order.exchange = self.exchange
+        order.vtSymbol = '.'.join([self.gatewayName, order.symbol])
         order.orderID = data['orderid']
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
         order.direction = directionMapReverse.get(data['isbuy'])
@@ -459,7 +460,7 @@ class HfpTdApi(TdApi):
         err = VtErrorData()
         err.gatewayName = self.gatewayName
         err.errorID = rsp['errcode']
-        err.errorMsg = rsp['errdesc'].decode('gbk')
+#        err.errorMsg = rsp['errdesc'].decode('gbk')
         self.gateway.onError(err)
 
         #每次收到rsp都要查询报单状态，因为API设计的很烂
@@ -475,8 +476,8 @@ class HfpTdApi(TdApi):
 
         order.gatewayName = self.gatewayName
         order.symbol = data['contractid']
-        order.exchange = data['marketid']
-        order.vtSymbol = '.'.join([order.symbol, order.exchange])
+        order.exchange = self.exchange
+        order.vtSymbol = '.'.join([self.gatewayName, order.symbol])
         order.orderID = data['orderid']
         order.direction = directionMapReverse.get(data['isbuy'])
         order.offset = offsetMapReverse.get(data['offsetflag'])
@@ -517,8 +518,8 @@ class HfpTdApi(TdApi):
 
         # 保存代码和报单号
         trade.symbol = data['contractid']
-        trade.exchange = data['marketid']
-        trade.vtSymbol = '.'.join([trade.symbol, trade.exchange])
+        trade.exchange = self.exchange
+        trade.vtSymbol = '.'.join([self.gatewayName, trade.symbol])
 
         trade.tradeID = data['dealid']
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
@@ -546,7 +547,7 @@ class HfpTdApi(TdApi):
         position.gatewayName = self.gatewayName
         # 代码编号相关
         position.symbol = data['contractid']  # 合约代码
-        position.exchange = data['marketid']  # 交易所代码
+        position.exchange = self.exchange
         position.vtSymbol = '.'.join([self.gatewayName, position.symbol])
 
         # 持仓相关
