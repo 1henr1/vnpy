@@ -1069,17 +1069,20 @@ class TradingWidget(QtWidgets.QFrame):
     def cancelOrder(self):
         """撤销指定委托"""
         orderID = str(self.cancelOrderID.text())
-        targetOrder = self.mainEngine.getOrder(orderID)
+        gatewayName = unicode(self.comboGateway.currentText())
+        vtOrderID = '.'.join([gatewayName, orderID])
+        targetOrder = self.mainEngine.getOrder(vtOrderID)
         if targetOrder:
             req = VtCancelOrderReq()
             req.symbol = targetOrder.symbol
             req.exchange = targetOrder.exchange
-            req.frontID = targetOrder.frontID
-            req.sessionID = targetOrder.sessionID
-            req.targetOrderID = targetOrder.targetOrderID
-            self.mainEngine.cancelOrder(req, targetOrder.gatewayName)
+            req.orderID = orderID  # 报单号
+            #req.frontID = EMPTY_STRING  # 前置机号
+            #req.sessionID = EMPTY_STRING  # 会话号
+
+            self.mainEngine.cancelOrder(req, gatewayName)
         else:
-            print "Can't find the target Order %s"  %  orderID
+            print "Can't find the target Order %s"  %  vtOrderID
 
     #----------------------------------------------------------------------
     def cancelAll(self):

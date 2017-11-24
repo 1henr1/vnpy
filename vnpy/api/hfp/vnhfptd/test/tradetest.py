@@ -251,7 +251,7 @@ def main():
     #api.qryOrder("001")
     
     ## 撤单
-    #seq = api.cancelOrder("001", "O89917092500007592")
+    seq = api.cancelOrder("001", "O89917112400046954")
     
     #seq = api.reqAccount()
     

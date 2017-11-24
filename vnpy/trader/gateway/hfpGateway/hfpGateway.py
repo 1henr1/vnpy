@@ -501,11 +501,19 @@ class HfpTdApi(TdApi):
     @simple_log
     def onCancelorderPush(self, data):
         print_dict(data)
+        self.qryAllOrder()
         pass
     
     @simple_log
     def onCancelorderResponse(self, rsp, data):
         print_dict(data)
+        # 创建报单数据对象
+        err = VtErrorData()
+        err.gatewayName = self.gatewayName
+        err.errorID = rsp['errcode']
+        #            err.errorMsg = rsp['errdesc'].decode('gbk')
+        self.gateway.onError(err)
+
         pass
     
     @simple_log
@@ -609,6 +617,7 @@ class HfpTdApi(TdApi):
     @simple_log
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
+        self.reqCancelOrder(self.marketID, cancelOrderReq.orderID)
 
     #----------------------------------------------------------------------
     @simple_log
