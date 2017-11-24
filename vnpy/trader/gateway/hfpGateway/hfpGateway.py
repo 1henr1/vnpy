@@ -239,7 +239,7 @@ class HfpMdApi(MdApi):
         
         self.gateway = gateway                  # gateway对象
         self.gatewayName = gateway.gatewayName  # gateway对象名称
-        self.exchane = "WuXi"
+        self.exchange = "WuXi"
         self.connectionStatus = False       # 连接状态
         self.subscribedSymbols = set()      # 已订阅合约代码
 
