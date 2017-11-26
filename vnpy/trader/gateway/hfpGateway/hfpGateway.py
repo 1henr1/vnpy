@@ -401,7 +401,7 @@ class HfpTdApi(TdApi):
             err = VtErrorData()
             err.gatewayName = self.gatewayName
             err.errorID = rsp['errcode']
-#            err.errorMsg = rsp['errdesc'].decode('gbk')
+            err.errorMsg = rsp['errdesc']
             self.gateway.onError(err)
 
     #----------------------------------------------------------------------
@@ -469,6 +469,16 @@ class HfpTdApi(TdApi):
     @simple_log
     def onOrderResponse(self, rsp, data):
         """发单错误（柜台）"""
+
+        # 推送错误信息
+        err = VtErrorData()
+        err.gatewayName = self.gatewayName
+        err.errorID = rsp['errcode']
+        err.errorMsg = rsp['errdesc']
+        self.gateway.onError(err)
+        if err.errorID != 0:
+            return
+
         # 推送委托信息
         order = VtOrderData()
         order.gatewayName = self.gatewayName
@@ -484,12 +494,6 @@ class HfpTdApi(TdApi):
         order.totalVolume = data['qty']
         self.gateway.onOrder(order)
 
-        # 推送错误信息
-        err = VtErrorData()
-        err.gatewayName = self.gatewayName
-        err.errorID = rsp['errcode']
-#        err.errorMsg = rsp['errdesc'].decode('gbk')
-        self.gateway.onError(err)
 
         #每次收到rsp都要查询报单状态，因为API设计的很烂
         self.qryOrder(self.marketID)
@@ -539,7 +543,7 @@ class HfpTdApi(TdApi):
         err = VtErrorData()
         err.gatewayName = self.gatewayName
         err.errorID = rsp['errcode']
-        #            err.errorMsg = rsp['errdesc'].decode('gbk')
+        err.errorMsg = rsp['errdesc']
         self.gateway.onError(err)
 
         pass
