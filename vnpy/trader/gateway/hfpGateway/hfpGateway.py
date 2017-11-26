@@ -285,11 +285,26 @@ class HfpMdApi(MdApi):
         tick.lowerLimit = data['down_limit']
         tick.average = data['average']
 
-        ## one level for the time being
         tick.bidPrice1 = data['buy_price_1']
         tick.bidVolume1 = data['buy_volume_1']
         tick.askPrice1 = data['sell_price_1']
         tick.askVolume1 = data['sell_volume_1']
+        tick.bidPrice2 = data['buy_price_2']
+        tick.bidVolume2 = data['buy_volume_2']
+        tick.askPrice2 = data['sell_price_2']
+        tick.askVolume2 = data['sell_volume_2']
+        tick.bidPrice3 = data['buy_price_3']
+        tick.bidVolume3 = data['buy_volume_3']
+        tick.askPrice3 = data['sell_price_3']
+        tick.askVolume3 = data['sell_volume_3']
+        tick.bidPrice4 = data['buy_price_4']
+        tick.bidVolume4 = data['buy_volume_4']
+        tick.askPrice4 = data['sell_price_4']
+        tick.askVolume4 = data['sell_volume_4']
+        tick.bidPrice5 = data['buy_price_5']
+        tick.bidVolume5 = data['buy_volume_5']
+        tick.askPrice5 = data['sell_price_5']
+        tick.askVolume5 = data['sell_volume_5']
         self.gateway.onTick(tick)
 
     #----------------------------------------------------------------------
