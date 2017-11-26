@@ -93,7 +93,7 @@ class TestTdApi(TdApi):
     
     @simple_log
     def onContractResponse(self, ContractResponse):
-        #print_dict(ContractResponse)
+        print_dict(ContractResponse)
         pass    
     
     @simple_log
@@ -249,9 +249,12 @@ def main():
     
     ## 查询订单
     #api.qryOrder("001")
-    
+
+    ## 查询合约
+    api.reqContract()
+
     ## 撤单
-    seq = api.cancelOrder("001", "O89917112400046954")
+    #seq = api.cancelOrder("001", "O89917112400046954")
     
     #seq = api.reqAccount()
     

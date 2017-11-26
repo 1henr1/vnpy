@@ -58,11 +58,9 @@ class TestMdApi(MdApi):
     
     #----------------------------------------------------------------------
     def onQuotationInfo(self, data):
-        if data["contract_id"] == "Ni1710":
-            print_dict(data)
-            time_struct = time.localtime(data["datetime"])
-            print (time.strftime("%H:%M:%S", time.localtime(time.time())))
-        pass
+        print_dict(data)
+        ##time_struct = time.localtime(data["datetime"])
+        print (time.strftime("%H:%M:%S", time.localtime(time.time())))
 
 
 #----------------------------------------------------------------------

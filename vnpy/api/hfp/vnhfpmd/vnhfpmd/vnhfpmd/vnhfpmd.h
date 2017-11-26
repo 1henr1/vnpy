@@ -139,7 +139,10 @@ void getStr(dict d, string key, char* value);
 ///-------------------------------------------------------------------------------------
 
 ConcurrentQueue<Task> task_queue;	//任务队列
+
+#ifdef _DEBUG
 FILE *fp = fopen("md_debug.txt", "w");
+#endif
 
 //API的继承实现
 class MdApi 

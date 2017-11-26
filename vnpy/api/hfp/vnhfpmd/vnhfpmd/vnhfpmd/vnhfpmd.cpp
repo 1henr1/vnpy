@@ -205,6 +205,22 @@ void MdApi::processQuotationInfo(Task task)
 	marketdata["buy_volume_1"] = quotaData.buy_volume[0];//买量
 	marketdata["sell_price_1"] = quotaData.sell_price[0];//卖价
 	marketdata["sell_volume_1"] = quotaData.sell_volume[0];//卖量
+	marketdata["buy_price_2"] = quotaData.buy_price[1];//买价
+	marketdata["buy_volume_2"] = quotaData.buy_volume[1];//买量
+	marketdata["sell_price_2"] = quotaData.sell_price[1];//卖价
+	marketdata["sell_volume_2"] = quotaData.sell_volume[1];//卖量
+	marketdata["buy_price_3"] = quotaData.buy_price[2];//买价
+	marketdata["buy_volume_3"] = quotaData.buy_volume[2];//买量
+	marketdata["sell_price_3"] = quotaData.sell_price[2];//卖价
+	marketdata["sell_volume_3"] = quotaData.sell_volume[2];//卖量
+	marketdata["buy_price_4"] = quotaData.buy_price[3];//买价
+	marketdata["buy_volume_4"] = quotaData.buy_volume[3];//买量
+	marketdata["sell_price_4"] = quotaData.sell_price[3];//卖价
+	marketdata["sell_volume_4"] = quotaData.sell_volume[3];//卖量
+	marketdata["buy_price_5"] = quotaData.buy_price[4];//买价
+	marketdata["buy_volume_5"] = quotaData.buy_volume[4];//买量
+	marketdata["sell_price_5"] = quotaData.sell_price[4];//卖价
+	marketdata["sell_volume_5"] = quotaData.sell_volume[4];//卖量
 
 	this->onQuotationInfo(marketdata);
 }

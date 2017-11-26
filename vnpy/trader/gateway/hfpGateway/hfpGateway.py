@@ -271,7 +271,7 @@ class HfpMdApi(MdApi):
         tick.gatewayName = self.gatewayName
         tick.symbol = data['contract_id']
         tick.exchange = self.exchange
-        tick.vtSymbol = '.'.join([self.gatewayName, tick.symbol])
+        tick.vtSymbol = '.'.join([tick.symbol, tick.exchange])
         tick.lastPrice = data['new']
         tick.volume = data['cur_volume']
         tick.openInterest = data['subs_volume']
@@ -381,6 +381,7 @@ class HfpTdApi(TdApi):
             self.qryOrder(self.marketID)
             self.qryAccount()
             self.qryPosition()
+            self.reqContract()
         else:
             err = VtErrorData()
             err.gatewayName = self.gatewayName
@@ -410,7 +411,19 @@ class HfpTdApi(TdApi):
         pass
     
     @simple_log
-    def onContractResponse(self, ContractResponse):
+    def onContractResponse(self, data):
+        print_dict(data)
+        contract = VtContractData()
+
+        contract.symbol = data['contractid']  # 代码
+        contract.exchange = self.exchange  # 交易所代码
+        contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])  # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
+        contract.name = data['contractname']  # 合约中文名
+        contract.productClass = PRODUCT_FUTURES   # 合约类型
+        contract.size = EMPTY_INT  # 合约大小
+        contract.priceTick = data['mindiffprice']  # 合约最小价格TICK
+        self.gateway.onContract(contract)
+
         pass
     
     @simple_log
@@ -446,7 +459,7 @@ class HfpTdApi(TdApi):
         order.gatewayName = self.gatewayName
         order.symbol = data['contractid']
         order.exchange = self.exchange
-        order.vtSymbol = '.'.join([self.gatewayName, order.symbol])
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
         order.orderID = data['orderid']
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
         order.direction = directionMapReverse.get(data['isbuy'])
@@ -477,7 +490,7 @@ class HfpTdApi(TdApi):
         order.gatewayName = self.gatewayName
         order.symbol = data['contractid']
         order.exchange = self.exchange
-        order.vtSymbol = '.'.join([self.gatewayName, order.symbol])
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
         order.orderID = data['orderid']
         order.direction = directionMapReverse.get(data['isbuy'])
         order.offset = offsetMapReverse.get(data['offsetflag'])
@@ -527,7 +540,7 @@ class HfpTdApi(TdApi):
         # 保存代码和报单号
         trade.symbol = data['contractid']
         trade.exchange = self.exchange
-        trade.vtSymbol = '.'.join([self.gatewayName, trade.symbol])
+        trade.vtSymbol = '.'.join([trade.symbol, trade.exchange])
 
         trade.tradeID = data['dealid']
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
@@ -556,7 +569,7 @@ class HfpTdApi(TdApi):
         # 代码编号相关
         position.symbol = data['contractid']  # 合约代码
         position.exchange = self.exchange
-        position.vtSymbol = '.'.join([self.gatewayName, position.symbol])
+        position.vtSymbol = '.'.join([position.symbol, position.exchange])
 
         # 持仓相关
         position.direction = directionMapReverse.get(data['isbuy'])
