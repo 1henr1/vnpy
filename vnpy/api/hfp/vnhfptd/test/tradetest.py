@@ -94,7 +94,7 @@ class TestTdApi(TdApi):
     @simple_log
     def onContractResponse(self, ContractResponse):
         print_dict(ContractResponse)
-        pass    
+        pass
     
     @simple_log
     def onAccountResponse(self, AccountResponse):

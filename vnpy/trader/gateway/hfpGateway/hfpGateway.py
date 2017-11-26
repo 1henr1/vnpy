@@ -429,11 +429,11 @@ class HfpTdApi(TdApi):
     def onContractResponse(self, data):
         print_dict(data)
         contract = VtContractData()
-
+        contract.gatewayName = self.gatewayName
         contract.symbol = data['contractid']  # 代码
         contract.exchange = self.exchange  # 交易所代码
         contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])  # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
-        contract.name = data['contractname']  # 合约中文名
+        contract.name = unicode(data['contractname'])  # 合约中文名
         contract.productClass = PRODUCT_FUTURES   # 合约类型
         contract.size = EMPTY_INT  # 合约大小
         contract.priceTick = data['mindiffprice']  # 合约最小价格TICK
