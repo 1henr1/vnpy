@@ -23,6 +23,9 @@ if system == 'Windows':
     from vnpy.trader.gateway import (femasGateway, xspeedGateway, 
                                      sgitGateway, shzdGateway)
 
+if system == 'Windows':
+    from vnpy.trader.gateway import (hfpGateway)
+
 # 加载上层应用
 from vnpy.trader.app import (riskManager, ctaStrategy, spreadTrading)
 
@@ -40,18 +43,8 @@ def main():
     me = MainEngine(ee)
     
     # 添加交易接口
-    me.addGateway(ctpGateway)
-    me.addGateway(oandaGateway)
-    me.addGateway(ibGateway)
-    me.addGateway(huobiGateway)
-    me.addGateway(okcoinGateway)
-    
-    if system == 'Windows':
-        me.addGateway(femasGateway)
-        me.addGateway(xspeedGateway)
-        me.addGateway(sgitGateway)  
-        me.addGateway(shzdGateway)
-        
+    me.addGateway(hfpGateway)
+
     # 添加上层应用
     me.addApp(riskManager)
     me.addApp(ctaStrategy)
