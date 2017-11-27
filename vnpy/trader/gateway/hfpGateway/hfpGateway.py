@@ -179,6 +179,13 @@ class HfpGateway(VtGateway):
         self.tdApi.qryAllOrder()
 
     #----------------------------------------------------------------------
+    def refresh(self):
+        """更新所有数据"""
+        self.qryPosition()
+        self.qryAccount()
+        self.qryAllOrder()
+
+    #----------------------------------------------------------------------
     def close(self):
         """关闭"""
         if self.mdConnected:
@@ -433,7 +440,7 @@ class HfpTdApi(TdApi):
         contract.symbol = data['contractid']  # 代码
         contract.exchange = self.exchange  # 交易所代码
         contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])  # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
-        contract.name = unicode(data['contractname'])  # 合约中文名
+        #contract.name = data['contractname']  # 合约中文名
         contract.productClass = PRODUCT_FUTURES   # 合约类型
         contract.size = EMPTY_INT  # 合约大小
         contract.priceTick = data['mindiffprice']  # 合约最小价格TICK
@@ -443,6 +450,7 @@ class HfpTdApi(TdApi):
     
     @simple_log
     def onAccountResponse(self, data):
+        print_dict(data)
         account = VtAccountData()
         account.gatewayName = self.gatewayName
         account.accountID = data['memberid']  # 账户代码

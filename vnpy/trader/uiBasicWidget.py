@@ -888,11 +888,13 @@ class TradingWidget(QtWidgets.QFrame):
         buttonSendOrder = QtWidgets.QPushButton(vtText.SEND_ORDER)
         buttonCancelOrder = QtWidgets.QPushButton(vtText.CANCEL_ORDER)
         buttonCancelAll = QtWidgets.QPushButton(vtText.CANCEL_ALL)
+        buttonRefresh = QtWidgets.QPushButton(vtText.REFRESH)
 
         size = buttonSendOrder.sizeHint()
         buttonSendOrder.setMinimumHeight(size.height()*1)   # 把按钮高度设为默认两倍
         buttonCancelOrder.setMinimumHeight(size.height()*1)
         buttonCancelAll.setMinimumHeight(size.height()*1)
+        buttonRefresh.setMinimumHeight(size.height()*1)
 
         # 整合布局
         hbox = QtWidgets.QHBoxLayout()
@@ -904,6 +906,7 @@ class TradingWidget(QtWidgets.QFrame):
         vbox.addWidget(buttonSendOrder)
         vbox.addWidget(buttonCancelOrder)
         vbox.addWidget(buttonCancelAll)
+        vbox.addWidget(buttonRefresh)
         vbox.addStretch()
 
         self.setLayout(vbox)
@@ -912,6 +915,7 @@ class TradingWidget(QtWidgets.QFrame):
         buttonSendOrder.clicked.connect(self.sendOrder)
         buttonCancelOrder.clicked.connect(self.cancelOrder)
         buttonCancelAll.clicked.connect(self.cancelAll)
+        buttonRefresh.clicked.connect(self.refresh)
         self.lineSymbol.returnPressed.connect(self.updateSymbol)
 
     #----------------------------------------------------------------------
@@ -1099,6 +1103,11 @@ class TradingWidget(QtWidgets.QFrame):
             req.orderID = order.orderID
             self.mainEngine.cancelOrder(req, order.gatewayName)
 
+    #----------------------------------------------------------------------
+    def refresh(self):
+        """刷新接口数据"""
+        gatewayName = unicode(self.comboGateway.currentText())
+        self.mainEngine.refresh(gatewayName)
 
     #----------------------------------------------------------------------
     def closePosition(self, cell):

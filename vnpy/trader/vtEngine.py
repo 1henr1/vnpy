@@ -162,7 +162,14 @@ class MainEngine(object):
         
         if gateway:
             gateway.qryPosition()
-            
+
+    #----------------------------------------------------------------------
+    def refresh(self, gatewayName):
+        gateway = self.getGateway(gatewayName)
+
+        if gateway:
+            gateway.refresh()
+
     #----------------------------------------------------------------------
     def exit(self):
         """退出程序前调用，保证正常退出"""        
