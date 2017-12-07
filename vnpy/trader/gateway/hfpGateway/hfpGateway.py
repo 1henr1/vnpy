@@ -105,7 +105,7 @@ class HfpGateway(VtGateway):
         self.mdConnected = False        # 行情API连接状态，登录完成后为True
         self.tdConnected = False        # 交易API连接状态
         
-        self.qryEnabled = True         # 循环查询
+        self.qryEnabled = False         # 循环查询
         
         self.fileName = self.gatewayName + '_connect.json'
         self.filePath = getJsonPath(self.fileName, __file__)        
@@ -202,7 +202,7 @@ class HfpGateway(VtGateway):
             self.qryFunctionList = [self.qryAccount, self.qryPosition]
             
             self.qryCount = 0           # 查询触发倒计时
-            self.qryTrigger = 5         # 查询触发点
+            self.qryTrigger = 60         # 查询触发点
             self.qryNextFunction = 0    # 上次运行的查询函数索引
             
             self.startQuery()
@@ -505,7 +505,8 @@ class HfpTdApi(TdApi):
 
 
         #每次收到rsp都要查询报单状态，因为API设计的很烂
-        self.qryOrder(self.marketID)
+        #self.qryOrder(self.marketID)
+        self.refreshAll()
         pass
     
     @simple_log
@@ -542,7 +543,7 @@ class HfpTdApi(TdApi):
     @simple_log
     def onCancelorderPush(self, data):
         print_dict(data)
-        self.qryAllOrder()
+        self.refreshAll()
         pass
     
     @simple_log
@@ -583,6 +584,7 @@ class HfpTdApi(TdApi):
 
         # 推送
         self.gateway.onTrade(trade)
+        self.refreshAll()
         pass
     
     @simple_log
@@ -618,6 +620,11 @@ class HfpTdApi(TdApi):
     @simple_log
     def onQueryPositiondetailResponse(self, rsp, position_detail):
         pass
+
+    def refreshAll(self):
+        self.qryAllOrder()
+        self.qryAccount()
+        self.qryPosition()
 
     #----------------------------------------------------------------------
     def qryAccount(self):
