@@ -151,6 +151,7 @@ class HfpGateway(VtGateway):
         self.tdApi.connectTradeFront(tdAddress, int(tdPort))
 
         self.tdApi.setLoginInfo(userID, password)
+        self.initQuery()
         
 
     #----------------------------------------------------------------------
@@ -198,10 +199,10 @@ class HfpGateway(VtGateway):
         """初始化连续查询"""
         if self.qryEnabled:
             # 需要循环的查询函数列表
-            self.qryFunctionList = [self.qryAccount, self.qryPosition, self.qryAccount]
+            self.qryFunctionList = [self.qryAccount, self.qryPosition]
             
             self.qryCount = 0           # 查询触发倒计时
-            self.qryTrigger = 2         # 查询触发点
+            self.qryTrigger = 5         # 查询触发点
             self.qryNextFunction = 0    # 上次运行的查询函数索引
             
             self.startQuery()
@@ -602,7 +603,10 @@ class HfpTdApi(TdApi):
         position.direction = directionMapReverse.get(data['isbuy'])
         position.position = data['totalqty']  # 持仓量
         position.frozen = data['frzord']  # 冻结数量
-        position.price = data['totalcost'] / data['totalqty'] # 持仓均价
+        if data['totalqty'] == 0:
+            position.price = 0
+        else:
+            position.price = data['totalcost'] / data['totalqty'] # 持仓均价
         position.vtPositionName = '.'.join([position.vtSymbol, position.direction])  # 持仓在vt系统中的唯一代码，通常是vtSymbol.方向
         position.ydPosition = data['totalqty'] - data['totalqtytoday']  # 昨持仓
         position.positionProfit = data['balance']  # 持仓盈亏
