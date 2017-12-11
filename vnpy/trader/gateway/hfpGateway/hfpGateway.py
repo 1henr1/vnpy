@@ -603,8 +603,14 @@ class HfpTdApi(TdApi):
 
         # 持仓相关
         position.direction = directionMapReverse.get(data['isbuy'])
-        position.position = data['totalqty']  # 持仓量
-        position.frozen = data['frzord']  # 冻结数量
+        if data['totalqty'] == "":
+            position.position = 0
+        else:
+            position.position = data['totalqty']  # 持仓量
+        if data['frzord'] == "":
+            position.frozen = 0
+        else:
+            position.frozen = data['frzord']  # 冻结数量
         if data['totalqty'] == 0:
             position.price = 0
         else:

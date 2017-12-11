@@ -73,7 +73,7 @@ void getChar(dict d, string key, char *value)
 	}
 };
 
-#define ToString(str) ((str) == NULL ? "" : (string)(str))
+#define ToString(str) ((str) == NULL ? "" : string(str))
 
 ///-------------------------------------------------------------------------------------
 ///C++的回调函数将数据保存到队列中
@@ -178,13 +178,6 @@ void TdApi::processAssociatorResponse(Task task)
 	pdict["clientsize"] = item.clientsize;//全称
 	pdict["bankid"] = ToString(item.bankid);//银行id (0 无绑定银行;1 工商银行无锡南长支行;2 工商银行;3 农业银行;4 中信银行)
 
-//	dict pclient;
-//	unsigned int i = 0;
-//	while (i < item.clientsize)
-//	{
-//		pclient[to_string(i)] = ToString(item.clientids[i]);
-//		i++;
-//	}
 	this->onAssociatorResponse(prsp, pdict);
 }
 
@@ -208,11 +201,11 @@ void TdApi::processContractResponse(Task task)
 	PyLock lock;
 	contract contractinfo = any_cast<contract>(task.task_data);
 	dict pdict;
-	pdict["contractid"] = (string)(contractinfo.contractid);//合约编码
-	pdict["contractname"] = (string)(contractinfo.contractname);//合约名称
+	pdict["contractid"] = ToString(contractinfo.contractid);//合约编码
+	pdict["contractname"] = ToString(contractinfo.contractname);//合约名称
 	pdict["initprice"] = contractinfo.initprice;//初始价
-	pdict["beginday"] = (string)(contractinfo.beginday);//开始交易日(yymmddhh24mi)
-	pdict["endday"] = (string)(contractinfo.endday);//结束交易日(yymmddhh24mi)
+	pdict["beginday"] = ToString(contractinfo.beginday);//开始交易日(yymmddhh24mi)
+	pdict["endday"] = ToString(contractinfo.endday);//结束交易日(yymmddhh24mi)
 	pdict["uplimit"] = contractinfo.uplimit;//最高限价
 	pdict["downlimit"] = contractinfo.downlimit;//最低限价
 	pdict["maxqty"] = contractinfo.maxqty;//单笔最大申报量
@@ -239,8 +232,8 @@ void TdApi::processAccountResponse(Task task)
 	PyLock lock;
 	account item = any_cast<account>(task.task_data);
 	dict pdict;
-	pdict["memberid"] = (string)item.memberid;//会员编码
-	pdict["curname"] = (string)item.curname;//币种名称
+	pdict["memberid"] = ToString(item.memberid);//会员编码
+	pdict["curname"] = ToString(item.curname);//币种名称
 	pdict["avlb"] = item.avlb;//可用资金
 	pdict["occp"] = item.occp;//保证金(实收)
 	pdict["frzord"] = item.frzord;//报单冻结
@@ -267,9 +260,9 @@ void TdApi::processReceiptcollectResponse(Task task)
 	PyLock lock;
 	receipt_collect item = any_cast<receipt_collect>(task.task_data);
 	dict pdict;
-	pdict["memberid"] = (string)item.memberid;//会员编码
-	pdict["goodsid"] = (string)item.goodsid;//商品编码
-	pdict["goodsname"] = (string)item.goodsname;//商品名称
+	pdict["memberid"] = ToString(item.memberid);//会员编码
+	pdict["goodsid"] = ToString(item.goodsid);//商品编码
+	pdict["goodsname"] = ToString(item.goodsname);//商品名称
 	pdict["totalqty"] = item.totalqty;//总量
 	pdict["avlbqty"] = item.avlbqty;//可用量
 	pdict["frzord"] = item.frzord;//报单冻结量
