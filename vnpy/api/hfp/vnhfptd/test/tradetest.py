@@ -180,8 +180,10 @@ def main():
     #800261
     #800262    
     loginReq = {}                           # 创建一个空字典
-    loginReq['userID'] = '800401'                 # 参数作为字典键值的方式传入
-    loginReq['password'] = '800401'               # 键名和C++中的结构体成员名对应
+    #loginReq['userID'] = '800401'                 # 参数作为字典键值的方式传入
+    #loginReq['password'] = '800401'               # 键名和C++中的结构体成员名对应
+    loginReq['userID'] = '800362'                 # 参数作为字典键值的方式传入
+    loginReq['password'] = '800362'               # 键名和C++中的结构体成员名对应
     api.reqUserLogin(loginReq)
     
     
@@ -199,12 +201,6 @@ def main():
     print(type(Servertime))
     print 'Server Time is:' + str(Servertime)
 
-
-    #mid = float(1511445339645)
-    mid = 1511445339645
-    print type(mid)
-
-    print( time.strftime("%H:%M:%S", time.localtime(mid / 1000)))
     #print( time.strftime("%H:%M:%S", time.localtime()))
     #seq = api.reqAssociator()
     #print seq
@@ -217,9 +213,9 @@ def main():
     #seq = api.reqContract()
     #print seq
     
-    ## 请求账户信息 pass
-    #seq = api.reqAccount()
-    #print seq
+    # 请求账户信息 pass
+    seq = api.reqAccount()
+    print seq
     
     ## 请求仓单汇总信息 pass
     #seq = api.reqReceiptcollect()

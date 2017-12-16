@@ -593,6 +593,14 @@ class HfpTdApi(TdApi):
     
     @simple_log
     def onQueryPositioncollectResponse(self, rsp, data):
+        # 推送错误信息
+        err = VtErrorData()
+        err.gatewayName = self.gatewayName
+        err.errorID = rsp['errcode']
+        err.errorMsg = rsp['errdesc']
+        self.gateway.onError(err)
+        if err.errorID != 0:
+            return
 
         position = VtPositionData()
         position.gatewayName = self.gatewayName
@@ -603,14 +611,8 @@ class HfpTdApi(TdApi):
 
         # 持仓相关
         position.direction = directionMapReverse.get(data['isbuy'])
-        if data['totalqty'] == "":
-            position.position = 0
-        else:
-            position.position = data['totalqty']  # 持仓量
-        if data['frzord'] == "":
-            position.frozen = 0
-        else:
-            position.frozen = data['frzord']  # 冻结数量
+        position.position = data['totalqty']  # 持仓量
+        position.frozen = data['frzord']  # 冻结数量
         if data['totalqty'] == 0:
             position.price = 0
         else:
