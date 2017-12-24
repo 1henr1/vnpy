@@ -27,22 +27,16 @@
     <ClInclude Include="vntaptd.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapAPICommDef.h">
+    <ClInclude Include="..\..\tapapi\api\include\iTapAPICommDef.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapAPIError.h">
+    <ClInclude Include="..\..\tapapi\api\include\iTapAPIError.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapQuoteAPI.h">
+    <ClInclude Include="..\..\tapapi\api\include\iTapTradeAPI.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapQuoteAPIDataType.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapTradeAPI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\tapapi\api\include\TapTradeAPIDataType.h">
+    <ClInclude Include="..\..\tapapi\api\include\iTapTradeAPIDataType.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

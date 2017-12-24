@@ -158,6 +158,8 @@ const TAPICommodityType		TAPI_COMMODITY_TYPE_CROSSFOREX			= 'C';
 const TAPICommodityType		TAPI_COMMODITY_TYPE_INDEX				= 'Z';
 //! 股票
 const TAPICommodityType		TAPI_COMMODITY_TYPE_STOCK				= 'T';
+//! 现货延期
+const TAPICommodityType		TAPI_COMMODITY_TYPE_SPOT_TRADINGDEFER	= 'Y';
 
 /** @}*/
 

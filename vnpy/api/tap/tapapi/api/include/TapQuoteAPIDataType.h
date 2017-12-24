@@ -139,6 +139,7 @@ struct TapAPIQuoteWhole
 	TAPIQPRICE					QSwing;							///< 振幅
 	TAPIQVOLUME					QTotalBidQty;					///< 委买总量
 	TAPIQVOLUME					QTotalAskQty;					///< 委卖总量
+	TapAPIContract				UnderlyContract;				///< 虚拟合约对应的真实合约
 };
 
 

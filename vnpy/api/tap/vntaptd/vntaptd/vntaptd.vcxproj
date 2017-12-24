@@ -61,6 +61,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>C:\Anaconda2\libs;C:\workspace\boost_1_57_0\stage\lib;C:\workspace\vnpy\vnpy\api\tap\tapapi\api\lib\windows32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iTapTradeApi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -79,18 +80,17 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>C:\Anaconda2\libs;C:\workspace\boost_1_57_0\stage\lib;C:\workspace\vnpy\vnpy\api\tap\tapapi\api\lib\windows32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>iTapTradeApi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\tapapi\api\include\TapAPICommDef.h" />
-    <ClInclude Include="..\..\tapapi\api\include\TapAPIError.h" />
-    <ClInclude Include="..\..\tapapi\api\include\TapQuoteAPI.h" />
-    <ClInclude Include="..\..\tapapi\api\include\TapQuoteAPIDataType.h" />
-    <ClInclude Include="..\..\tapapi\api\include\TapTradeAPI.h" />
-    <ClInclude Include="..\..\tapapi\api\include\TapTradeAPIDataType.h" />
+    <ClInclude Include="..\..\tapapi\api\include\iTapAPICommDef.h" />
+    <ClInclude Include="..\..\tapapi\api\include\iTapAPIError.h" />
+    <ClInclude Include="..\..\tapapi\api\include\iTapTradeAPI.h" />
+    <ClInclude Include="..\..\tapapi\api\include\iTapTradeAPIDataType.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="vntaptd.h" />
