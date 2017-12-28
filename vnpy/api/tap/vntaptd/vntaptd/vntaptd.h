@@ -348,6 +348,6 @@ public:
 	int reqAmendOrder(dict req);
 	int qryOrder(dict req);
 	int qryFill();
-	int qryPosition();
+	int qryPosition(dict req);
 };
 

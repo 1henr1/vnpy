@@ -114,6 +114,7 @@ void TdApi::OnRspLogin(ITapTrade::TAPIINT32 errorCode, const ITapTrade::TapAPITr
 	else
 	{
 		TapAPITradeLoginRspInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -151,6 +152,7 @@ void TdApi::OnRspSetReservedInfo(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAP
 	else
 	{
 		TAPISTR_50 empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -167,6 +169,7 @@ void TdApi::OnRspQryAccount(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIUINT
 	else
 	{
 		TapAPIAccountInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -183,6 +186,7 @@ void TdApi::OnRspQryFund(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 e
 	else
 	{
 		TapAPIFundData empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -197,6 +201,7 @@ void TdApi::OnRtnFund(const ITapTrade::TapAPIFundData *info) {
 	else
 	{
 		TapAPIFundData empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -213,6 +218,7 @@ void TdApi::OnRspQryExchange(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	else
 	{
 		TapAPIExchangeInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -229,6 +235,7 @@ void TdApi::OnRspQryCommodity(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIIN
 	else
 	{
 		TapAPICommodityInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -245,6 +252,7 @@ void TdApi::OnRspQryContract(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	else
 	{
 		TapAPITradeContractInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -259,6 +267,7 @@ void TdApi::OnRtnContract(const ITapTrade::TapAPITradeContractInfo *info) {
 	else
 	{
 		TapAPITradeContractInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -277,6 +286,7 @@ void TdApi::OnRspOrderAction(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 		TAPIORDERACT actionType;	
 		task.task_error = actionType;
 		TapAPIOrderInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -292,6 +302,7 @@ void TdApi::OnRtnOrder(const ITapTrade::TapAPIOrderInfoNotice *info) {
 	else
 	{
 		TapAPIOrderInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_id = -1;
 		task.task_data = empty_data;
 	}
@@ -309,6 +320,7 @@ void TdApi::OnRspQryOrder(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 
 	else
 	{
 		TapAPIOrderInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -325,6 +337,7 @@ void TdApi::OnRspQryOrderProcess(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAP
 	else
 	{
 		TapAPIOrderInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -341,6 +354,7 @@ void TdApi::OnRspQryFill(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 e
 	else
 	{
 		TapAPIFillInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -355,6 +369,7 @@ void TdApi::OnRtnFill(const ITapTrade::TapAPIFillInfo *info) {
 	else
 	{
 		TapAPIFillInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -371,6 +386,7 @@ void TdApi::OnRspQryPosition(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	else
 	{
 		TapAPIPositionInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -385,6 +401,7 @@ void TdApi::OnRtnPosition(const ITapTrade::TapAPIPositionInfo *info) {
 	else
 	{
 		TapAPIPositionInfo empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -399,6 +416,7 @@ void TdApi::OnRtnPositionProfit(const ITapTrade::TapAPIPositionProfitNotice *inf
 	else
 	{
 		TapAPIPositionProfitNotice empty_data;
+		memset(&empty_data, 0, sizeof(empty_data));
 		task.task_data = empty_data;
 	}
 	this->task_queue.push(task);
@@ -1125,7 +1143,73 @@ void TdApi::processRspQryOrder(Task task) {
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	PyLock lock;
+	TapAPIOrderInfo task_data = any_cast<TapAPIOrderInfo>(task.task_data);
 	dict data;
+	data["AccountNo"] = task_data.AccountNo;						///< 客户资金帐号
+	data["ExchangeNo"] = task_data.ExchangeNo;						///< 交易所编号
+	data["CommodityType"] = task_data.CommodityType;					///< 品种类型
+	data["CommodityNo"] = task_data.CommodityNo;					///< 品种编码类型
+	data["ContractNo"] = task_data.ContractNo;						///< 合约1
+	data["StrikePrice"] = task_data.StrikePrice;					///< 执行价格1
+	data["CallOrPutFlag"] = task_data.CallOrPutFlag;					///< 看张看跌1
+	data["ContractNo2"] = task_data.ContractNo2;					///< 合约2
+	data["StrikePrice2"] = task_data.StrikePrice2;					///< 执行价格2
+	data["CallOrPutFlag2"] = task_data.CallOrPutFlag2;					///< 看张看跌2
+	data["OrderType"] = task_data.OrderType;						///< 委托类型
+	data["OrderSource"] = task_data.OrderSource;					///< 委托来源
+	data["TimeInForce"] = task_data.TimeInForce;					///< 委托有效类型
+	data["ExpireTime"] = task_data.ExpireTime;						///< 有效日期(GTD情况下使用)
+	data["IsRiskOrder"] = task_data.IsRiskOrder;					///< 是否风险报单
+	data["OrderSide"] = task_data.OrderSide;						///< 买入卖出
+	data["PositionEffect"] = task_data.PositionEffect;					///< 开平标志1
+	data["PositionEffect2"] = task_data.PositionEffect2;				///< 开平标志2
+	data["InquiryNo"] = task_data.InquiryNo;						///< 询价号
+	data["HedgeFlag"] = task_data.HedgeFlag;						///< 投机保值
+	data["OrderPrice"] = task_data.OrderPrice;						///< 委托价格1
+	data["OrderPrice2"] = task_data.OrderPrice2;					///< 委托价格2，做市商应价使用
+	data["StopPrice"] = task_data.StopPrice;						///< 触发价格
+	data["OrderQty"] = task_data.OrderQty;						///< 委托数量
+	data["OrderMinQty"] = task_data.OrderMinQty;					///< 最小成交量
+	data["RefInt"] = task_data.RefInt;							///< 整型参考值
+	data["RefDouble"] = task_data.RefDouble;						///< 浮点参考值
+	data["RefString"] = task_data.RefString;                                      ///< 字符串参考值
+	data["MinClipSize"] = task_data.MinClipSize;					///< 冰山单最小随机量
+	data["MaxClipSize"] = task_data.MaxClipSize;					///< 冰山单最大随机量
+	data["LicenseNo"] = task_data.LicenseNo;						///< 软件授权号
+	data["ServerFlag"] = task_data.ServerFlag;						///< 服务器标识
+	data["OrderNo"] = task_data.OrderNo;						///< 委托编码
+	data["ClientOrderNo"] = task_data.ClientOrderNo;					///< 客户端本地委托编号
+	data["ClientID"] = task_data.ClientID;                                           ///< 客户子账号.
+	data["TacticsType"] = task_data.TacticsType;					///< 策略单类型
+	data["TriggerCondition"] = task_data.TriggerCondition;				///< 触发条件
+	data["TriggerPriceType"] = task_data.TriggerPriceType;				///< 触发价格类型
+	data["AddOneIsValid"] = task_data.AddOneIsValid;					///< 是否T+1有效
+	data["ClientLocalIP"] = task_data.ClientLocalIP;					///< 终端本地IP
+	data["ClientMac"] = task_data.ClientMac;						///< 终端本地Mac地址
+	data["ClientIP"] = task_data.ClientIP;						///< 终端网络地址.
+	data["OrderStreamID"] = task_data.OrderStreamID;					///< 委托流水号
+	data["UpperNo"] = task_data.UpperNo;						///< 上手号
+	data["UpperChannelNo"] = task_data.UpperChannelNo;					///< 上手通道号
+	data["OrderLocalNo"] = task_data.OrderLocalNo;					///< 本地号
+	data["UpperStreamID"] = task_data.UpperStreamID;					///< 上手流号
+	data["OrderSystemNo"] = task_data.OrderSystemNo;					///< 系统号
+	data["OrderExchangeSystemNo"] = task_data.OrderExchangeSystemNo;			///< 交易所系统号 
+	data["OrderParentSystemNo"] = task_data.OrderParentSystemNo;			///< 父单系统号
+	data["OrderInsertUserNo"] = task_data.OrderInsertUserNo;				///< 下单人
+	data["OrderInsertTime"] = task_data.OrderInsertTime;				///< 下单时间
+	data["OrderCommandUserNo"] = task_data.OrderCommandUserNo;				///< 录单操作人
+	data["OrderUpdateUserNo"] = task_data.OrderUpdateUserNo;				///< 委托更新人
+	data["OrderUpdateTime"] = task_data.OrderUpdateTime;				///< 委托更新时间
+	data["OrderState"] = task_data.OrderState;						///< 委托状态
+	data["OrderMatchPrice"] = task_data.OrderMatchPrice;				///< 成交价1
+	data["OrderMatchPrice2"] = task_data.OrderMatchPrice2;				///< 成交价2
+	data["OrderMatchQty"] = task_data.OrderMatchQty;					///< 成交量1
+	data["OrderMatchQty2"] = task_data.OrderMatchQty2;					///< 成交量2
+	data["ErrorCode"] = task_data.ErrorCode;						///< 最后一次操作错误信息码
+	data["ErrorText"] = task_data.ErrorText;						///< 错误信息
+	data["IsBackInput"] = task_data.IsBackInput;					///< 是否为录入委托单
+	data["IsDeleted"] = task_data.IsDeleted;						///< 委托成交删除标
+	data["IsAddOne"] = task_data.IsAddOne;						///< 是否为T+1单
 	this->onRspQryOrder(task.task_id, task.task_last, data);
 };
 
@@ -1161,7 +1245,35 @@ void TdApi::processRspQryPosition(Task task) {
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	PyLock lock;
+	TapAPIPositionInfo task_data = any_cast<TapAPIPositionInfo>(task.task_data);
 	dict data;
+    data["AccountNo"] = task_data.AccountNo;						///< 客户资金帐号
+    data["ExchangeNo"] = task_data.ExchangeNo;						///< 交易所编号
+    data["CommodityType"] = task_data.CommodityType;					///< 品种类型
+    data["CommodityNo"] = task_data.CommodityNo;					///< 品种编码类型
+    data["ContractNo"] = task_data.ContractNo;						///< 合约1
+    data["StrikePrice"] = task_data.StrikePrice;					///< 执行价格
+    data["CallOrPutFlag"] = task_data.CallOrPutFlag;					///< 看张看跌
+    data["MatchSide"] = task_data.MatchSide;						///< 买入卖出
+    data["HedgeFlag"] = task_data.HedgeFlag;						///< 投机保值
+    data["PositionNo"] = task_data.PositionNo;						///< 本地持仓号，服务器编写
+    data["ServerFlag"] = task_data.ServerFlag;						///< 服务器标识
+    data["OrderNo"] = task_data.OrderNo;						///< 委托编码
+    data["MatchNo"] = task_data.MatchNo;						///< 本地成交号
+    data["UpperNo"] = task_data.UpperNo;						///< 上手号
+    data["PositionPrice"] = task_data.PositionPrice;					///< 持仓价
+    data["PositionQty"] = task_data.PositionQty;					///< 持仓量
+	data["PositionStreamId"] = task_data.PositionStreamId;				///< 持仓流号
+    data["CommodityCurrencyGroup"] = task_data.CommodityCurrencyGroup;			///< 品种币种组
+    data["CommodityCurrency"] = task_data.CommodityCurrency;				///< 品种币种
+    data["CalculatePrice"] = task_data.CalculatePrice;					///< 当前计算价格
+    data["AccountInitialMargin"] = task_data.AccountInitialMargin;			///< 客户初始保证金
+    data["AccountMaintenanceMargin"] = task_data.AccountMaintenanceMargin;		///< 客户维持保证金
+    data["UpperInitialMargin"] = task_data.UpperInitialMargin;				///< 上手初始保证金
+    data["UpperMaintenanceMargin"] = task_data.UpperMaintenanceMargin;			///< 上手维持保证金
+    data["PositionProfit"] = task_data.PositionProfit;					///< 持仓盈亏
+    data["LMEPositionProfit"] = task_data.LMEPositionProfit;				///< LME持仓盈亏
+    data["OptionMarketValue"] = task_data.OptionMarketValue;				///< 期权市值
 	this->onRspQryPosition(task.task_id, task.task_last, data);
 };
 
@@ -1170,7 +1282,35 @@ void TdApi::processRtnPosition(Task task) {
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	PyLock lock;
+	TapAPIPositionInfo task_data = any_cast<TapAPIPositionInfo>(task.task_data);
 	dict data;
+    data["AccountNo"] = task_data.AccountNo;						///< 客户资金帐号
+    data["ExchangeNo"] = task_data.ExchangeNo;						///< 交易所编号
+    data["CommodityType"] = task_data.CommodityType;					///< 品种类型
+    data["CommodityNo"] = task_data.CommodityNo;					///< 品种编码类型
+    data["ContractNo"] = task_data.ContractNo;						///< 合约1
+    data["StrikePrice"] = task_data.StrikePrice;					///< 执行价格
+    data["CallOrPutFlag"] = task_data.CallOrPutFlag;					///< 看张看跌
+    data["MatchSide"] = task_data.MatchSide;						///< 买入卖出
+    data["HedgeFlag"] = task_data.HedgeFlag;						///< 投机保值
+    data["PositionNo"] = task_data.PositionNo;						///< 本地持仓号，服务器编写
+    data["ServerFlag"] = task_data.ServerFlag;						///< 服务器标识
+    data["OrderNo"] = task_data.OrderNo;						///< 委托编码
+    data["MatchNo"] = task_data.MatchNo;						///< 本地成交号
+    data["UpperNo"] = task_data.UpperNo;						///< 上手号
+    data["PositionPrice"] = task_data.PositionPrice;					///< 持仓价
+    data["PositionQty"] = task_data.PositionQty;					///< 持仓量
+	data["PositionStreamId"] = task_data.PositionStreamId;				///< 持仓流号
+    data["CommodityCurrencyGroup"] = task_data.CommodityCurrencyGroup;			///< 品种币种组
+    data["CommodityCurrency"] = task_data.CommodityCurrency;				///< 品种币种
+    data["CalculatePrice"] = task_data.CalculatePrice;					///< 当前计算价格
+    data["AccountInitialMargin"] = task_data.AccountInitialMargin;			///< 客户初始保证金
+    data["AccountMaintenanceMargin"] = task_data.AccountMaintenanceMargin;		///< 客户维持保证金
+    data["UpperInitialMargin"] = task_data.UpperInitialMargin;				///< 上手初始保证金
+    data["UpperMaintenanceMargin"] = task_data.UpperMaintenanceMargin;			///< 上手维持保证金
+    data["PositionProfit"] = task_data.PositionProfit;					///< 持仓盈亏
+    data["LMEPositionProfit"] = task_data.LMEPositionProfit;				///< LME持仓盈亏
+    data["OptionMarketValue"] = task_data.OptionMarketValue;				///< 期权市值
 	this->onRtnPosition(data);
 };
 
@@ -1551,6 +1691,20 @@ int TdApi::qryOrder(dict req)
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	TapAPIOrderQryReq stOrderQryReq;
+    getStr(req, "AccountNo", stOrderQryReq.AccountNo);						///< 资金账号
+    getStr(req, "ExchangeNo", stOrderQryReq.ExchangeNo);						///< 交易所编号
+    getChar(req, "CommodityType", &stOrderQryReq.CommodityType);					///< 品种类型
+    getStr(req, "CommodityNo", stOrderQryReq.CommodityNo);					///< 品种编码类型
+    getChar(req, "OrderType", &stOrderQryReq.OrderType);						///< 委托类型
+    getChar(req, "OrderSource", &stOrderQryReq.OrderSource);					///< 委托来源
+    getChar(req, "TimeInForce", &stOrderQryReq.TimeInForce);					///< 委托有效类型
+    getStr(req, "ExpireTime", stOrderQryReq.ExpireTime);						///< 有效日期(GTD情况下使用)
+    getChar(req, "IsRiskOrder", &stOrderQryReq.IsRiskOrder);					///< 是否风险报单
+    getChar(req, "ServerFlag", &stOrderQryReq.ServerFlag);						///< 服务器标识
+    getStr(req, "OrderNo", stOrderQryReq.OrderNo);                        ///< 委托编号
+    getChar(req, "IsBackInput", &stOrderQryReq.IsBackInput);					///< 是否为录入委托单
+    getChar(req, "IsDeleted", &stOrderQryReq.IsDeleted);						///< 委托成交删除标
+    getChar(req, "IsAddOne", &stOrderQryReq.IsAddOne);						///< 是否为T+1单
 	return api->QryOrder(&m_sessionID, &stOrderQryReq);
 }
 
@@ -1563,12 +1717,13 @@ int TdApi::qryFill()
 	return api->QryFill(&m_sessionID, &stFillQryReq);
 }
 
-int TdApi::qryPosition()
+int TdApi::qryPosition(dict req)
 {
 #ifdef _DEBUG
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	TapAPIPositionQryReq stPositionReq;
+    getStr(req, "AccountNo", stPositionReq.AccountNo);						///< 客户资金帐号，必填
 	return api->QryPosition(&m_sessionID,&stPositionReq);
 }
 
@@ -1961,7 +2116,7 @@ struct TdApiWrap : TdApi, wrapper < TdApi >
 	};
 };
 
-BOOST_PYTHON_MODULE(vnctptd)
+BOOST_PYTHON_MODULE(vntaptd)
 {
 	PyEval_InitThreads();	//导入时运行，保证先创建GIL
 

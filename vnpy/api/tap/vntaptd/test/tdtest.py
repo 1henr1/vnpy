@@ -27,6 +27,7 @@ def simple_log(func):
     return wrapper
 
 
+
 ########################################################################
 class TestTdApi(TdApi):
     """测试用实例"""
@@ -45,140 +46,204 @@ class TestTdApi(TdApi):
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspLogin(self,  errorCode,  data):
+    def onRspLogin(self, errorCode,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onAPIReady(self):
+    def onExpriationDate(self, data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onAPIReady(self,):
         self.isApiReady = True
         pass
 
-   #----------------------------------------------------------------------
+    #----------------------------------------------------------------------
     @simple_log
-    def onDisconnect(self,  reasonCode):
+    def onDisconnect(self, reasonCode):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspChangePassword(self,   errorCode):
+    def onRspChangePassword(self, errorCode):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspSetReservedInfo(self,   errorCode,  data):
+    def onRspSetReservedInfo(self, errorCode,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryAccount(self,   errorCode,  isLast,  data):
+    def onRspQryAccount(self, errorCode,  isLast,  data):
+        print errorCode
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryFund(self,   errorCode,  isLast,  data):
+    def onRspQryFund(self, errorCode,  isLast,  data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnFund(self,  data):
+    def onRtnFund(self, data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryExchange(self,   errorCode,  isLast,  data):
+    def onRspQryExchange(self, errorCode,  isLast,  data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryCommodity(self,   errorCode,  isLast,  data):
+    def onRspQryCommodity(self, errorCode,  isLast,  data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryContract(self,   errorCode,  isLast,  data):
+    def onRspQryContract(self, errorCode,  isLast,  data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnContract(self,  data):
-        pass
-
-    #----------------------------------------------------------------------
-    @simple_log
-    def onRtnOrder(self,  errorCode,  data):
+    def onRtnContract(self, data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
     def onRspOrderAction(self, errorCode,  data):
+        print errorCode
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryOrder(self,   errorCode,  isLast,  data):
+    def onRtnOrder(self, data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryOrderProcess(self,   errorCode,  isLast,  data):
+    def onRspQryOrder(self, errorCode,  isLast,  data):
+        print errorCode, isLast
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryFill(self,   errorCode,  isLast,  data):
+    def onRspQryOrderProcess(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnFill(self,  data):
+    def onRspQryFill(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryPosition(self,   errorCode,  isLast,  data):
+    def onRtnFill(self, data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnPosition(self,  data):
+    def onRspQryPosition(self, errorCode,  isLast,  data):
+        print(errorCode, isLast)
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnClose(self,  data):
+    def onRtnPosition(self, data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnPositionProfit(self,  data):
+    def onRtnPositionProfit(self, data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryDeepQuote(self,   errorCode,  isLast,  data):
+    def onRspQryCurrency(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryExchangeStateInfo(self,  errorCode,  isLast, data):
+    def onRspQryTradeMessage(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnExchangeStateInfo(self,  data):
+    def onRtnTradeMessage(self, data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRtnReqQuoteNotice(self,  data):
+    def onRspQryHisOrder(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspUpperChannelInfo(self,  errorCode,  isLast,  data):
+    def onRspQryHisOrderProcess(self, errorCode,  isLast,  data):
         pass
 
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryHisMatch(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryHisPosition(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryHisDelivery(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryAccountCashAdjust(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryBill(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryAccountFeeRent(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryAccountMarginRent(self, errorCode,  isLast,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspHKMarketOrderInsert(self, errorCode,   data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspHKMarketOrderDelete(self, errorCode,  data):
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onHKMarketQuoteNotice(self,  data):
+        pass
 
 
 def main():
@@ -187,17 +252,17 @@ def main():
     # 创建Qt应用对象，用于事件循环
     app = QtGui.QApplication(sys.argv)
 
-    # 创建API对象
+# 创建API对象
     api = TestTdApi()
-    
+
     # 在C++环境中创建TdApi对象
     req = {}
     req["AuthCode"] = "67EA896065459BECDFDB924B29CB7DF1946CED32E26C1EAC946CED32E26C1EAC946CED32E26C1EAC946CED32E26C1EAC5211AF9FEE541DDE41BCBAB68D525B0D111A0884D847D57163FF7F329FA574E7946CED32E26C1EAC946CED32E26C1EAC733827B0CE853869ABD9B8F170E14F8847D3EA0BF4E191F5D97B3DFE4CCB1F01842DD2B3EA2F4B20CAD19B8347719B7E20EA1FA7A3D1BFEFF22290F4B5C43E6C520ED5A40EC1D50ACDF342F46A92CCF87AEE6D73542C42EC17818349C7DEDAB0E4DB16977714F873D505029E27B3D57EB92D5BEDA0A710197EB67F94BB1892B30F58A3F211D9C3B3839BE2D73FD08DD776B9188654853DDA57675EBB7D6FBBFC"
     req["KeyOperationLogPath"] = ".\\"
-    api.createTapTraderApi(req)
-    
+    print api.createTapTraderApi(req)
+
     # 注册前置机地址
-    api.setHostAddress("123.15.58.21", 7171)
+    api.setHostAddress("222.88.40.171" , 8383)
 
     # 登录服务器
     req = {}
@@ -209,52 +274,67 @@ def main():
         sleep(1)
         pass
 
-    # api.exit();
+    #VertificateCode = ""
+    #api.setVertificateCode(VertificateCode)
+
+    # OK
+    #api.qryAccount()
 
     req = {}
     req["AccountNo"] =  "Q1355739190"
-    api.qryAccount(req)
-
-    req = {}
-    req["AccountNo"] =  "Q1355739190"
-    api.qryFund(req)
-
-    api.qryExchange();
-
-    api.qryCommodity()
-
-    req = {}
     req["ExchangeNo"] = "COMEX"
-    req["CommodityNo"] = "SI"
+    req["CommodityNo"] = "GC"
     req["CommodityType"] = "F"
-    api.qryContract(req)
+    req["ServerFlag"] = 'A'
+    req["IsAddOne"] = 'Y'
+    print api.qryOrder(req)
+    #api.qryFill()
 
-    req = {}
-    req["AccountNo"] = ""
-    req["ExchangeNo"] = ""
-    req["CommodityType"] = ""
-    req["CommodityNo"] = ""
-    req["ContractNo"] = ""
-    req["OrderType"] = ""
-    req["OrderSource"] = ""
-    req["TimeInForce"] = ""
-    req["OrderSide"] = ""
-    req["OrderPrice"] = ""
-    req["OrderQty"] = ""
-    api.reqInsertOrder( req)
-	
+    # OK
+    # req = {}
+    # req["AccountNo"] =  "Q1355739190"
+    # api.qryPosition(req)
 
-    req = {}
-    req["OrderNo"] = ""
-    api.reqCancelOrder( req)
+    # OK
+    #req = {}
+    #req["AccountNo"] =  "Q1355739190"
+    #api.qryFund(req)
 
-    req = {}
-    req["QryOrderType"] = ""
-    api.qryOrder( req)
+    # OK
+    #api.qryExchange()
 
-    api.qryFill()
+    #OK
+    #api.qryCommodity()
 
-    api.qryPosition()
+    # OK
+    #req = {}
+    #req["ExchangeNo"] = "HKEX"
+    #req["CommodityNo"] = "HSI"
+    #req["CommodityType"] = "F"
+    #api.qryContract(req)
+
+#    req = {}
+#    req["AccountNo"] = "Q1355739190"					##//< 客户资金帐号，必填
+#    req["ExchangeNo"] = "COMEX"						##//< 交易所编号，必填
+#    req["CommodityType"] = "F"					##//< 品种类型，必填
+#    req["CommodityNo"] = "GC"					##//< 品种编码类型，必填
+#    req["ContractNo"] = "1802"						##//< 合约1，必填
+#    req["OrderType"] = "2"						##//< 委托类型 必填
+#    req["OrderSide"] = "B"						##//< 买入卖出
+#    req["OrderPrice"] = 1290					##//< 委托价格1
+#    req["OrderQty"] = 1						##//< 委托数量，必填
+#    req["OrderSource"] = "A"						##//< 委托数量，必填
+#    print api.reqInsertOrder(req)
+
+#    req = {}
+#    req["ServerFlag"] = "A"
+#    req["OrderNo"] = "OA201712280000002638"						##//< 委托数量，必填
+#    print api.reqCancelOrder(req)
+
+    #api.reqAmendOrder(req)
+
+
+
 
 
     # 连续运行，用于输出行情

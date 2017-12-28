@@ -88,8 +88,8 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     @simple_log
     def onRtnQuote(self,  data):
-        self.quoteTimes = self.quoteTimes + 1
-        print self.quoteTimes
+        ##self.quoteTimes = self.quoteTimes + 1
+        ##print self.quoteTimes
         if (self.quoteTimes == 5):
             self.quoteTimes = 0
             req = {}
@@ -149,10 +149,14 @@ def main():
     #api.qryContract(req)
 
     req = {}
+    #req["ExchangeNo"] = "COMEX"
+    #req["CommodityNo"] = "SI"
+    #req["CommodityType"] = "F"
+    #req["ContractNo1"] = "1805"
     req["ExchangeNo"] = "COMEX"
-    req["CommodityNo"] = "SI"
+    req["CommodityNo"] = "GC"
     req["CommodityType"] = "F"
-    req["ContractNo1"] = "1805"
+    req["ContractNo1"] = "1801"
     print api.subscribeMarketData(req)
 
 
