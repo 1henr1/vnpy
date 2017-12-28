@@ -1,0 +1,12 @@
+Entering TdApi::createTapTraderApi:1476 
+Entering TdApi::setHostAddress:1502 
+Entering TdApi::reqUserLogin:1510 
+Entering TdApi::processConnect:711 
+Entering TdApi::processRspLogin:719 
+Entering TdApi::processAPIReady:750 
+Entering TdApi::reqInsertOrder:1588 
+Entering TdApi::processRspOrderAction:992 
+Entering TdApi::processRtnOrder:1069 
+Entering TdApi::processRtnOrder:1069 
+Entering TdApi::processRtnOrder:1069 
+Entering TdApi::processRtnOrder:1069 
