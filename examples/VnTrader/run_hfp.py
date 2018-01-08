@@ -24,7 +24,7 @@ if system == 'Windows':
                                      sgitGateway, shzdGateway)
 
 if system == 'Windows':
-    from vnpy.trader.gateway import (hfpGateway)
+    from vnpy.trader.gateway import (hfpGateway, tapGateway)
 
 # 加载上层应用
 from vnpy.trader.app import (riskManager, ctaStrategy, spreadTrading)
@@ -44,6 +44,7 @@ def main():
     
     # 添加交易接口
     me.addGateway(hfpGateway)
+    me.addGateway(tapGateway)
 
     # 添加上层应用
     me.addApp(riskManager)

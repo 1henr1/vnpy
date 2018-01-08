@@ -99,6 +99,14 @@ def main():
                 fpy.write(py_line.decode('gbk').encode('utf-8'))
 
         fcpp.close()
+        fcpp = open('TapAPICommDef.h','r')
+
+        for line in fcpp:
+            py_line = process_line(line)
+            if py_line:
+                fpy.write(py_line.decode('gbk').encode('utf-8'))
+
+        fcpp.close()
         fpy.close()
 
         print u'data_type.py生成过程完成'

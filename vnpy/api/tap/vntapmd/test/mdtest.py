@@ -107,6 +107,9 @@ class TestMdApi(MdApi):
         print "Implyid"
         print data["QImpliedAskPrice"], data["QImpliedAskQty"]
         print data["QImpliedBidPrice"], data["QImpliedBidQty"]
+        print "Stamp:  "
+        print data["DateTimeStamp"][:10].replace('-',''),
+        print data["DateTimeStamp"][10:]
         pass
 
 #----------------------------------------------------------------------
@@ -156,7 +159,7 @@ def main():
     req["ExchangeNo"] = "COMEX"
     req["CommodityNo"] = "GC"
     req["CommodityType"] = "F"
-    req["ContractNo1"] = "1801"
+    req["ContractNo1"] = "1803"
     print api.subscribeMarketData(req)
 
 

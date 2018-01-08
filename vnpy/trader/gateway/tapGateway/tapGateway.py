@@ -148,7 +148,7 @@ class TapGateway(VtGateway):
         
         # 创建行情和交易接口对象
         self.mdApi.connect(authCode, mdUserID, mdPassword, mdAddress, mdPort)
-        self.tdApi.connect(authCode, tdUserID, tdPassword, tdAddress, tdPort)
+        #self.tdApi.connect(authCode, tdUserID, tdPassword, tdAddress, tdPort)
 
         # 初始化并启动查询
         self.initQuery()
@@ -271,8 +271,8 @@ class TapMdApi(MdApi):
                 self.subscribe(subscribeReq)
 
             # 获取交易日
-            self.tradingDate = data['TradingDay']
-            self.tradingDt = datetime.strptime(self.tradingDate, '%Y%m%d')
+            # self.tradingDate = data['TradingDay']
+            # self.tradingDt = datetime.strptime(self.tradingDate, '%Y%m%d')
 
         # 否则，推送错误信息
         else:
@@ -289,6 +289,12 @@ class TapMdApi(MdApi):
         self.isApiReady = True
         self.connectionStatus = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
+
+        req = VtSubscribeReq()
+        req.symbol = "1803"
+        req.exchange = "COMEX"
+        req.productClass = "GC"
+        self.subscribe(req)
         pass
 
     #----------------------------------------------------------------------
@@ -333,67 +339,78 @@ class TapMdApi(MdApi):
         tick.exchange =  data['ExchangeNo']
         tick.vtSymbol = '.'.join([tick.symbol, tick.exchange])
 
-        tick.lastPrice = data['QLastPrice']
-        tick.volume = data['QLastQty']
-        #tick.date = data['ActionDay'
-        tick.time = data['DateTimeStamp']
+        tick.lastPrice = data['QLastPrice']            # 最新成交价
+        tick.lastVolume = data['QLastQty']             # 最新成交量
+        tick.volume = data['QTotalQty']                 # 今天总成交量
+        tick.openInterest = data['QPrePositionQty']  # 持仓量
+        tick.time = data['DateTimeStamp'][10:].replace('-','')                # 时间 11:20:56.5
+        tick.date = data['DateTimeStamp'][:10]                # 日期 20151009
+        #tick.datetime = None                    # python的datetime时间对象
 
-        tick.openInterest = data['QPrePositionQty']
         tick.openPrice = data['QOpeningPrice']
         tick.highPrice = data['QHighPrice']
-        tick.lowPrice = data['QHisLowPrice']
+        tick.lowPrice = data['QLowPrice']
         tick.preClosePrice = data['QPreClosingPrice']
         tick.upperLimit = data['QLimitUpPrice']
         tick.lowerLimit = data['QLimitDownPrice']
 
-        #data["QImpliedBidPrice"] = task_data.QImpliedBidPrice;				///< 隐含买价
-        #data["QImpliedBidQty"] = task_data.QImpliedBidQty;					///< 隐含买量
-        #data["QImpliedAskPrice"] = task_data.QImpliedAskPrice;				///< 隐含卖价
-        #data["QImpliedAskQty"] = task_data.QImpliedAskQty;					///< 隐含卖量
-        if data['QBidPrice1'] == data['QImpliedBidPrice"']:
-            tick.bidVolume1 = data['QBidQty1'] + data['QImpliedBidQty"']
+        if data['QBidPrice1'] < data['QImpliedBidPrice']:
+            tick.bidPrice1 = data['QImpliedBidPrice']
+            tick.bidVolume1 = data['QImpliedBidQty']
+        elif data['QBidPrice1'] == data['QImpliedBidPrice']:
+            tick.bidPrice1 = data['QBidQty1']
+            tick.bidVolume1 = data['QBidQty1'] + data['QImpliedBidQty']
         else:
+            tick.bidPrice1 = data['QBidQty1']
             tick.bidVolume1 = data['QBidQty1']
-        if data['QAskPrice1'] == data['QImpliedAskPrice"']:
-            tick.askVolume1 = data['QAskQty1'] + data['QImpliedAskQty"']
+
+        if data['QAskPrice1'] > data['QImpliedAskPrice']:
+            tick.askPrice1 = data['QImpliedAskPrice']
+            tick.askVolume1 = data['QImpliedAskQty']
+        elif data['QAskPrice1'] == data['QImpliedAskPrice']:
+            tick.askPrice1 = data['QAskQty1']
+            tick.askVolume1 = data['QAskQty1'] + data['QImpliedAskQty']
         else:
+            tick.askPrice1 = data['QAskQty1']
             tick.askVolume1 = data['QAskQty1']
-        tick.bidPrice2 = data['QBidPrice2']
-        tick.bidVolume2 = data['QBidQty2']
-        tick.askPrice2 = data['QAskPrice2']
-        tick.askVolume2 = data['QAskQty2']
-        tick.bidPrice3 = data['QBidPrice3']
-        tick.bidVolume3 = data['QBidQty3']
-        tick.askPrice3 = data['QAskPrice3']
-        tick.askVolume3 = data['QAskQty3']
-        tick.bidPrice4 = data['QBidPrice4']
-        tick.bidVolume4 = data['QBidQty4']
-        tick.askPrice4 = data['QAskPrice4']
-        tick.askVolume4 = data['QAskQty4']
-        tick.bidPrice5 = data['QBidPrice5']
-        tick.bidVolume5 = data['QBidQty5']
-        tick.askPrice5 = data['QAskPrice5']
-        tick.askVolume5 = data['QAskQty5']
-        tick.bidPrice6 = data['QBidPrice6']
-        tick.bidVolume6 = data['QBidQty6']
-        tick.askPrice6 = data['QAskPrice6']
-        tick.askVolume6 = data['QAskQty6']
-        tick.bidPrice7 = data['QBidPrice7']
-        tick.bidVolume7 = data['QBidQty7']
-        tick.askPrice7 = data['QAskPrice7']
-        tick.askVolume7 = data['QAskQty7']
-        tick.bidPrice8 = data['QBidPrice8']
-        tick.bidVolume8 = data['QBidQty8']
-        tick.askPrice8 = data['QAskPrice8']
-        tick.askVolume8 = data['QAskQty8']
-        tick.bidPrice9 = data['QBidPrice9']
-        tick.bidVolume9 = data['QBidQty9']
-        tick.askPrice9 = data['QAskPrice9']
-        tick.askVolume9 = data['QAskQty9']
-        tick.bidPrice10 = data['QBidPrice10']
-        tick.bidVolume10 = data['QBidQty10']
-        tick.askPrice10 = data['QAskPrice10']
-        tick.askVolume10 = data['QAskQty10']
+
+
+        #tick.bidPrice2 = data['QBidPrice2']
+        #tick.bidVolume2 = data['QBidQty2']
+        #tick.askPrice2 = data['QAskPrice2']
+        #tick.askVolume2 = data['QAskQty2']
+        #tick.bidPrice3 = data['QBidPrice3']
+        #tick.bidVolume3 = data['QBidQty3']
+        #tick.askPrice3 = data['QAskPrice3']
+        #tick.askVolume3 = data['QAskQty3']
+        #tick.bidPrice4 = data['QBidPrice4']
+        #tick.bidVolume4 = data['QBidQty4']
+        #tick.askPrice4 = data['QAskPrice4']
+        #tick.askVolume4 = data['QAskQty4']
+        #tick.bidPrice5 = data['QBidPrice5']
+        #tick.bidVolume5 = data['QBidQty5']
+        #tick.askPrice5 = data['QAskPrice5']
+        #tick.askVolume5 = data['QAskQty5']
+        #tick.bidPrice6 = data['QBidPrice6']
+        #tick.bidVolume6 = data['QBidQty6']
+        #tick.askPrice6 = data['QAskPrice6']
+        #tick.askVolume6 = data['QAskQty6']
+        #tick.bidPrice7 = data['QBidPrice7']
+        #tick.bidVolume7 = data['QBidQty7']
+        #tick.askPrice7 = data['QAskPrice7']
+        #tick.askVolume7 = data['QAskQty7']
+        #tick.bidPrice8 = data['QBidPrice8']
+        #tick.bidVolume8 = data['QBidQty8']
+        #tick.askPrice8 = data['QAskPrice8']
+        #tick.askVolume8 = data['QAskQty8']
+        #tick.bidPrice9 = data['QBidPrice9']
+        #tick.bidVolume9 = data['QBidQty9']
+        #tick.askPrice9 = data['QAskPrice9']
+        #tick.askVolume9 = data['QAskQty9']
+        #tick.bidPrice10 = data['QBidPrice10']
+        #tick.bidVolume10 = data['QBidQty10']
+        #tick.askPrice10 = data['QAskPrice10']
+        #tick.askVolume10 = data['QAskQty10']
 
 
         self.gateway.onTick(tick)
@@ -434,10 +451,10 @@ class TapMdApi(MdApi):
         # 则先保存订阅请求，登录完成后会自动订阅
         if self.loginStatus:
             req = {}
-            req["ExchangeNo"] = req.exchange
-            req["CommodityNo"] = req.productClass
+            req["ExchangeNo"] = subscribeReq.exchange
+            req["CommodityNo"] = subscribeReq.productClass
             req["CommodityType"] = "F"
-            req["ContractNo1"] = req.symbol
+            req["ContractNo1"] = subscribeReq.symbol
             self.subscribeMarketData(req)
         self.subscribedSymbols.add(subscribeReq)
 

@@ -521,3 +521,95 @@ defineDict["TAPI_BILL_FILE_PDF"] =  'F'
 #! 港交所做市商双边撤单请求
 
 
+
+
+
+# 长度为10的字符串
+# 长度为20的字符串
+# 长度为30的字符串
+# 长度为40的字符串
+# 长度为50的字符串
+# 长度为70的字符串
+# 长度为100的字符串
+# 长度为300的字符串
+# 长度为500的字符串
+# 长度为2000的字符串
+
+# Authorization Code
+
+
+# 单字符定义，可用于定义其他类型
+
+
+
+# int 32
+# unsigned 32
+# int 64
+# unsigned 64
+# unsigned 16
+# unsigned 8
+# real 64
+
+
+# 是否标示
+# 是
+defineDict["APIYNFLAG_YES"] = 'Y'# 否
+defineDict["APIYNFLAG_NO"] = 'N'
+
+
+
+
+# 时间戳类型(格式 yyyy-MM-dd hh:nn:ss.xxx)
+# 日期和时间类型(格式 yyyy-MM-dd hh:nn:ss)
+# 日期类型(格式 yyyy-MM-dd)
+# 时间类型(格式 hh:nn:ss)
+
+# 日志级别
+# 无
+defineDict["APILOGLEVEL_NONE"] = 'N'# Error
+defineDict["APILOGLEVEL_ERROR"] = 'E'# Warning
+defineDict["APILOGLEVEL_WARNING"] = 'W'# Debug
+defineDict["APILOGLEVEL_DEBUG"] = 'D'
+
+
+# 品种类型
+# 无
+defineDict["TAPI_COMMODITY_TYPE_NONE"] =  'N'# 现货
+defineDict["TAPI_COMMODITY_TYPE_SPOT"] =  'P'# 期货
+defineDict["TAPI_COMMODITY_TYPE_FUTURES"] =  'F'# 期权
+defineDict["TAPI_COMMODITY_TYPE_OPTION"] =  'O'# 跨期套利
+defineDict["TAPI_COMMODITY_TYPE_SPREAD_MONTH"] =  'S'# 跨品种套利
+defineDict["TAPI_COMMODITY_TYPE_SPREAD_COMMODITY"] =  'M'# 看涨垂直套利
+defineDict["TAPI_COMMODITY_TYPE_BUL"] =  'U'# 看跌垂直套利
+defineDict["TAPI_COMMODITY_TYPE_BER"] =  'E'# 跨式套利
+defineDict["TAPI_COMMODITY_TYPE_STD"] =  'D'# 宽跨式套利
+defineDict["TAPI_COMMODITY_TYPE_STG"] =  'G'# 备兑组合
+defineDict["TAPI_COMMODITY_TYPE_PRT"] =  'R'# 外汇——直接汇率
+defineDict["TAPI_COMMODITY_TYPE_DIRECTFOREX"] =  'X'# 外汇——间接汇率
+defineDict["TAPI_COMMODITY_TYPE_INDIRECTFOREX"] =  'I'# 外汇——交叉汇率
+defineDict["TAPI_COMMODITY_TYPE_CROSSFOREX"] =  'C'# 指数
+defineDict["TAPI_COMMODITY_TYPE_INDEX"] =  'Z'# 股票
+defineDict["TAPI_COMMODITY_TYPE_STOCK"] =  'T'# 现货延期
+defineDict["TAPI_COMMODITY_TYPE_SPOT_TRADINGDEFER"] =  'Y'
+
+
+
+# 看涨看跌标示
+# 买权
+defineDict["TAPI_CALLPUT_FLAG_CALL"] =  'C'# 卖权
+defineDict["TAPI_CALLPUT_FLAG_PUT"] =  'P'# 无
+defineDict["TAPI_CALLPUT_FLAG_NONE"] =  'N'
+
+
+# Application信息
+
+
+# 品种编码结构
+
+# 合约编码结构
+
+# 交易所信息
+
+# 修改密码请求
+
+

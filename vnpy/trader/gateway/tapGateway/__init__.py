@@ -7,4 +7,4 @@ gatewayClass = TapGateway
 gatewayName = 'TAP'
 gatewayDisplayName = 'TAP'
 gatewayType = vtConstant.GATEWAYTYPE_FUTURES
-gatewayQryEnabled = True
+gatewayQryEnabled = False
