@@ -278,7 +278,7 @@ def main():
     #api.setVertificateCode(VertificateCode)
 
     # OK
-    #api.qryAccount()
+    # api.qryAccount()
 
 #    req = {}
 #    req["AccountNo"] =  "Q1355739190"
@@ -301,7 +301,7 @@ def main():
     #api.qryFund(req)
 
     # OK
-    #api.qryExchange()
+    api.qryExchange()
 
     #OK
     #api.qryCommodity()
@@ -313,18 +313,18 @@ def main():
     #req["CommodityType"] = "F"
     #api.qryContract(req)
 
-    req = {}
-    req["AccountNo"] = "Q1355739190"					##//< 客户资金帐号，必填
-    req["ExchangeNo"] = "COMEX"						##//< 交易所编号，必填
-    req["CommodityType"] = "F"					##//< 品种类型，必填
-    req["CommodityNo"] = "GC"					##//< 品种编码类型，必填
-    req["ContractNo"] = "1802"						##//< 合约1，必填
-    req["OrderType"] = "2"						##//< 委托类型 必填
-    req["OrderSide"] = "B"						##//< 买入卖出
-    req["OrderPrice"] = 1290					##//< 委托价格1
-    req["OrderQty"] = 1						##//< 委托数量，必填
-    req["OrderSource"] = "A"						##//< 委托数量，必填
-    print api.reqInsertOrder(req)
+    #req = {}
+    #req["AccountNo"] = "Q1355739190"					##//< 客户资金帐号，必填
+    #req["ExchangeNo"] = "COMEX"						##//< 交易所编号，必填
+    #req["CommodityType"] = "F"					##//< 品种类型，必填
+    #req["CommodityNo"] = "GC"					##//< 品种编码类型，必填
+    #req["ContractNo"] = "1802"						##//< 合约1，必填
+    #req["OrderType"] = "2"						##//< 委托类型 必填
+    #req["OrderSide"] = "B"						##//< 买入卖出
+    #req["OrderPrice"] = 1290					##//< 委托价格1
+    #req["OrderQty"] = 1						##//< 委托数量，必填
+    #req["OrderSource"] = "A"						##//< 委托数量，必填
+    #print api.reqInsertOrder(req)
 
 #    req = {}
 #    req["ServerFlag"] = "A"
@@ -332,10 +332,6 @@ def main():
 #    print api.reqCancelOrder(req)
 
     #api.reqAmendOrder(req)
-
-
-
-
 
     # 连续运行，用于输出行情
     app.exec_()

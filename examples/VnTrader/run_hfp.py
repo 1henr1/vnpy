@@ -47,8 +47,8 @@ def main():
     me.addGateway(tapGateway)
 
     # 添加上层应用
-    me.addApp(riskManager)
-    me.addApp(ctaStrategy)
+    # me.addApp(riskManager)
+    # me.addApp(ctaStrategy)
     me.addApp(spreadTrading)
     
     # 创建主窗口

@@ -737,7 +737,7 @@ class PositionDetail(object):
             self.shortYd = pos.ydPosition
             self.shortTd = self.shortPos - self.shortYd
             
-        self.output()
+        #self.output()
     
     #----------------------------------------------------------------------
     def updateOrderReq(self, req, vtOrderID):
@@ -766,7 +766,7 @@ class PositionDetail(object):
         self.longPos = self.longTd + self.longYd
         self.shortPos = self.shortTd + self.shortYd      
         
-        self.output()
+        # self.output()
         
     #----------------------------------------------------------------------
     def calculateFrozen(self):
@@ -819,7 +819,7 @@ class PositionDetail(object):
             self.longPosFrozen = self.longYdFrozen + self.longTdFrozen
             self.shortPosFrozen = self.shortYdFrozen + self.shortTdFrozen
         
-        self.output()
+        # self.output()
             
     #----------------------------------------------------------------------
     def output(self):

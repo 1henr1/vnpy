@@ -16,3 +16,4 @@ TRADING_SERVER_LOGOUT = u'Trading server logout completed.'
 
 SETTLEMENT_INFO_CONFIRMED = u'Settlement info confirmed.'
 CONTRACT_DATA_RECEIVED = u'Contract data received.'
+ACCOUNT_ID_RECEIVED = u'AccountID received.'

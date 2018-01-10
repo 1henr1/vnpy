@@ -1236,7 +1236,36 @@ void TdApi::processRtnFill(Task task) {
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	PyLock lock;
+	TapAPIFillInfo task_data = any_cast<TapAPIFillInfo>(task.task_data);
 	dict data;
+    data["AccountNo"] = task_data.AccountNo;						///< 客户资金帐号
+    data["ExchangeNo"] = task_data.ExchangeNo;						///< 交易所编号
+    data["CommodityType"] = task_data.CommodityType;					///< 品种类型
+    data["CommodityNo"] = task_data.CommodityNo;					///< 品种编码类型
+    data["ContractNo"] = task_data.ContractNo;						///< 合约1
+    data["StrikePrice"] = task_data.StrikePrice;					///< 执行价格
+    data["CallOrPutFlag"] = task_data.CallOrPutFlag;					///< 看张看跌
+    data["MatchSource"] = task_data.MatchSource;					///< 委托来源
+    data["MatchSide"] = task_data.MatchSide;						///< 买入卖出
+    data["PositionEffect"] = task_data.PositionEffect;					///< 开平标志1
+    data["ServerFlag"] = task_data.ServerFlag;						///< 服务器标识
+    data["OrderNo"] = task_data.OrderNo;						///< 委托编码
+    data["OrderSystemNo"] = task_data.OrderSystemNo;					///< 系统号
+    data["MatchNo"] = task_data.MatchNo;						///< 本地成交号
+    data["UpperMatchNo"] = task_data.UpperMatchNo;					///< 上手成交号
+    data["ExchangeMatchNo"] = task_data.ExchangeMatchNo;				///< 交易所成交号
+    data["MatchDateTime"] = task_data.MatchDateTime;					///< 成交时间
+    data["UpperMatchDateTime"] = task_data.UpperMatchDateTime;				///< 上手成交时间
+    data["UpperNo"] = task_data.UpperNo;						///< 上手号
+    data["MatchPrice"] = task_data.MatchPrice;						///< 成交价
+    data["MatchQty"] = task_data.MatchQty;						///< 成交量
+    data["IsDeleted"] = task_data.IsDeleted;						///< 委托成交删除标
+    data["IsAddOne"] = task_data.IsAddOne;						///< 是否为T+1单
+    data["FeeCurrencyGroup"] = task_data.FeeCurrencyGroup;				///< 客户手续费币种组
+    data["FeeCurrency"] = task_data.FeeCurrency;					///< 客户手续费币种
+    data["FeeValue"] = task_data.FeeValue;						///< 手续费
+    data["IsManualFee"] = task_data.IsManualFee;					///< 人工客户手续费标记
+    data["ClosePrositionPrice"] = task_data.ClosePrositionPrice;					///< 指定价格平仓
 	this->onRtnFill(data);
 };
 
