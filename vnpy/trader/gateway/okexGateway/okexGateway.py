@@ -21,6 +21,21 @@ from vnpy.api.okex import OkexSpotApi, CONTRACT_SYMBOL, SPOT_CURRENCY
 from vnpy.trader.vtGateway import *
 from vnpy.trader.vtFunction import getJsonPath
 
+def print_dict(d):
+    """按照键值打印一个字典"""
+    for key,value in d.items():
+        print key + ':' + str(value),
+    print
+
+#----------------------------------------------------------------------
+def simple_log(func):
+    """简单装饰器用于输出函数名"""
+    def wrapper(*args, **kw):
+        print ""
+        print str(func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
 # 价格类型映射
 # 买卖类型： 限价单（buy/sell） 市价单（buy_market/sell_market）
 priceTypeMap = {}
@@ -38,6 +53,7 @@ statusMap[1] = STATUS_PARTTRADED
 statusMap[2] = STATUS_ALLTRADED
 statusMap[4] = STATUS_UNKNOWN
 
+okex_all_symbol_pairs = ['bch_usdt']
 
 ########################################################################
 class OkexGateway(VtGateway):
@@ -221,6 +237,7 @@ class SpotApi(OkexSpotApi):
 , u'size': u'0.01000000'}}
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onMessage(self, ws, evt):
         """信息推送""" 
         # print evt
@@ -250,6 +267,7 @@ class SpotApi(OkexSpotApi):
             #print self.cbDict
 
     #----------------------------------------------------------------------
+    @simple_log
     def onError(self, ws, evt):
         """错误推送"""
         error = VtErrorData()
@@ -258,6 +276,7 @@ class SpotApi(OkexSpotApi):
         self.gateway.onError(error)
 
     #----------------------------------------------------------------------
+    @simple_log
     def onError(self, data):
         error = VtErrorData()
         error.gatewayName = self.gatewayName
@@ -265,6 +284,7 @@ class SpotApi(OkexSpotApi):
         self.gateway.onError(error)
 
     #----------------------------------------------------------------------
+    @simple_log
     def onClose(self, ws):
         """接口断开"""
         # 如果尚未连上，则忽略该次断开提示
@@ -286,6 +306,7 @@ class SpotApi(OkexSpotApi):
             t = Thread(target=reconnect)
             t.start()
     #----------------------------------------------------------------------
+    @simple_log
     def subscribe(self, subscribeReq):
         symbol_pair_gateway = subscribeReq.symbol
         arr = symbol_pair_gateway.split('.')
@@ -298,6 +319,7 @@ class SpotApi(OkexSpotApi):
             self.spotOrderInfo(symbol_pair, '-1')
 
     #----------------------------------------------------------------------
+    @simple_log
     def subscribeSingleSymbol(self, symbol):
         if symbol in okex_all_symbol_pairs:
             self.subscribeSpotTicker(symbol)
@@ -305,6 +327,7 @@ class SpotApi(OkexSpotApi):
             #self.subscribeSpotDeals(symbol)
 
     #----------------------------------------------------------------------
+    @simple_log
     def spotAllOrders(self):
         print spotAllOrders
         for symbol in registerSymbolPairArray:
@@ -318,7 +341,8 @@ class SpotApi(OkexSpotApi):
                 self.spotOrderInfo(symbol_pair, orderId)
 
     #----------------------------------------------------------------------
-    def onOpen(self, ws):       
+    @simple_log
+    def onOpen(self, ws):
         """连接成功"""
         self.gateway.connected = True
         self.writeLog(u'服务器连接成功')
@@ -327,11 +351,11 @@ class SpotApi(OkexSpotApi):
         # 连接后查询账户和委托数据
         self.spotUserInfo()
         
-        self.subscribeSingleSymbol("etc_usdt")
+        #self.subscribeSingleSymbol("bch_usdt")
         for symbol in okex_all_symbol_pairs:
-            # self.subscribeSpotTicker(symbol)
-            # self.subscribeSpotDepth5(symbol)
-            # self.subscribeSpotDeals(symbol)
+            self.subscribeSpotTicker(symbol)
+            self.subscribeSpotDepth(symbol, 5)
+            #self.subscribeSpotDeals(symbol)
 
             #Ticker数据
             self.channelSymbolMap["ok_sub_spot_%s_ticker" % symbol] = symbol
@@ -358,6 +382,7 @@ class SpotApi(OkexSpotApi):
     }]
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onSpotSubDeals(self, data):
         if 'data' not in data:
             return
@@ -367,6 +392,7 @@ class SpotApi(OkexSpotApi):
 
 
     #----------------------------------------------------------------------
+    @simple_log
     def writeLog(self, content):
         """快速记录日志"""
         log = VtLogData()
@@ -375,6 +401,7 @@ class SpotApi(OkexSpotApi):
         self.gateway.onLog(log)
         
     #----------------------------------------------------------------------
+    @simple_log
     def initCallback(self):
         """初始化回调函数"""
         # USD_SPOT
@@ -417,6 +444,7 @@ class SpotApi(OkexSpotApi):
     ]
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onTicker(self, data):
         """"""
         if 'data' not in data:
@@ -444,15 +472,15 @@ class SpotApi(OkexSpotApi):
             tick.lowPrice = float(rawData['low'])
             tick.lastPrice = float(rawData['last'])
             tick.volume = float(rawData['vol'].replace(',', ''))
-            # tick.date, tick.time = self.generateDateTime(rawData['timestamp'])
-            
-            # print "ticker", tick.date, tick.time
-            # newtick = copy(tick)
-            # self.gateway.onTick(newtick)
+            tick.bidPrice1 = float(rawData['buy'])
+            tick.askPrice1 = float(rawData['sell'])
+            tick.date, tick.time = self.generateDateTime(rawData['timestamp'])
+            self.gateway.onTick(tick)
         except Exception,ex:
             print "Error in onTicker ", channel
     
     #----------------------------------------------------------------------
+    @simple_log
     def onDepth(self, data):
         """"""
         if 'data' not in data:
@@ -494,9 +522,8 @@ class SpotApi(OkexSpotApi):
         
         tick.date, tick.time = self.generateDateTime(rawData['timestamp'])
         # print "Depth", tick.date, tick.time
-        
-        newtick = copy(tick)
-        self.gateway.onTick(newtick)
+         #newtick = copy(tick)
+        self.gateway.onTick(tick)
 
     '''
     [
@@ -520,6 +547,7 @@ class SpotApi(OkexSpotApi):
         }
     ]
     '''
+    @simple_log
     def onSpotBalance(self, data):
         """交易发生金额变动之后会触发这个函数"""
         # print data
@@ -565,6 +593,7 @@ etc': u'0', u'act': u'0', u'eth': u'0', u'ltc': u'0', u'bcs': u'0'}, u'free': {u
 }, u'result': True}, u'channel': u'ok_spot_userinfo'}
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onSpotUserInfo(self, data):
         """现货账户资金推送"""
         rawData = data['data']
@@ -573,7 +602,7 @@ etc': u'0', u'act': u'0', u'eth': u'0', u'ltc': u'0', u'bcs': u'0'}, u'free': {u
         
         # 持仓信息
         #for symbol in ['btc', 'ltc','eth', self.currency]:
-        for symbol in :
+        for symbol in ['btc']:
             if symbol in funds['free']:
                 pos = VtPositionData()
                 pos.gatewayName = self.gatewayName
@@ -599,6 +628,7 @@ etc': u'0', u'act': u'0', u'eth': u'0', u'ltc': u'0', u'bcs': u'0'}, u'free': {u
     
     #----------------------------------------------------------------------
     # 这个 API 现在文档没找到。。 好像废弃了
+    @simple_log
     def onSpotSubUserInfo(self, data):
         """现货账户资金推送"""
         if 'data' not in data:
@@ -655,6 +685,7 @@ etc': u'0', u'act': u'0', u'eth': u'0', u'ltc': u'0', u'bcs': u'0'}, u'free': {u
 nel': u'ok_sub_spot_etc_usdt_order'}
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onSpotSubOrder(self, data):
         """交易数据"""
         if 'data' not in data:
@@ -782,6 +813,7 @@ nel': u'ok_sub_spot_etc_usdt_order'}
     ]
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onSpotOrderInfo(self, data):
         """委托信息查询回调"""
         if "error_code" in data.keys():
@@ -832,6 +864,7 @@ nel': u'ok_sub_spot_etc_usdt_order'}
         }
     ]
     '''
+    @simple_log
     def onSpotOrder(self, data):
         rawData = data['data']
         if 'error_code' in rawData.keys():
@@ -882,6 +915,7 @@ nel': u'ok_sub_spot_etc_usdt_order'}
     ]
     '''
     #----------------------------------------------------------------------
+    @simple_log
     def onSpotCancelOrder(self, data):
         """撤单回报"""
         if 'data' not in data:
@@ -922,6 +956,7 @@ nel': u'ok_sub_spot_etc_usdt_order'}
             del self.cache_some_order[orderId]
     
     #----------------------------------------------------------------------
+    @simple_log
     def spotSendOrder(self, req):
         """发单"""
         #symbol = spotSymbolMapReverse[req.symbol][:4]
@@ -937,6 +972,7 @@ nel': u'ok_sub_spot_etc_usdt_order'}
         return vtOrderID
     
     #----------------------------------------------------------------------
+    @simple_log
     def spotCancel(self, req):
         """撤单"""
         #symbol = spotSymbolMapReverse[req.symbol][:4]

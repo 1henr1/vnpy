@@ -23,6 +23,28 @@ from setuptools import setup
 
 import vnpy
 
+ignore_list = ['ctp',
+"coincheck",
+"cshshlp",
+"ctp",
+"femas",
+"hfp",
+"ib",
+"korbit",
+"ksgold",
+"ksotp",
+"lbank",
+"lts",
+"oanda",
+"qdp",
+"sec",
+"sgit",
+"shzd",
+"tap",
+"xspeed",
+"xtp",
+"zaif",
+"zb"]
 
 def getSubpackages(name):
     """获取该模块下所有的子模块名称"""
@@ -30,8 +52,15 @@ def getSubpackages(name):
 
     for dirpath, _dirnames, _filenames in os.walk(name):
         if os.path.isfile(os.path.join(dirpath, '__init__.py')):
-            splist.append(".".join(dirpath.split(os.sep)))
-    
+            shouldIgnore = False
+            for item in ignore_list:
+                if dirpath.find(item) != -1:
+                    shouldIgnore = True
+                    break
+            if not shouldIgnore:
+                splist.append(".".join(dirpath.split(os.sep)))
+
+    print splist
     return splist
 
 
