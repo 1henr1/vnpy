@@ -14,6 +14,9 @@ char filename[] = "tap_td_debug.txt";
 using namespace std;
 using namespace ITapTrade;
 
+
+#define  transIsLast(isLast) ((isLast == APIYNFLAG_YES) ? true : false)
+
 ///-------------------------------------------------------------------------------------
 ///从Python对象到C++类型转换用的函数
 ///-------------------------------------------------------------------------------------
@@ -161,7 +164,7 @@ void TdApi::OnRspQryAccount(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIUINT
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryAccount;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -178,7 +181,7 @@ void TdApi::OnRspQryFund(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 e
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryFund;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -210,7 +213,7 @@ void TdApi::OnRspQryExchange(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryExchange;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -227,7 +230,7 @@ void TdApi::OnRspQryCommodity(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIIN
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryCommodity;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -244,7 +247,7 @@ void TdApi::OnRspQryContract(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryContract;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -312,7 +315,7 @@ void TdApi::OnRspQryOrder(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryOrder;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -329,7 +332,7 @@ void TdApi::OnRspQryOrderProcess(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAP
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryOrderProcess;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -346,7 +349,7 @@ void TdApi::OnRspQryFill(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT32 e
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryFill;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;
@@ -378,7 +381,7 @@ void TdApi::OnRspQryPosition(ITapTrade::TAPIUINT32 sessionID, ITapTrade::TAPIINT
 	Task task = Task();
 	task.task_name = DEFINE_OnRspQryPosition;
 	task.task_id = errorCode;
-	task.task_last = isLast;
+	task.task_last = transIsLast(isLast);
 	if (info)
 	{
 		task.task_data = *info;

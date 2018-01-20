@@ -679,7 +679,8 @@ class TapTdApi(TdApi):
     @simple_log
     def onRspQryPosition(self, errorCode,  isLast,  data):
         # 获取持仓缓存对象
-        posName = '.'.join([data['CommodityNo'], data['ContractNo'], data['MatchSide']])
+        print_dict(data)
+        posName = '.'.join([data['CommodityNo'], data['ContractNo']])
         if posName in self.posDict:
             pos = self.posDict[posName]
         else:
@@ -693,12 +694,18 @@ class TapTdApi(TdApi):
             pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
 
         # 计算成本
-        print_dict(data)
-        pos.position = pos.position + int(data["PositionQty"])               # 持仓量
+        lastPosition = pos.position
+        if data["MatchSide"] == directionMap.get(DIRECTION_LONG):
+            pos.position = pos.position + data["PositionQty"]               # 持仓量
+        else:
+            pos.position = pos.position - data["PositionQty"]               # 持仓量
+        if pos.position == 0:
+            pos.price = 0
+        else:
+            pos.price = (pos.price * lastPosition + data["PositionPrice"] * data["PositionQty"] ) / (pos.position)                # 持仓均价
+        pos.ydPosition = pos.position            # 昨持仓
+        pos.positionProfit = pos.positionProfit + data["PositionProfit"]       # 持仓盈亏
         pos.frozen = 0                 # 冻结数量
-        pos.price = data['PositionPrice']                # 持仓均价
-        pos.ydPosition = 0             # 昨持仓
-        pos.positionProfit = data["PositionProfit"]       # 持仓盈亏
 
         # 查询回报结束
         if isLast:
@@ -707,13 +714,14 @@ class TapTdApi(TdApi):
                 self.gateway.onPosition(pos)
 
             # 清空缓存
-            self.posDict.clear()
+            #self.posDict.clear()
 
     #----------------------------------------------------------------------
     @simple_log
     def onRtnPosition(self, data):
         # 代码编号相关
-        posName = '.'.join([data['CommodityNo'], data['ContractNo'], data['MatchSide']])
+        print_dict(data)
+        posName = '.'.join([data['CommodityNo'], data['ContractNo']])
         if posName in self.posDict:
             pos = self.posDict[posName]
         else:
@@ -727,11 +735,17 @@ class TapTdApi(TdApi):
             pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
 
         # 计算成本
-        pos.position = data["PositionQty"]               # 持仓量
-        pos.frozen = 0                 # 冻结数量
-        pos.price = data['PositionPrice']                # 持仓均价
-        pos.ydPosition = 0             # 昨持仓
-        pos.positionProfit = data["PositionProfit"]       # 持仓盈亏
+        lastPosition = pos.position
+        if data["MatchSide"] == directionMap.get(DIRECTION_LONG):
+            pos.position = pos.position + data["PositionQty"]               # 持仓量
+        else:
+            pos.position = pos.position - data["PositionQty"]               # 持仓量
+        if pos.position == 0:
+            pos.price = 0
+        else:
+            pos.price = (pos.price * lastPosition + data["PositionPrice"] * data["PositionQty"] ) / (pos.position)                # 持仓均价
+        #pos.positionProfit = 0       # 持仓盈亏
+        #pos.frozen = 0                 # 冻结数量
 
         self.gateway.onPosition(pos)
 
