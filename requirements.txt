@@ -3,3 +3,6 @@ websocket-client
 msgpack-python
 qdarkstyle
 SortedContainers
+futuquant
+wmi
+future
