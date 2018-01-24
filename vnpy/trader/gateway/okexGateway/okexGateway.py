@@ -71,7 +71,10 @@ class OkexGateway(VtGateway):
         self.connected = False
         
         self.fileName = self.gatewayName + '_connect.json'
-        self.filePath = getJsonPath(self.fileName, __file__)     
+        self.filePath = getJsonPath(self.fileName, __file__)
+
+        # 初始化后自动连接
+        # self.connect()
 
     #----------------------------------------------------------------------
     def connect(self):
@@ -237,7 +240,6 @@ class SpotApi(OkexSpotApi):
 , u'size': u'0.01000000'}}
     '''
     #----------------------------------------------------------------------
-    @simple_log
     def onMessage(self, ws, evt):
         """信息推送""" 
         # print evt
@@ -316,14 +318,14 @@ class SpotApi(OkexSpotApi):
             self.registerSymbolPairArray.add(symbol_pair)
             self.subscribeSingleSymbol(symbol_pair)
 
-            self.spotOrderInfo(symbol_pair, '-1')
+            #self.spotOrderInfo(symbol_pair, '-1')
 
     #----------------------------------------------------------------------
     @simple_log
     def subscribeSingleSymbol(self, symbol):
         if symbol in okex_all_symbol_pairs:
             self.subscribeSpotTicker(symbol)
-            self.subscribeSpotDepth5(symbol)
+            self.subscribeSpotDepth(symbol,5)
             #self.subscribeSpotDeals(symbol)
 
     #----------------------------------------------------------------------
@@ -444,7 +446,6 @@ class SpotApi(OkexSpotApi):
     ]
     '''
     #----------------------------------------------------------------------
-    @simple_log
     def onTicker(self, data):
         """"""
         if 'data' not in data:
@@ -480,7 +481,6 @@ class SpotApi(OkexSpotApi):
             print "Error in onTicker ", channel
     
     #----------------------------------------------------------------------
-    @simple_log
     def onDepth(self, data):
         """"""
         if 'data' not in data:
@@ -519,11 +519,11 @@ class SpotApi(OkexSpotApi):
         tick.askPrice3, tick.askVolume3 = rawData['asks'][-3]
         tick.askPrice4, tick.askVolume4 = rawData['asks'][-4]
         tick.askPrice5, tick.askVolume5 = rawData['asks'][-5]     
-        
+
         tick.date, tick.time = self.generateDateTime(rawData['timestamp'])
         # print "Depth", tick.date, tick.time
-         #newtick = copy(tick)
-        self.gateway.onTick(tick)
+        newtick = copy(tick)
+        self.gateway.onTick(newtick)
 
     '''
     [

@@ -87,7 +87,7 @@ class DrEngine(object):
                 for setting in l:
                     symbol = setting[0]
                     gateway = setting[1]
-                    vtSymbol = symbol
+                    vtSymbol = ".".join([symbol, gateway])
 
                     req = VtSubscribeReq()
                     req.symbol = setting[0]
@@ -102,7 +102,7 @@ class DrEngine(object):
                         req.currency = setting[3]
                         req.productClass = setting[4]
 
-                    self.mainEngine.subscribe(req, gateway)
+                    #self.mainEngine.subscribe(req, gateway)
 
                     #tick = VtTickData()           # 该tick实例可以用于缓存部分数据（目前未使用）
                     #self.tickDict[vtSymbol] = tick
@@ -140,7 +140,7 @@ class DrEngine(object):
                         req.currency = setting[3]
                         req.productClass = setting[4]                    
 
-                    self.mainEngine.subscribe(req, gateway)  
+                    #self.mainEngine.subscribe(req, gateway)
                     
                     # 保存到配置字典中
                     if vtSymbol not in self.settingDict:

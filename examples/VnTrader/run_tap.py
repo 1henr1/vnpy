@@ -16,12 +16,11 @@ from vnpy.trader.uiQt import createQApp
 from vnpy.trader.uiMainWindow import MainWindow
 
 # 加载底层接口
-from vnpy.trader.gateway import (ctpGateway, oandaGateway, ibGateway, 
-                                 huobiGateway, okcoinGateway)
+#from vnpy.trader.gateway import (ctpGateway, oandaGateway, ibGateway)
 
-if system == 'Windows':
-    from vnpy.trader.gateway import (femasGateway, xspeedGateway, 
-                                     sgitGateway, shzdGateway)
+#if system == 'Windows':
+#    from vnpy.trader.gateway import (femasGateway, xspeedGateway,
+#                                     sgitGateway, shzdGateway)
 
 if system == 'Windows':
     from vnpy.trader.gateway import (tapGateway)
