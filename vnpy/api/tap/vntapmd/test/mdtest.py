@@ -70,6 +70,8 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     @simple_log
     def onRspSubscribeQuote(self,  errorCode, isLast,  data):
+        print(errorCode)
+        print(isLast)
         print_dict(data)
         pass
 
@@ -151,16 +153,33 @@ def main():
     #req["CommodityType"] = "F"
     #api.qryContract(req)
 
+    #req["ExchangeNo"] = "COMEX"
+    #req["CommodityNo"] = "GC"
+    #req["CommodityType"] = "F"
+    #req["ContractNo1"] = "1803"
+    #print api.unSubscribeMarketData(req)
+
     req = {}
     #req["ExchangeNo"] = "COMEX"
     #req["CommodityNo"] = "SI"
     #req["CommodityType"] = "F"
     #req["ContractNo1"] = "1805"
-    req["ExchangeNo"] = "COMEX"
-    req["CommodityNo"] = "GC"
+    req["ExchangeNo"] = "NYMEX"
+    req["CommodityNo"] = "CL"
     req["CommodityType"] = "F"
     req["ContractNo1"] = "1803"
     print api.subscribeMarketData(req)
+
+    #req = {}
+    ##req["ExchangeNo"] = "COMEX"
+    ##req["CommodityNo"] = "SI"
+    ##req["CommodityType"] = "F"
+    ##req["ContractNo1"] = "1805"
+    #req["ExchangeNo"] = "COMEX"
+    #req["CommodityNo"] = "GC"
+    #req["CommodityType"] = "F"
+    #req["ContractNo1"] = "1802"
+    #print api.subscribeMarketData(req)
 
 
     # 连续运行，用于输出行情

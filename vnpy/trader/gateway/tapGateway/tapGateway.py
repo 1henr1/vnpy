@@ -953,12 +953,13 @@ class TapTdApi(TdApi):
         req["OrderPrice"] = orderReq.price					##//< 委托价格1
         req["OrderQty"] = orderReq.volume						##//< 委托数量，必填
         req["OrderSource"] = "A"
+        print "GateWay: %s sendOrder" % self.gatewayName
         print_dict(req)
-        self.orderRef = self.reqInsertOrder(req)
+        self.reqInsertOrder(req)
 
         # 返回订单号（字符串），便于某些算法进行动态管理
-        vtOrderID = '.'.join([self.gatewayName, str(self.orderRef)])
-        return vtOrderID
+        #vtOrderID = '.'.join([self.gatewayName, str(self.orderRef)])
+        return []
     
     #----------------------------------------------------------------------
     def cancelOrder(self, cancelOrderReq):
