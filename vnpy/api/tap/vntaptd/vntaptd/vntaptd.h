@@ -343,7 +343,7 @@ public:
 	int qryExchange();
 	int qryCommodity();
 	int qryContract(dict req);
-	int reqInsertOrder(dict req);
+	string reqInsertOrder(dict req);
 	int reqCancelOrder(dict req);
 	int reqAmendOrder(dict req);
 	int qryOrder(dict req);

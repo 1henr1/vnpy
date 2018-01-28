@@ -34,8 +34,8 @@
         "passiveLegs": [
             {
                 "vtSymbol": "bch_usdt.OKEX",
-                "ratio": -1,
-                "multiplier": -1.0,
+                "ratio": -6,
+                "multiplier": -6.0,
                 "payup": 0
             }
         ]

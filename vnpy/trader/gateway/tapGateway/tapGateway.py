@@ -10,6 +10,7 @@ import os
 import json
 from copy import copy
 from datetime import datetime, timedelta
+from Queue import Queue
 
 from vnpy.api.tap import MdApi, TdApi, defineDict
 from vnpy.trader.vtGateway import *
@@ -520,8 +521,9 @@ class TapTdApi(TdApi):
         self.gateway = gateway                  # gateway对象
         self.gatewayName = gateway.gatewayName  # gateway对象名称
         
-        self.orderRef = EMPTY_INT           # 订单编号
-        
+        self.localNoDict = {}           # key为本地委托号，value为系统委托号
+        self.orderIdDict = {}           # key为系统委托号，value为本地委托号
+
         self.connectionStatus = False       # 连接状态
         self.loginStatus = False            # 登录状态
         self.authStatus = False             # 验证状态
@@ -758,6 +760,12 @@ class TapTdApi(TdApi):
         err.errorMsg = ""
         self.gateway.onError(err)
 
+        # 更新本地报单号 与 系统报单号 的映射关系
+        localNo = data["OrderLocalNo"]
+        orderId = data["OrderNo"]
+        self.localNoDict[localNo] = orderId
+        self.orderIdDict[orderId] = localNo
+
     #----------------------------------------------------------------------
     @simple_log
     def onRtnOrder(self, data):
@@ -771,7 +779,7 @@ class TapTdApi(TdApi):
         order.exchange = exchangeMapReverse[data['ExchangeNo']]
         order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
-        order.orderID = data['OrderNo']
+        order.orderID = data['ClientOrderNo']
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
@@ -845,7 +853,8 @@ class TapTdApi(TdApi):
         trade.tradeID = data['MatchNo']
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
         
-        trade.orderID = data['OrderNo']
+        orderSysID = data['OrderNo']
+        trade.orderID = self.orderIdDict[orderSysID]
         trade.vtOrderID = '.'.join([self.gatewayName, trade.orderID])
         
         # 方向
@@ -939,6 +948,7 @@ class TapTdApi(TdApi):
         self.qryPosition(req)
 
     #----------------------------------------------------------------------
+    @simple_log
     def sendOrder(self, orderReq):
         """发单"""
         req = {}
@@ -953,20 +963,19 @@ class TapTdApi(TdApi):
         req["OrderPrice"] = orderReq.price					##//< 委托价格1
         req["OrderQty"] = orderReq.volume						##//< 委托数量，必填
         req["OrderSource"] = "A"
-        print "GateWay: %s sendOrder" % self.gatewayName
         print_dict(req)
-        self.reqInsertOrder(req)
+        localID = self.reqInsertOrder(req)
 
         # 返回订单号（字符串），便于某些算法进行动态管理
-        #vtOrderID = '.'.join([self.gatewayName, str(self.orderRef)])
-        return []
+        vtOrderID = '.'.join([self.gatewayName, localID])
+        return vtOrderID
     
     #----------------------------------------------------------------------
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
         req = {}
         req["ServerFlag"] = "A"
-        req["OrderNo"] = cancelOrderReq.orderID
+        req["OrderNo"] = self.localNoDict[cancelOrderReq.orderID]
         self.reqCancelOrder(req)
 
     #----------------------------------------------------------------------

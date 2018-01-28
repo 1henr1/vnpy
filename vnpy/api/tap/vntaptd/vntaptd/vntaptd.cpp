@@ -1613,7 +1613,7 @@ int TdApi::qryContract(dict req)
 	return api->QryContract(&m_sessionID,&stAPICommodity);
 }
 
-int TdApi::reqInsertOrder(dict req)
+string TdApi::reqInsertOrder(dict req)
 {
 #ifdef _DEBUG
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
@@ -1654,7 +1654,8 @@ int TdApi::reqInsertOrder(dict req)
     getChar(req, "TriggerCondition",&stNewOrder.TriggerCondition);				///< 触发条件，默认N
     getChar(req, "TriggerPriceType",&stNewOrder.TriggerPriceType);				///< 触发价格类型，默认N
     getChar(req, "AddOneIsValid",&stNewOrder.AddOneIsValid);					///< 是否T+1有效,默认T+1有效。
-	return api->InsertOrder(&m_sessionID, &m_clientOrderNo, &stNewOrder);
+	api->InsertOrder(&m_sessionID, &m_clientOrderNo, &stNewOrder);
+	return string(m_clientOrderNo);
 }
 
 int TdApi::reqCancelOrder(dict req)
