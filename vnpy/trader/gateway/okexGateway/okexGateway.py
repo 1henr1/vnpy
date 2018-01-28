@@ -53,7 +53,7 @@ statusMap[1] = STATUS_PARTTRADED
 statusMap[2] = STATUS_ALLTRADED
 statusMap[4] = STATUS_UNKNOWN
 
-okex_all_symbol_pairs = ['bch_usdt']
+okex_all_symbol_pairs = ['bch_usdt', 'btc_usdt']
 
 ########################################################################
 class OkexGateway(VtGateway):
@@ -506,19 +506,18 @@ class SpotApi(OkexSpotApi):
         if 'data' not in data:
             return
         rawData = data['data']
-        
 
-        tick.bidPrice1, tick.bidVolume1 = rawData['bids'][0]
-        tick.bidPrice2, tick.bidVolume2 = rawData['bids'][1]
-        tick.bidPrice3, tick.bidVolume3 = rawData['bids'][2]
-        tick.bidPrice4, tick.bidVolume4 = rawData['bids'][3]
-        tick.bidPrice5, tick.bidVolume5 = rawData['bids'][4]
+        tick.bidPrice1, tick.bidVolume1 = [ float(item) for item in rawData['bids'][0]]
+        tick.bidPrice2, tick.bidVolume2 = [ float(item) for item in rawData['bids'][1]]
+        tick.bidPrice3, tick.bidVolume3 = [ float(item) for item in rawData['bids'][2]]
+        tick.bidPrice4, tick.bidVolume4 = [ float(item) for item in rawData['bids'][3]]
+        tick.bidPrice5, tick.bidVolume5 = [ float(item) for item in rawData['bids'][4]]
         
-        tick.askPrice1, tick.askVolume1 = rawData['asks'][-1]
-        tick.askPrice2, tick.askVolume2 = rawData['asks'][-2]
-        tick.askPrice3, tick.askVolume3 = rawData['asks'][-3]
-        tick.askPrice4, tick.askVolume4 = rawData['asks'][-4]
-        tick.askPrice5, tick.askVolume5 = rawData['asks'][-5]     
+        tick.askPrice1, tick.askVolume1 = [ float(item) for item in rawData['asks'][-1]]
+        tick.askPrice2, tick.askVolume2 = [ float(item) for item in rawData['asks'][-2]]
+        tick.askPrice3, tick.askVolume3 = [ float(item) for item in rawData['asks'][-3]]
+        tick.askPrice4, tick.askVolume4 = [ float(item) for item in rawData['asks'][-4]]
+        tick.askPrice5, tick.askVolume5 = [ float(item) for item in rawData['asks'][-5]]
 
         tick.date, tick.time = self.generateDateTime(rawData['timestamp'])
         # print "Depth", tick.date, tick.time

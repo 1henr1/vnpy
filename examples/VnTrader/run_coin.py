@@ -41,7 +41,7 @@ def main():
     #me.addApp(riskManager)
     #me.addApp(ctaStrategy)
     me.addApp(spreadTrading)
-    me.addApp(dataRecorder)
+    #me.addApp(dataRecorder)
 
     # 创建主窗口
     mw = MainWindow(me, ee)
