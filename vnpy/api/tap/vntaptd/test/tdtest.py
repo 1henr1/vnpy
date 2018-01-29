@@ -90,6 +90,13 @@ class TestTdApi(TdApi):
 
     #----------------------------------------------------------------------
     @simple_log
+    def onRspQryOrder(self, errorCode,  isLast,  data):
+        print errorCode, isLast
+        print_dict(data)
+        pass
+
+    #----------------------------------------------------------------------
+    @simple_log
     def onRtnFund(self, data):
         print_dict(data)
         pass
@@ -274,11 +281,28 @@ def main():
         sleep(1)
         pass
 
+    ##req = {}
+    ##req["AccountNo"] = "Q1355739190"
+    ##req["ExchangeNo"] =  "COMEX"
+    ##req["CommodityType"] =  "GC"
+    ##req["CommodityNo"] =  "1803"
+    ##req["OrderType"] =  '2'						##< 委托类型
+    ##req["OrderSource"] =  "6"					##< 委托来源
+    ##req["TimeInForce"] =  '0'
+    ###req["ExpireTime"] =  stOrderQryReq.ExpireTime);						///< 有效日期(GTD情况下使用)
+    ##req["IsRiskOrder"] =  "N"					##< 是否风险报单
+    ##req["ServerFlag"] =  "A"
+    ##req["OrderNo"] = "OA201801290000050193"                          ##< 委托编号
+    ##req["IsBackInput"] =  "N"					##< 是否为录入委托单
+    ##req["IsDeleted"] =  "N"						##< 委托成交删除标
+    ##req["IsAddOne"] =  "N"
+    ##api.qryOrder(req)
+
     #VertificateCode = ""
     #api.setVertificateCode(VertificateCode)
 
     # OK
-    # api.qryAccount()
+    api.qryAccount()
 
 #    req = {}
 #    req["AccountNo"] =  "Q1355739190"
@@ -301,7 +325,7 @@ def main():
     #api.qryFund(req)
 
     # OK
-    api.qryExchange()
+    # api.qryExchange()
 
     #OK
     #api.qryCommodity()
@@ -318,10 +342,10 @@ def main():
     #req["ExchangeNo"] = "COMEX"						##//< 交易所编号，必填
     #req["CommodityType"] = "F"					##//< 品种类型，必填
     #req["CommodityNo"] = "GC"					##//< 品种编码类型，必填
-    #req["ContractNo"] = "1802"						##//< 合约1，必填
+    #req["ContractNo"] = "1803"						##//< 合约1，必填
     #req["OrderType"] = "2"						##//< 委托类型 必填
     #req["OrderSide"] = "B"						##//< 买入卖出
-    #req["OrderPrice"] = 1290					##//< 委托价格1
+    #req["OrderPrice"] = 1000					##//< 委托价格1
     #req["OrderQty"] = 1						##//< 委托数量，必填
     #req["OrderSource"] = "A"						##//< 委托数量，必填
     #print api.reqInsertOrder(req)

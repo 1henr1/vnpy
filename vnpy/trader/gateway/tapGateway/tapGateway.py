@@ -203,7 +203,12 @@ class TapGateway(VtGateway):
     def cancelOrder(self, cancelOrderReq):
         """撤单"""
         self.tdApi.cancelOrder(cancelOrderReq)
-        
+
+    #----------------------------------------------------------------------
+    def qryOrder(self):
+        """查询报单"""
+        self.tdApi.qryOrderGateway()
+
     #----------------------------------------------------------------------
     def qryAccount(self):
         """查询账户资金"""
@@ -324,11 +329,11 @@ class TapMdApi(MdApi):
         self.connectionStatus = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
 
-        req = VtSubscribeReq()
-        req.symbol = "1803"
-        req.exchange = "COMEX"
-        req.productClass = "GC"
-        self.subscribe(req)
+        #req = VtSubscribeReq()
+        #req.symbol = "1803"
+        #req.exchange = "COMEX"
+        #req.productClass = "GC"
+        #self.subscribe(req)
         pass
 
     #----------------------------------------------------------------------
@@ -478,10 +483,11 @@ class TapMdApi(MdApi):
         # 则先保存订阅请求，登录完成后会自动订阅
         if self.loginStatus:
             req = {}
+            index = subscribeReq.symbol.index(" ")
             req["ExchangeNo"] = subscribeReq.exchange
-            req["CommodityNo"] = subscribeReq.productClass
+            req["CommodityNo"] = subscribeReq.symbol[:index]
             req["CommodityType"] = "F"
-            req["ContractNo1"] = subscribeReq.symbol
+            req["ContractNo1"] = subscribeReq.symbol[(index+1):]
             self.subscribeMarketData(req)
         self.subscribedSymbols.add(subscribeReq)
 
@@ -571,10 +577,11 @@ class TapTdApi(TdApi):
         self.writeLog(text.TRADING_SERVER_CONNECTED)
 
         ##API准备好后，查询基础数据
-        self.qryAccount()
-        self.qryCommodity()
+        self.qryAccount()   ## 这个是用于获取资金账户名的，不是查余额的
         self.qryAccountGateway()
+        self.qryCommodity()
         self.qryPositionGateway()
+        self.qryOrderGateway()
         pass
 
     #----------------------------------------------------------------------
@@ -586,6 +593,7 @@ class TapTdApi(TdApi):
         self.writeLog(text.TRADING_SERVER_DISCONNECTED)
 
     #----------------------------------------------------------------------
+
     def onRspQryAccount(self, errorCode,  isLast,  data):
         if errorCode == 0:
             self.accountID = data["AccountNo"]
@@ -611,13 +619,17 @@ class TapTdApi(TdApi):
         contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])
         #contract.name = data['InstrumentName'].decode('GBK')
 
+        # 不识别的产品类型，不用纪录
+        contract.productClass = productClassMapReverse.get(data['CommodityType'], PRODUCT_UNKNOWN)
+        if (contract.productClass == PRODUCT_UNKNOWN):
+            return
+
         # 合约数值
         #contract.size = data['VolumeMultiple']
         #contract.priceTick = data['PriceTick']
         #contract.strikePrice = data['StrikePrice']
         #contract.underlyingSymbol = data['UnderlyingInstrID']
 
-        contract.productClass = productClassMapReverse.get(data['CommodityType'], PRODUCT_UNKNOWN)
 
         # 缓存代码和交易所的印射关系
         self.symbolExchangeDict[contract.symbol] = contract.exchange
@@ -750,6 +762,47 @@ class TapTdApi(TdApi):
         #pos.frozen = 0                 # 冻结数量
 
         #self.gateway.onPosition(pos)
+
+    #----------------------------------------------------------------------
+    @simple_log
+    def onRspQryOrder(self, errorCode, isLast, data):
+        """报单回报"""
+        # 创建报单数据对象
+        print_dict(data)
+
+        #更新本地报单号 与 系统报单号的 映射关系
+        localNo = data["ClientOrderNo"]
+        orderId = data["OrderNo"]
+        self.localNoDict[localNo] = orderId
+        self.orderIdDict[orderId] = localNo
+        if localNo == "" or orderId == "":
+            return
+
+        order = VtOrderData()
+        order.gatewayName = self.gatewayName
+
+        # 保存代码和报单号
+        order.symbol = data['CommodityNo'] + " " + data['ContractNo']
+        order.exchange = exchangeMapReverse[data['ExchangeNo']]
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
+
+        order.orderID = data['ClientOrderNo']
+        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
+
+
+        order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
+        order.status = statusMapReverse.get(data['OrderState'], STATUS_UNKNOWN)
+
+        # 价格、报单量等数值
+        order.price = data['OrderPrice']
+        order.totalVolume = data['OrderQty']
+        order.tradedVolume = data['OrderMatchQty']
+        order.orderTime = data['OrderInsertTime']
+        if order.status == STATUS_CANCELLED:
+            order.cancelTime = data['OrderUpdateTime']
+
+        # 推送
+        self.gateway.onOrder(order)
 
     #----------------------------------------------------------------------
     @simple_log
@@ -932,6 +985,26 @@ class TapTdApi(TdApi):
             req["UserID"] = self.userID
             req["Password"] = self.password
             self.reqUserLogin(req)
+
+    #----------------------------------------------------------------------
+    def qryOrderGateway(self):
+        """查询账户"""
+        req = {}
+        req["AccountNo"] = self.accountID
+        #req["ExchangeNo"] =  stOrderQryReq.ExchangeNo);						///< 交易所编号
+        #req["CommodityType"] =  &stOrderQryReq.CommodityType);					///< 品种类型
+        #req["CommodityNo"] =  stOrderQryReq.CommodityNo);					///< 品种编码类型
+        #req["OrderType"] =  &stOrderQryReq.OrderType);						///< 委托类型
+        #req["OrderSource"] =  &stOrderQryReq.OrderSource);					///< 委托来源
+        #req["TimeInForce"] =  &stOrderQryReq.TimeInForce);					///< 委托有效类型
+        #req["ExpireTime"] =  stOrderQryReq.ExpireTime);						///< 有效日期(GTD情况下使用)
+        #req["IsRiskOrder"] =  &stOrderQryReq.IsRiskOrder);					///< 是否风险报单
+        #req["ServerFlag"] =  &stOrderQryReq.ServerFlag);						///< 服务器标识
+        #req["OrderNo"] =  stOrderQryReq.OrderNo);                        ///< 委托编号
+        #req["IsBackInput"] =  &stOrderQryReq.IsBackInput);					///< 是否为录入委托单
+        #req["IsDeleted"] =  &stOrderQryReq.IsDeleted);						///< 委托成交删除标
+        #req["IsAddOne"] =  &stOrderQryReq.IsAddOne);
+        self.qryOrder(req)
 
     #----------------------------------------------------------------------
     def qryAccountGateway(self):

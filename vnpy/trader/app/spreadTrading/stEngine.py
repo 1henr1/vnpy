@@ -357,6 +357,7 @@ class StAlgoEngine(object):
         req.symbol = contract.symbol
         req.exchange = contract.exchange
         req.vtSymbol = contract.vtSymbol
+        req.productClass = contract.productClass
         req.direction = direction
         req.offset = offset
         req.volume = int(volume)

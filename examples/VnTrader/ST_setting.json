@@ -7,15 +7,15 @@
                 "vtSymbol": "GC 1803.COMEX",
                 "ratio": 1,
                 "multiplier": 1.0,
-                "payup": 2
+                "payup": 0
             },
 
         "passiveLegs": [
             {
                 "vtSymbol": "SI 1803.COMEX",
-                "ratio": -1,
-                "multiplier": -1.0,
-                "payup": 2
+                "ratio": -2,
+                "multiplier": -2,
+                "payup": 0
             }
         ]
     },
