@@ -328,7 +328,7 @@ def main():
     # api.qryExchange()
 
     #OK
-    #api.qryCommodity()
+    api.qryCommodity()
 
     # OK
     #req = {}

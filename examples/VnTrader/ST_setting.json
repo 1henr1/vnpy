@@ -21,21 +21,21 @@
     },
 
 	{
-        "name": "OKEX BTC-BCH",
+        "name": "SI",
 
         "activeLeg": 
             {
-                "vtSymbol": "btc_usdt.OKEX",
+                "vtSymbol": "SI 1803.COMEX",
                 "ratio": 1,
-                "multiplier": 1.0,
+                "multiplier": 208.979,
                 "payup": 0
             },
 
         "passiveLegs": [
             {
-                "vtSymbol": "bch_usdt.OKEX",
-                "ratio": -6,
-                "multiplier": -6.0,
+                "vtSymbol": "AG 1804.SHFE",
+                "ratio": -10,
+                "multiplier": -1,
                 "payup": 0
             }
         ]

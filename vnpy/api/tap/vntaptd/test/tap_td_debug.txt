@@ -1,8 +1,0 @@
-Entering TdApi::createTapTraderApi:1507 
-Entering TdApi::setHostAddress:1533 
-Entering TdApi::reqUserLogin:1541 
-Entering TdApi::processConnect:713 
-Entering TdApi::processRspLogin:721 
-Entering TdApi::processAPIReady:752 
-Entering TdApi::qryAccount:1570 
-Entering TdApi::processRspQryAccount:785 

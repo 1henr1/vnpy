@@ -132,10 +132,10 @@ NIGHT_TRADING = datetime(1900, 1, 1, 20).time()
 
 ########################################################################
 class TapGateway(VtGateway):
-    """CTP接口"""
+    """TAP接口"""
 
     #----------------------------------------------------------------------
-    def __init__(self, eventEngine, gatewayName='CTP'):
+    def __init__(self, eventEngine, gatewayName='TAP'):
         """Constructor"""
         super(TapGateway, self).__init__(eventEngine, gatewayName)
         
@@ -187,7 +187,7 @@ class TapGateway(VtGateway):
         self.tdApi.connect(authCode, tdUserID, tdPassword, tdAddress, tdPort)
 
         # 初始化并启动查询
-        self.initQuery()
+        # self.initQuery()
     
     #----------------------------------------------------------------------
     def subscribe(self, subscribeReq):
@@ -805,24 +805,20 @@ class TapTdApi(TdApi):
         self.gateway.onOrder(order)
 
     #----------------------------------------------------------------------
-    @simple_log
     def onRspOrderAction(self, errorCode,  data):
-        err = VtErrorData()
-        err.gatewayName = self.gatewayName
-        err.errorID = errorCode
-        err.errorMsg = ""
-        self.gateway.onError(err)
+        pass
+        #err = VtErrorData()
+        #err.gatewayName = self.gatewayName
+        #err.errorID = errorCode
+        #err.errorMsg = ""
+        #self.gateway.onError(err)
 
-        # 更新本地报单号 与 系统报单号 的映射关系
-        localNo = data["OrderLocalNo"]
-        orderId = data["OrderNo"]
-        self.localNoDict[localNo] = orderId
-        self.orderIdDict[orderId] = localNo
 
     #----------------------------------------------------------------------
     @simple_log
     def onRtnOrder(self, data):
         """报单回报"""
+
         # 创建报单数据对象
         order = VtOrderData()
         order.gatewayName = self.gatewayName
@@ -834,6 +830,12 @@ class TapTdApi(TdApi):
 
         order.orderID = data['ClientOrderNo']
         order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
+
+        # 更新本地报单号 与 系统报单号 的映射关系
+        if self.localNoDict.get(order.orderID, "") == "":
+            orderSysID = data["OrderNo"]
+            self.localNoDict[order.orderID] = orderSysID
+            self.orderIdDict[orderSysID] = order.orderID
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
         order.status = statusMapReverse.get(data['OrderState'], STATUS_UNKNOWN)
@@ -907,7 +909,9 @@ class TapTdApi(TdApi):
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
         
         orderSysID = data['OrderNo']
-        trade.orderID = self.orderIdDict[orderSysID]
+        trade.orderID = self.orderIdDict.get(orderSysID, "")
+        if trade.orderID == "":
+            print "can't find %s related localID" % orderSysID
         trade.vtOrderID = '.'.join([self.gatewayName, trade.orderID])
         
         # 方向
