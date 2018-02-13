@@ -1292,12 +1292,13 @@ int TdApi::qryContract(dict req)
 	return api->QryContract(&m_sessionID,&stAPICommodity);
 }
 
-string TdApi::reqInsertOrder(dict req)
+int TdApi::reqInsertOrder(dict req)
 {
 #ifdef _DEBUG
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 	TapAPINewOrder stNewOrder;
+	memset(&stNewOrder, 0, sizeof(TapAPINewOrder));
     getStr(req, "AccountNo", stNewOrder.AccountNo);						///< 客户资金帐号，必填
     getStr(req, "ExchangeNo", stNewOrder.ExchangeNo);						///< 交易所编号，必填
     getChar(req, "CommodityType",&stNewOrder.CommodityType);					///< 品种类型，必填
@@ -1317,22 +1318,27 @@ string TdApi::reqInsertOrder(dict req)
     getChar(req, "PositionEffect",&stNewOrder.PositionEffect);					///< 开平标志1,默认N
     getChar(req, "PositionEffect2",&stNewOrder.PositionEffect2);				///< 开平标志2，默认N
     getStr(req, "InquiryNo", stNewOrder.InquiryNo);						///< 询价号
-    getChar(req, "HedgeFlag",&stNewOrder.HedgeFlag);						///< 投机保值，默认N
-    getDouble(req, "OrderPrice",&stNewOrder.OrderPrice);						///< 委托价格1
-    getDouble(req, "OrderPrice2",&stNewOrder.OrderPrice2);					///< 委托价格2，做市商应价使用
-    getDouble(req, "StopPrice",&stNewOrder.StopPrice);						///< 触发价格
-    getUInt(req, "OrderQty",&stNewOrder.OrderQty);						///< 委托数量，必填
-    getUInt(req, "OrderMinQty",&stNewOrder.OrderMinQty);					///< 最小成交量，默认1
-    getUInt(req, "MinClipSize",&stNewOrder.MinClipSize);					///< 冰山单最小随机量
-    getUInt(req, "MaxClipSize",&stNewOrder.MaxClipSize);					///< 冰山单最大随机量
-    getInt(req, "RefInt",&stNewOrder.RefInt);							///< 整型参考值
-    getStr(req, "RefString", stNewOrder.RefString);						///< 字符串参考值
-    getChar(req, "TacticsType",&stNewOrder.TacticsType);					///< 策略单类型，默认N
-    getChar(req, "TriggerCondition",&stNewOrder.TriggerCondition);				///< 触发条件，默认N
-    getChar(req, "TriggerPriceType",&stNewOrder.TriggerPriceType);				///< 触发价格类型，默认N
-    getChar(req, "AddOneIsValid",&stNewOrder.AddOneIsValid);					///< 是否T+1有效,默认T+1有效。
-	api->InsertOrder(&m_sessionID, &stNewOrder);
-	return string(m_clientOrderNo);
+	getChar(req, "HedgeFlag",&stNewOrder.HedgeFlag);						///< 投机保值，默认N
+	getDouble(req, "OrderPrice", &stNewOrder.OrderPrice);						///< 委托价格
+	getDouble(req, "StopPrice", &stNewOrder.StopPrice);						///< 触发价格
+	getUInt(req, "OrderQty", &stNewOrder.OrderQty);						///< 委托数量
+	getUInt(req, "OrderMinQty", &stNewOrder.OrderMinQty);					///< 最小成交量
+	getUInt(req, "MinClipSize", &stNewOrder.MinClipSize);					///< 冰山单最小随机量
+	getUInt(req, "MaxClipSize", &stNewOrder.MaxClipSize);					///< 冰山单最大随机量
+	getInt(req, "RefInt", &stNewOrder.RefInt);							///< 整型参考值
+	getStr(req, "RefString", stNewOrder.RefString);						///< 字符串参考值
+	getChar(req, "TacticsType", &stNewOrder.TacticsType);					///< 策略单类型
+	getChar(req, "TriggerCondition", &stNewOrder.TriggerCondition);				///< 触发条件
+	getChar(req, "TriggerPriceType", &stNewOrder.TriggerPriceType);				///< 触发价格类型	
+	getChar(req, "AddOneIsValid", &stNewOrder.AddOneIsValid);					///< 是否T+1有效
+	getUInt(req, "OrderQty2", &stNewOrder.OrderQty2);						///< 委托数量2
+	getChar(req, "HedgeFlag2", &stNewOrder.HedgeFlag2);						///< 投机保值2
+	unsigned int  marketLevel;
+	getUInt(req, "MarketLevel", &marketLevel);					///< 市价撮合深度
+	stNewOrder.MarketLevel = marketLevel;
+	getChar(req, "OrderDeleteByDisConnFlag", &stNewOrder.OrderDeleteByDisConnFlag);		///< 心跳检测失败时，服务器自动撤单标识
+	getStr(req, "UpperChannelNo", stNewOrder.UpperChannelNo);					///< 上手通道号
+	return api->InsertOrder(&m_sessionID, &stNewOrder);
 }
 
 int TdApi::reqCancelOrder(dict req)
