@@ -83,6 +83,7 @@ exchangeMap[EXCHANGE_NYMEX] = 'NYMEX'
 exchangeMap[EXCHANGE_SGX] = 'SGX'
 exchangeMap[EXCHANGE_TOCOM] = 'TOCOM'
 exchangeMap[EXCHANGE_TSE] = 'TSE'
+exchangeMap[EXCHANGE_KRX] = 'KRX'
 exchangeMap[EXCHANGE_UNKNOWN] = ''
 exchangeMapReverse = {v:k for k,v in exchangeMap.items()}
 
@@ -762,6 +763,10 @@ class TapTdApi(TdApi):
         #pos.frozen = 0                 # 冻结数量
 
         #self.gateway.onPosition(pos)
+
+    #----------------------------------------------------------------------
+    def onRtnPositionProfit(self, data):
+        pass
 
     #----------------------------------------------------------------------
     @simple_log

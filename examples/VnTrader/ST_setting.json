@@ -1,10 +1,31 @@
 [
     {
-        "name": "COMEX GC-SI",
+        "name": "COMEX SI - SHFE AG",
 
         "activeLeg": 
             {
-                "vtSymbol": "GC 1803.COMEX",
+                "vtSymbol": "SI 1803.COMEX",
+                "ratio": 1,
+                "multiplier": 6.5,
+                "payup": 0
+            },
+
+        "passiveLegs": [
+            {
+                "vtSymbol": "AG 1806.SHFE",
+                "ratio": -1,
+                "multiplier": -0.0311,
+                "payup": 0
+            }
+        ]
+    },
+
+	{
+        "name": "OKEX BTC-BCH",
+
+        "activeLeg": 
+            {
+                "vtSymbol": "btc_usdt.OKEX",
                 "ratio": 1,
                 "multiplier": 1.0,
                 "payup": 0
@@ -12,30 +33,9 @@
 
         "passiveLegs": [
             {
-                "vtSymbol": "SI 1803.COMEX",
-                "ratio": -2,
-                "multiplier": -2,
-                "payup": 0
-            }
-        ]
-    },
-
-	{
-        "name": "SI",
-
-        "activeLeg": 
-            {
-                "vtSymbol": "SI 1803.COMEX",
-                "ratio": 1,
-                "multiplier": 208.979,
-                "payup": 0
-            },
-
-        "passiveLegs": [
-            {
-                "vtSymbol": "AG 1804.SHFE",
-                "ratio": -10,
-                "multiplier": -1,
+                "vtSymbol": "bch_usdt.OKEX",
+                "ratio": -6,
+                "multiplier": -6.0,
                 "payup": 0
             }
         ]

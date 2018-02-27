@@ -84,7 +84,7 @@ def process_define(line):
 def main():
     """主函数"""
     try:
-        fcpp = open('iTapTradeAPIDataType.h','r')
+        fcpp = open('TapTradeAPIDataType.h','r')
         fpy = open('tap_data_type.py', 'w')
 
         fpy.write('# encoding: UTF-8\n')

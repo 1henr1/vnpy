@@ -23,7 +23,7 @@ from vnpy.trader.uiMainWindow import MainWindow
 #                                     sgitGateway, shzdGateway)
 
 if system == 'Windows':
-    from vnpy.trader.gateway import (tapGateway)
+    from vnpy.trader.gateway import (tapGateway, tapInGateway)
 
 # 加载上层应用
 from vnpy.trader.app import (riskManager, ctaStrategy, spreadTrading)
@@ -43,6 +43,7 @@ def main():
     
     # 添加交易接口
     me.addGateway(tapGateway)
+    me.addGateway(tapInGateway)
 
     # 添加上层应用
     # me.addApp(riskManager)

@@ -247,6 +247,8 @@ const int TAPIERROR_USER_ORDER_FREQUENCE_QRY                           = 28901;
 //==============================================================================
 //! 资金账号不存在
 const int TAPIERROR_ORDERINSERT_ACCOUNT                                = 60001;
+//! 资金账号状态不正确
+const int TAPIERROR_ORDERINSERT_ACCOUNT_STATE		                   = 60002;
 //! 下单无效的合约
 const int TAPIERROR_ORDERINSERT_CONTRACT                               = 60011;
 //! 下单合约无交易路由
@@ -325,6 +327,8 @@ const int TAPIERROR_POSITION_CANNOT_EXEC_OR_ABANDON                    = 60109;
 const int TAPIERROR_ORDERCHECK_NO_PERMIT                               = 60110;
 //! 超过当日最大开仓量
 const int TAPIERROR_ORDERMAXOPENVOL_NO_PERMIT                          = 60111;
+//! 非大连应价单不允许两笔委托量不一致
+const int TAPIERROR_ORDER_QTY_NO_PERMIT                                = 60115;
 //! 订单操作频率过高
 const int TAPIERROR_ORDER_FREQUENCY                                    = 61001;
 //! 委托查询返回前不能进行下次查询

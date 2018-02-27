@@ -134,7 +134,7 @@ def main():
         sleep(1)
         pass
 
-    #api.qryCommodity()
+    api.qryCommodity()
 
     #req = {}
     #req["ExchangeNo"] = "SHFE"
@@ -148,12 +148,12 @@ def main():
     #req["ContractNo1"] = "1803"
     #print api.unSubscribeMarketData(req)
 
-    req = {}
-    req["ExchangeNo"] = "SHFE"
-    req["CommodityNo"] = "AG"
-    req["CommodityType"] = "F"
-    req["ContractNo1"] = "1806"
-    print api.subscribeMarketData(req)
+    #req = {}
+    #req["ExchangeNo"] = "SHFE"
+    #req["CommodityNo"] = "AG"
+    #req["CommodityType"] = "F"
+    #req["ContractNo1"] = "1806"
+    #print api.subscribeMarketData(req)
 
     #req = {}
     ##req["ExchangeNo"] = "COMEX"

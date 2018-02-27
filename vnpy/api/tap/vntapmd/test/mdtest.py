@@ -139,7 +139,7 @@ def main():
     req = {}
     req["UserID"] =  "ES"
     req["Password"] =  "123456"
-    api.reqUserLogin(req)
+    print api.reqUserLogin(req)
 
     while (not api.isApiReady):
         sleep(1)
@@ -160,12 +160,8 @@ def main():
     #print api.unSubscribeMarketData(req)
 
     req = {}
-    #req["ExchangeNo"] = "COMEX"
-    #req["CommodityNo"] = "SI"
-    #req["CommodityType"] = "F"
-    #req["ContractNo1"] = "1805"
-    req["ExchangeNo"] = "NYMEX"
-    req["CommodityNo"] = "CL"
+    req["ExchangeNo"] = "COMEX"
+    req["CommodityNo"] = "SI"
     req["CommodityType"] = "F"
     req["ContractNo1"] = "1803"
     print api.subscribeMarketData(req)

@@ -37,6 +37,7 @@ class TestTdApi(TdApi):
         super(TestTdApi, self).__init__()
         self.isApiReady = False
         self.quoteTimes = 0
+        self.lastOrderID = ""
 
     #----------------------------------------------------------------------
     @simple_log
@@ -50,11 +51,6 @@ class TestTdApi(TdApi):
 
     #----------------------------------------------------------------------
     @simple_log
-    def onExpriationDate(self, data):
-        pass
-
-    #----------------------------------------------------------------------
-    @simple_log
     def onAPIReady(self,):
         self.isApiReady = True
         pass
@@ -62,16 +58,6 @@ class TestTdApi(TdApi):
     #----------------------------------------------------------------------
     @simple_log
     def onDisconnect(self, reasonCode):
-        pass
-
-    #----------------------------------------------------------------------
-    @simple_log
-    def onRspChangePassword(self, errorCode):
-        pass
-
-    #----------------------------------------------------------------------
-    @simple_log
-    def onRspSetReservedInfo(self, errorCode,  data):
         pass
 
     #----------------------------------------------------------------------
@@ -95,9 +81,9 @@ class TestTdApi(TdApi):
         pass
 
     #----------------------------------------------------------------------
-    @simple_log
+    #@simple_log
     def onRtnFund(self, data):
-        print_dict(data)
+        #print_dict(data)
         pass
 
     #----------------------------------------------------------------------
@@ -134,6 +120,9 @@ class TestTdApi(TdApi):
     @simple_log
     def onRtnOrder(self, data):
         print_dict(data)
+        if data["OrderState"] == '4':
+            self.lastOrderID = data["OrderNo"]
+            print "current orderID is " + self.lastOrderID
         pass
 
     #----------------------------------------------------------------------
@@ -145,23 +134,18 @@ class TestTdApi(TdApi):
 
     #----------------------------------------------------------------------
     @simple_log
-    def onRspQryOrderProcess(self, errorCode,  isLast,  data):
-        pass
-
-    #----------------------------------------------------------------------
-    @simple_log
     def onRspQryFill(self, errorCode,  isLast,  data):
         pass
 
     #----------------------------------------------------------------------
     @simple_log
     def onRtnFill(self, data):
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
     @simple_log
     def onRspQryPosition(self, errorCode,  isLast,  data):
-        print(errorCode, isLast)
         print_dict(data)
         pass
 
@@ -169,6 +153,10 @@ class TestTdApi(TdApi):
     @simple_log
     def onRtnPosition(self, data):
         print_dict(data)
+        pass
+
+    #----------------------------------------------------------------------
+    def onRtnPositionProfit(self, data):
         pass
 
 def main():
@@ -217,9 +205,9 @@ def main():
     #api.qryFill()
 
     # OK
-    # req = {}
-    # req["AccountNo"] =  "Q1355739190"
-    # api.qryPosition(req)
+    req = {}
+    req["AccountNo"] =  "Q1355739190"
+    api.qryPosition(req)
 
     # OK
     #req = {}
@@ -249,15 +237,15 @@ def main():
     req["StrikePrice"] = ""						##//< 合约1，必填
     req["StrikePrice2"] = ""						##//< 合约1，必填
     req["OrderType"] = "2"						##//< 委托类型 必填
-    req["OrderSide"] = "B"						##//< 买入卖出
-    req["OrderPrice"] = 3651					##//< 委托价格1
+    req["OrderSide"] = "S"						##//< 买入卖出
+    req["PositionEffect"] = 'T'  ## open
+    req["OrderPrice"] = 3703					##//< 委托价格1
     req["OrderQty"] = 1						##//< 委托数量，必填
     req["OrderSource"] = "A"						##//< 委托数量，必填
     req["CallOrPutFlag"] = 'N'
     req["CallOrPutFlag2"] = 'N'
     req["TimeInForce"] = '0'
     req["IsRiskOrder"] = 'N'
-    req["PositionEffect"] = 'O'  ## open
     req["PositionEffect2"] = 'N'  ## none
     req["HedgeFlag"] = 'T'  ## none
     req["TacticsType"] = 'N'
@@ -265,14 +253,16 @@ def main():
     req["TriggerPriceType"] = 'N'
     req["AddOneIsValid"] = 'N'
     req["HedgeFlag2"] = 'N'
-    req["MarketLevel"] = 0
+    req["MarketLevel"] = 1
     req["OrderDeleteByDisConnFlag"] = 'N'
-    print api.reqInsertOrder(req)
+    #api.reqInsertOrder(req)
+    print "insertOrder Finished"
 
+    #sleep(5)
     # success
     #req = {}
     #req["ServerFlag"] = "A"
-    #req["OrderNo"] = "OC180214RW00005888"						##//< 委托数量，必填
+    #req["OrderNo"] = api.lastOrderID
     #print api.reqCancelOrder(req)
 
     #api.reqAmendOrder(req)
