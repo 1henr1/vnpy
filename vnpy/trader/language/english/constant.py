@@ -41,6 +41,7 @@ PRODUCT_FOREX = u'forex'
 PRODUCT_UNKNOWN = u'unknown'
 PRODUCT_SPOT = u'spot'
 PRODUCT_DEFER = u'defer'
+PRODUCT_SPOT_TRADINGDEFER = u'spot_tradingdefer'
 PRODUCT_NONE = 'none'
 
 # 价格类型常量

@@ -55,11 +55,11 @@ class TestMdApi(MdApi):
         pass
 
     #----------------------------------------------------------------------
-    @simple_log
+    #@simple_log
     def onRspQryCommodity(self,  errorCode,  isLast,  data):
         #print errorCode, isLast
         #print_dict(data)
-        if data["Commodity.ExchangeNo"] == "SHFE":
+        if data["Commodity.ExchangeNo"] == "SGE":
             print_dict(data)
         pass
 
@@ -136,23 +136,23 @@ def main():
 
     api.qryCommodity()
 
-    #req = {}
-    #req["ExchangeNo"] = "SHFE"
-    #req["CommodityNo"] = "AG"
-    #req["CommodityType"] = "F"
-    #api.qryContract(req)
+    req = {}
+    req["ExchangeNo"] = "SGE"
+    req["CommodityNo"] = "AG(T+D)"
+    req["CommodityType"] = "Y"
+    api.qryContract(req)
 
-    #req["ExchangeNo"] = "COMEX"
-    #req["CommodityNo"] = "GC"
-    #req["CommodityType"] = "F"
-    #req["ContractNo1"] = "1803"
+    #req["ExchangeNo"] = "SGE"
+    #req["CommodityNo"] = "AG(T+D)"
+    #req["CommodityType"] = "Y"
+    #req["ContractNo1"] = ""
     #print api.unSubscribeMarketData(req)
 
     #req = {}
-    #req["ExchangeNo"] = "SHFE"
-    #req["CommodityNo"] = "AG"
-    #req["CommodityType"] = "F"
-    #req["ContractNo1"] = "1806"
+    #req["ExchangeNo"] = "SGE"
+    #req["CommodityNo"] = "AG(T+D)"
+    #req["CommodityType"] = "Y"
+    #req["ContractNo1"] = ""
     #print api.subscribeMarketData(req)
 
     #req = {}

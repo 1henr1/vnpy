@@ -114,7 +114,7 @@ productClassMap[PRODUCT_OPTION] = defineDict["TAPI_COMMODITY_TYPE_OPTION"]
 #productClassMap[PRODUCT_CROSSFOREX] = defineDict["TAPI_COMMODITY_TYPE_CROSSFOREX"]
 #productClassMap[PRODUCT_INDEX] = defineDict["TAPI_COMMODITY_TYPE_INDEX"]
 #productClassMap[PRODUCT_STOCK] = defineDict["TAPI_COMMODITY_TYPE_STOCK"]
-#productClassMap[PRODUCT_SPOT_TRADINGDEFER] = defineDict["TAPI_COMMODITY_TYPE_SPOT_TRADINGDEFER"]
+productClassMap[PRODUCT_SPOT_TRADINGDEFER] = defineDict["TAPI_COMMODITY_TYPE_SPOT_TRADINGDEFER"]
 productClassMapReverse = {v:k for k,v in productClassMap.items()}
 
 # 委托状态映射
@@ -332,11 +332,6 @@ class TapMdApi(MdApi):
         self.connectionStatus = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
 
-        #req = VtSubscribeReq()
-        #req.symbol = "1803"
-        #req.exchange = "COMEX"
-        #req.productClass = "GC"
-        #self.subscribe(req)
         pass
 
     #----------------------------------------------------------------------
@@ -357,7 +352,8 @@ class TapMdApi(MdApi):
 
     #----------------------------------------------------------------------
     def onRspSubscribeQuote(self,  errorCode, isLast,  data):
-        #print_dict(data)
+        if (errorCode == 0):
+            self.onRtnQuote(data)
         pass
 
     #----------------------------------------------------------------------
@@ -462,9 +458,9 @@ class TapMdApi(MdApi):
             
         # 若已经连接但尚未登录，则进行登录
         else:
-            if not self.loginStatus:
-                self.login()
-        
+            self.close()
+            self.connectionStatus = False
+
     #----------------------------------------------------------------------
     def subscribe(self, subscribeReq):
         """订阅合约"""
@@ -475,7 +471,7 @@ class TapMdApi(MdApi):
             index = subscribeReq.symbol.index(" ")
             req["ExchangeNo"] = subscribeReq.exchange
             req["CommodityNo"] = subscribeReq.symbol[:index]
-            req["CommodityType"] = "F"
+            req["CommodityType"] = subscribeReq.productClass
             req["ContractNo1"] = subscribeReq.symbol[(index+1):]
             self.subscribeMarketData(req)
         self.subscribedSymbols.add(subscribeReq)
@@ -534,6 +530,8 @@ class TapTdApi(TdApi):
 
         self.posDict = {}
         self.symbolExchangeDict = {}        # 保存合约代码和交易所的印射关系
+        self.CommodityTypeDict = {}        # 保存产品与产品类型的印射关系
+        self.CommodityTickDict = {}        # 保存产品与tick的印射关系
         self.symbolSizeDict = {}            # 保存合约代码和合约大小的印射关系
 
         self.requireAuthentication = False
@@ -595,6 +593,9 @@ class TapTdApi(TdApi):
         req["ExchangeNo"] = data['ExchangeNo']
         req["CommodityNo"] = data['CommodityNo']
         req["CommodityType"] = data['CommodityType']
+        exchange_commodity = ".".join([data["ExchangeNo"], data["CommodityNo"]])
+        self.CommodityTypeDict[exchange_commodity] = data["CommodityType"]
+        self.CommodityTickDict[exchange_commodity] = data["CommodityTickSize"]
         self.qryContract(req)
         pass
 
@@ -608,14 +609,17 @@ class TapTdApi(TdApi):
         contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])
         #contract.name = data['InstrumentName'].decode('GBK')
 
-        # 不识别的产品类型，不用纪录
-        contract.productClass = productClassMapReverse.get(data['CommodityType'], PRODUCT_UNKNOWN)
+        exchange_commodity = ".".join([data["ExchangeNo"], data["CommodityNo"]])
+        origin_commodityType = self.CommodityTypeDict.get(exchange_commodity, "")
+        if origin_commodityType == "":
+            return
+        contract.productClass = productClassMapReverse.get( origin_commodityType, PRODUCT_UNKNOWN)
         if (contract.productClass == PRODUCT_UNKNOWN):
             return
 
         # 合约数值
         #contract.size = data['VolumeMultiple']
-        #contract.priceTick = data['PriceTick']
+        contract.priceTick = self.CommodityTickDict[exchange_commodity]
         #contract.strikePrice = data['StrikePrice']
         #contract.underlyingSymbol = data['UnderlyingInstrID']
 
@@ -678,14 +682,13 @@ class TapTdApi(TdApi):
         pass
 
     #----------------------------------------------------------------------
-    @simple_log
     def onRspQryPosition(self, errorCode,  isLast,  data):
         # 获取持仓缓存对象
-        print_dict(data)
         if data["PositionQty"] == 0:
             return
 
-        posName = '.'.join([data['CommodityNo'], data['ContractNo'], data['MatchSide']])
+        pos_direction  = directionMapReverse.get(data["MatchSide"], DIRECTION_UNKNOWN)
+        posName = '.'.join([data['CommodityNo'], data['ContractNo'], pos_direction])
         if posName in self.posDict:
             pos = self.posDict[posName]
         else:
@@ -695,16 +698,16 @@ class TapTdApi(TdApi):
             pos.gatewayName = self.gatewayName
             pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
             pos.vtSymbol = '.'.join([pos.symbol , pos.gatewayName])
-            pos.direction = posiDirectionMapReverse.get(data['MatchSide'], '')
+            pos.direction = pos_direction
             pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
 
         # 计算数量， 这里需要区分昨仓和今仓
         if data["IsHistory"] == "N":
             ## 说明是今仓
-            pos.position = pos.position + data["PositionQty"]
+            pos.position += data["PositionQty"]
         else:
             ## 说明是昨仓
-            pos.ydPosition = pos.ydPosition + data["PositionQty"]
+            pos.ydPosition += data["PositionQty"]
 
 
         #pos.positionProfit =  data["PositionProfit"]       # 持仓盈亏
@@ -720,45 +723,15 @@ class TapTdApi(TdApi):
             #self.posDict.clear()
 
     #----------------------------------------------------------------------
-    @simple_log
     def onRtnPosition(self, data):
         # 代码编号相关
         pass
-        #print_dict(data)
-        #posName = '.'.join([data['CommodityNo'], data['ContractNo']])
-        #if posName in self.posDict:
-        #    pos = self.posDict[posName]
-        #else:
-        #    pos = VtPositionData()
-        #    self.posDict[posName] = pos
-
-        #    pos.gatewayName = self.gatewayName
-        #    pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
-        #    pos.vtSymbol = '.'.join([pos.symbol , pos.gatewayName])
-        #    pos.direction = posiDirectionMapReverse.get(data['MatchSide'], '')
-        #    pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
-
-        ## 计算成本
-        #lastPosition = pos.position
-        #if data["MatchSide"] == directionMap.get(DIRECTION_LONG):
-        #    pos.position = pos.position + data["PositionQty"]               # 持仓量
-        #else:
-        #    pos.position = pos.position - data["PositionQty"]               # 持仓量
-        #if pos.position == 0:
-        #    pos.price = 0
-        #else:
-        #    pos.price = (pos.price * lastPosition + data["PositionPrice"] * data["PositionQty"] ) / (pos.position)                # 持仓均价
-        #pos.positionProfit = 0       # 持仓盈亏
-        #pos.frozen = 0                 # 冻结数量
-
         #self.gateway.onPosition(pos)
 
     #----------------------------------------------------------------------
-    @simple_log
     def onRspQryOrder(self, errorCode, isLast, data):
         """报单回报"""
         # 创建报单数据对象
-        print_dict(data)
 
         #更新本地报单号 与 系统报单号的 映射关系
         self.localID += 1
@@ -779,18 +752,19 @@ class TapTdApi(TdApi):
         order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
         order.orderID = currentlocalNo
-        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
+        order.vtOrderID = '.'.join([self.gatewayName, str(order.orderID)])
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
+        order.offset = offsetMapReverse.get(data['PositionEffect'], OFFSET_UNKNOWN)
         order.status = statusMapReverse.get(data['OrderState'], STATUS_UNKNOWN)
 
         # 价格、报单量等数值
         order.price = data['OrderPrice']
         order.totalVolume = data['OrderQty']
         order.tradedVolume = data['OrderMatchQty']
-        order.orderTime = data['OrderInsertTime']
+        order.orderTime = datetime.strptime("20" + str(data['OrderInsertTime'])[:12], '%Y%m%d%H%M%S')   # python的datetime时间对象
         if order.status == STATUS_CANCELLED:
-            order.cancelTime = data['OrderUpdateTime']
+            order.cancelTime = datetime.strptime("20" + str(data['OrderUpdateTime'])[:12], '%Y%m%d%H%M%S')   # python的datetime时间对象
 
         # 推送
         self.gateway.onOrder(order)
@@ -814,6 +788,9 @@ class TapTdApi(TdApi):
         # 更新本地报单号 与 系统报单号 的关系
         if currentLocalID == "":
             ## 说明当前map没有保存该报单，该报单属于新的报单，那么就建立新的关联关系
+            if self.localNoDict.get(self.localID, "") != "":
+                ##说明当前的localID已经被占用了， 可能通过其他途径进行了报单
+                self.localID += 1
             self.localNoDict[self.localID] = orderSysID
             self.orderIdDict[orderSysID] = self.localID
             order.orderID = self.localID
@@ -821,62 +798,23 @@ class TapTdApi(TdApi):
             ## 说明是已知的报单，则从字典中取出本地报单号
             order.orderID = currentLocalID
         ## order中的报单号，用本地报单号来标识
-        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
+        order.vtOrderID = '.'.join([self.gatewayName, str(order.orderID)])
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
+        order.offset = offsetMapReverse.get(data['PositionEffect'], OFFSET_UNKNOWN)
         order.status = statusMapReverse.get(data['OrderState'], STATUS_UNKNOWN)
 
         # 价格、报单量等数值
         order.price = data['OrderPrice']
         order.totalVolume = data['OrderQty']
         order.tradedVolume = data['OrderMatchQty']
-        order.orderTime = data['OrderInsertTime']
+        order.orderTime = datetime.strptime("20" + str(data['OrderInsertTime'])[:12], '%Y%m%d%H%M%S')   # python的datetime时间对象
         if order.status == STATUS_CANCELLED:
-            order.cancelTime = data['OrderUpdateTime']
+            order.cancelTime = datetime.strptime("20" + str(data['OrderUpdateTime'])[:12], '%Y%m%d%H%M%S')   # python的datetime时间对象
 
         # 推送
         self.gateway.onOrder(order)
         pass
-
-    #----------------------------------------------------------------------
-    def onRspQryInstrument(self, data, error, n, last):
-        """合约查询回报"""
-        contract = VtContractData()
-        contract.gatewayName = self.gatewayName
-
-        contract.symbol = data['InstrumentID']
-        contract.exchange = exchangeMapReverse[data['ExchangeID']]
-        contract.vtSymbol = contract.symbol #'.'.join([contract.symbol, contract.exchange])
-        contract.name = data['InstrumentName'].decode('GBK')
-
-        # 合约数值
-        contract.size = data['VolumeMultiple']
-        contract.priceTick = data['PriceTick']
-        contract.strikePrice = data['StrikePrice']
-        contract.underlyingSymbol = data['UnderlyingInstrID']
-
-        contract.productClass = productClassMapReverse.get(data['ProductClass'], PRODUCT_UNKNOWN)
-        
-        # 期权类型
-        if contract.productClass is PRODUCT_OPTION:
-            if data['OptionsType'] == '1':
-                contract.optionType = OPTION_CALL
-            elif data['OptionsType'] == '2':
-                contract.optionType = OPTION_PUT
-
-        # 缓存代码和交易所的印射关系
-        self.symbolExchangeDict[contract.symbol] = contract.exchange
-        self.symbolSizeDict[contract.symbol] = contract.size
-
-        # 推送
-        self.gateway.onContract(contract)
-        
-        # 缓存合约代码和交易所映射
-        symbolExchangeDict[contract.symbol] = contract.exchange
-
-        if last:
-            self.writeLog(text.CONTRACT_DATA_RECEIVED)
-
 
     #----------------------------------------------------------------------
     @simple_log
@@ -898,19 +836,19 @@ class TapTdApi(TdApi):
         trade.orderID = self.orderIdDict.get(orderSysID, "")
         if trade.orderID == "":
             print "can't find %s related localID" % orderSysID
-        trade.vtOrderID = '.'.join([self.gatewayName, trade.orderID])
+        trade.vtOrderID = '.'.join([self.gatewayName, str(trade.orderID)])
         
         # 方向
         trade.direction = directionMapReverse.get(data['MatchSide'], '')
             
         # 开平
-        trade.offset = offsetMapReverse.get(data['OffsetFlag'], '')
+        trade.offset = offsetMapReverse.get(data['PositionEffect'], '')
             
         # 价格、报单量等数值
         trade.price = data['MatchPrice']
         trade.volume = data['MatchQty']
-        trade.tradeTime = data['MatchDateTime']
-        
+        trade.tradeTime = datetime.strptime(data['MatchDateTime'], '%Y-%m-%d %H:%M:%S')   # python的datetime时间对象
+
         # 推送
         self.gateway.onTrade(trade)
 
@@ -944,10 +882,11 @@ class TapTdApi(TdApi):
         ##  根据开平标志修改持仓量
         if trade.offset == OFFSET_OPEN:
             pos.position += trade.volume
-        elif trade.offset == OFFSET_CLOSE:
-            pos.ydPosition -= trade.volume
         else:
-            pos.position -= trade.volume
+            if trade.offset == OFFSET_CLOSE:
+                pos.ydPosition -= trade.volume
+            else:
+                pos.position -= trade.volume
 
         self.gateway.onPosition(pos)
 
@@ -1059,11 +998,12 @@ class TapTdApi(TdApi):
         req["HedgeFlag2"] = 'N'
         req["MarketLevel"] = 1
         req["OrderDeleteByDisConnFlag"] = 'N'
+        print_dict(req)
         self.reqInsertOrder(req)
         self.localID += 1
 
         # 返回订单号（字符串），便于某些算法进行动态管理
-        vtOrderID = '.'.join([self.gatewayName, self.localID])
+        vtOrderID = '.'.join([self.gatewayName, str(self.localID)])
         return vtOrderID
     
     #----------------------------------------------------------------------

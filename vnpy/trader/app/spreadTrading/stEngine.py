@@ -258,7 +258,8 @@ class StDataEngine(object):
         req = VtSubscribeReq()
         req.symbol = contract.symbol
         req.exchange = contract.exchange
-        
+        req.productClass = contract.productClass
+
         self.mainEngine.subscribe(req, contract.gatewayName)
         
     #----------------------------------------------------------------------
