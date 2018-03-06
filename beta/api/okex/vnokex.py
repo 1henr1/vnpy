@@ -6,7 +6,9 @@ import json
 from time import sleep
 from threading import Thread
 
-import websocket    
+import websocket
+
+
 
 # OKEX网站
 OKEX_USD_SPOT = 'wss://real.okex.com:10441/websocket'               # OKEX 现货地址

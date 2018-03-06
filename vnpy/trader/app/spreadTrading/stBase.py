@@ -32,12 +32,12 @@ class StLeg(object):
         
         self.bidPrice = EMPTY_FLOAT
         self.askPrice = EMPTY_FLOAT
-        self.bidVolume = EMPTY_INT
-        self.askVolume = EMPTY_INT
+        self.bidVolume = EMPTY_FLOAT
+        self.askVolume = EMPTY_FLOAT
         
-        self.longPos = EMPTY_INT
-        self.shortPos = EMPTY_INT
-        self.netPos = EMPTY_INT
+        self.longPos = EMPTY_FLOAT
+        self.shortPos = EMPTY_FLOAT
+        self.netPos = EMPTY_FLOAT
 
 
 ########################################################################
@@ -53,6 +53,7 @@ class StSpread(object):
         self.activeLeg = None           # 主动腿
         self.passiveLegs = []           # 被动腿（支持多条）
         self.allLegs = []               # 所有腿
+        self.floorDigits = 1000
         
         self.bidPrice = EMPTY_FLOAT
         self.askPrice = EMPTY_FLOAT
@@ -93,8 +94,8 @@ class StSpread(object):
         # 清空价格和委托量数据
         self.bidPrice = EMPTY_FLOAT
         self.askPrice = EMPTY_FLOAT
-        self.askVolume = EMPTY_INT
-        self.bidVolume = EMPTY_INT
+        self.askVolume = EMPTY_FLOAT
+        self.bidVolume = EMPTY_FLOAT
         
         # 遍历价差腿列表
         for n, leg in enumerate(self.allLegs):
@@ -116,11 +117,11 @@ class StSpread(object):
                 
             # 计算报单量
             if leg.ratio > 0:
-                legAdjustedBidVolume = floor(leg.bidVolume / leg.ratio)
-                legAdjustedAskVolume = floor(leg.askVolume / leg.ratio)
+                legAdjustedBidVolume = floor(self.floorDigits * leg.bidVolume / leg.ratio) / self.floorDigits
+                legAdjustedAskVolume = floor(self.floorDigits * leg.askVolume / leg.ratio) / self.floorDigits
             else:
-                legAdjustedBidVolume = floor(leg.askVolume / abs(leg.ratio))
-                legAdjustedAskVolume = floor(leg.bidVolume / abs(leg.ratio))
+                legAdjustedBidVolume = floor(self.floorDigits * leg.askVolume / abs(leg.ratio)) / self.floorDigits
+                legAdjustedAskVolume = floor(self.floorDigits * leg.bidVolume / abs(leg.ratio)) / self.floorDigits
             
             if n == 0:
                 self.bidVolume = legAdjustedBidVolume                           # 对于第一条腿，直接初始化

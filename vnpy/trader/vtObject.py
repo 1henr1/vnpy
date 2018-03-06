@@ -35,8 +35,8 @@ class VtTickData(VtBaseData):
         # 成交数据
         self.lastPrice = EMPTY_FLOAT            # 最新成交价
         self.lastVolume = EMPTY_INT             # 最新成交量
-        self.volume = EMPTY_INT                 # 今天总成交量
-        self.openInterest = EMPTY_INT           # 持仓量
+        self.volume = EMPTY_FLOAT                 # 今天总成交量
+        self.openInterest = EMPTY_FLOAT           # 持仓量
         self.time = EMPTY_STRING                # 时间 11:20:56.5
         self.date = EMPTY_STRING                # 日期 20151009
         self.datetime = None                    # python的datetime时间对象
@@ -63,17 +63,17 @@ class VtTickData(VtBaseData):
         self.askPrice4 = EMPTY_FLOAT
         self.askPrice5 = EMPTY_FLOAT        
         
-        self.bidVolume1 = EMPTY_INT
-        self.bidVolume2 = EMPTY_INT
-        self.bidVolume3 = EMPTY_INT
-        self.bidVolume4 = EMPTY_INT
-        self.bidVolume5 = EMPTY_INT
+        self.bidVolume1 = EMPTY_FLOAT
+        self.bidVolume2 = EMPTY_FLOAT
+        self.bidVolume3 = EMPTY_FLOAT
+        self.bidVolume4 = EMPTY_FLOAT
+        self.bidVolume5 = EMPTY_FLOAT
         
-        self.askVolume1 = EMPTY_INT
-        self.askVolume2 = EMPTY_INT
-        self.askVolume3 = EMPTY_INT
-        self.askVolume4 = EMPTY_INT
-        self.askVolume5 = EMPTY_INT         
+        self.askVolume1 = EMPTY_FLOAT
+        self.askVolume2 = EMPTY_FLOAT
+        self.askVolume3 = EMPTY_FLOAT
+        self.askVolume4 = EMPTY_FLOAT
+        self.askVolume5 = EMPTY_FLOAT
 
     
 ########################################################################

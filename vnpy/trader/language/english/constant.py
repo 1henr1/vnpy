@@ -41,6 +41,7 @@ PRODUCT_FOREX = u'forex'
 PRODUCT_UNKNOWN = u'unknown'
 PRODUCT_SPOT = u'spot'
 PRODUCT_DEFER = u'defer'
+PRODUCT_SPOT_TRADINGDEFER = u'spot_tradingdefer'
 PRODUCT_NONE = 'none'
 
 # 价格类型常量
@@ -66,6 +67,8 @@ EXCHANGE_UNKNOWN = 'UNKNOWN'# 未知交易所
 EXCHANGE_NONE = ''          # 空交易所
 EXCHANGE_HKEX = 'HKEX'      # 港交所
 EXCHANGE_HKFE = 'HKFE'      # 香港期货交易所
+EXCHANGE_ZCE = 'ZCE'        # 郑商所
+EXCHANGE_KRX = 'KRX'        # 韩国交易所
 
 EXCHANGE_SMART = 'SMART'       # IB智能路由（股票、期权）
 EXCHANGE_NYMEX = 'NYMEX'       # IB 期货

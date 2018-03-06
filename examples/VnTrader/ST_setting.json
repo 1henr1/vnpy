@@ -1,84 +1,42 @@
 [
     {
-        "name": "m.09-01",
+        "name": "COMEX SI - SHFE AG",
 
         "activeLeg": 
             {
-                "vtSymbol": "m1709",
+                "vtSymbol": "SI 1805.COMEX",
                 "ratio": 1,
-                "multiplier": 1.0,
-                "payup": 2
+                "multiplier": 6.5,
+                "payup": 0
             },
 
         "passiveLegs": [
             {
-                "vtSymbol": "m1801",
-                "ratio": -1,
-                "multiplier": -1.0,
-                "payup": 2
+                "vtSymbol": "AG 1806.SHFE",
+                "ratio": -10,
+                "multiplier": -0.0311,
+                "payup": 0
             }
         ]
     },
-
-    {
-        "name": "IF.07-09",
+	
+	{
+        "name": "OKEX BTC-BCH",
 
         "activeLeg": 
             {
-                "vtSymbol": "IF1707",
+                "vtSymbol": "btc_usdt.OKEX",
                 "ratio": 1,
                 "multiplier": 1.0,
-                "payup": 2
+                "payup": 0
             },
 
         "passiveLegs": [
             {
-                "vtSymbol": "IF1709",
+                "vtSymbol": "bch_usdt.OKEX",
                 "ratio": -1,
                 "multiplier": -1.0,
-                "payup": 2
-            }
-        ]
-    },
-
-    {
-        "name": "IH.07-09",
-
-        "activeLeg": 
-            {
-                "vtSymbol": "IH1707",
-                "ratio": 1,
-                "multiplier": 1.0,
-                "payup": 2
-            },
-
-        "passiveLegs": [
-            {
-                "vtSymbol": "IH1709",
-                "ratio": -1,
-                "multiplier": -1.0,
-                "payup": 2
-            }
-        ]
-    },
-
-    {
-        "name": "IC.07-09",
-
-        "activeLeg": 
-            {
-                "vtSymbol": "IC1707",
-                "ratio": 1,
-                "multiplier": 1.0,
-                "payup": 2
-            },
-
-        "passiveLegs": [
-            {
-                "vtSymbol": "IC1709",
-                "ratio": -1,
-                "multiplier": -1.0,
-                "payup": 2
+                "payup": 0
             }
         ]
     }

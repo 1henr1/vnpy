@@ -3,8 +3,8 @@
 from vnokex import *
 
 # 在OkCoin网站申请这两个Key，分别对应用户名和密码
-apiKey = '你的accessKey'
-secretKey = '你的secretKey'
+apiKey = 'eacbe156-2885-42f7-855b-08ec1770e6b0'
+secretKey = '0B411289348D28BACEF58AC25894F5AA'
 
 # 创建API对象
 api = OkexSpotApi()
@@ -13,12 +13,12 @@ api.connect(apiKey, secretKey, True)
 
 sleep(3)
 
-#api.login()
-api.subscribeSpotTicker("bch_btc")
-api.subscribeSpotDepth("bch_btc")
-api.subscribeSpotDepth("bch_btc", 5)
-api.subscribeSpotDeals("bch_btc")
-api.subscribeSpotKlines("bch_btc","30min")
+api.login()
+api.subscribeSpotTicker("bch_usdt")
+api.subscribeSpotDepth("bch_usdt")
+api.subscribeSpotDepth("bch_usdt", 5)
+#api.subscribeSpotDeals("bch_btc")
+#api.subscribeSpotKlines("bch_btc","30min")
 
 #api.spotTrade("etc_usdt","sell", "50" , "0.01")
 #api.spotCancelOrder("etc_btc","44274138")

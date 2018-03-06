@@ -673,25 +673,29 @@ class TradingWidget(QtWidgets.QFrame):
                      PRICETYPE_MARKETPRICE,
                      PRICETYPE_FAK,
                      PRICETYPE_FOK]
-    
+
     exchangeList = [EXCHANGE_NONE,
-                    EXCHANGE_CFFEX,
-                    EXCHANGE_SHFE,
-                    EXCHANGE_DCE,
-                    EXCHANGE_CZCE,
-                    EXCHANGE_SSE,
-                    EXCHANGE_SZSE,
-                    EXCHANGE_SGE,
-                    EXCHANGE_HKEX,
-                    EXCHANGE_HKFE,
-                    EXCHANGE_SMART,
-                    EXCHANGE_ICE,
-                    EXCHANGE_CME,
-                    EXCHANGE_NYMEX,
-                    EXCHANGE_LME,
-                    EXCHANGE_GLOBEX,
-                    EXCHANGE_IDEALPRO]
-    
+                    EXCHANGE_WUXI,
+                    EXCHANGE_ASX ,
+                    EXCHANGE_BMD ,
+                    EXCHANGE_CBOE ,
+                    EXCHANGE_CBOT ,
+                    EXCHANGE_CME ,
+                    EXCHANGE_COMEX ,
+                    EXCHANGE_EUREX ,
+                    EXCHANGE_HKEX ,
+                    EXCHANGE_HKMEX ,
+                    EXCHANGE_ICCA ,
+                    EXCHANGE_ICEU ,
+                    EXCHANGE_ICUS ,
+                    EXCHANGE_INE ,
+                    EXCHANGE_LIFFE ,
+                    EXCHANGE_LME ,
+                    EXCHANGE_NYMEX ,
+                    EXCHANGE_SGX ,
+                    EXCHANGE_TOCOM ,
+                    EXCHANGE_TSE]
+
     currencyList = [CURRENCY_NONE,
                     CURRENCY_CNY,
                     CURRENCY_HKD,
@@ -744,6 +748,7 @@ class TradingWidget(QtWidgets.QFrame):
         labelCurrency = QtWidgets.QLabel(vtText.CURRENCY)
         labelProductClass = QtWidgets.QLabel(vtText.PRODUCT_CLASS)
         labelGateway = QtWidgets.QLabel(vtText.GATEWAY)
+        labelCancelOrderID = QtWidgets.QLabel(vtText.CANCEL_ORDERID)
 
         self.lineSymbol = QtWidgets.QLineEdit()
         self.lineName = QtWidgets.QLineEdit()
@@ -776,7 +781,9 @@ class TradingWidget(QtWidgets.QFrame):
         self.comboProductClass.addItems(self.productClassList)     
         
         self.comboGateway = QtWidgets.QComboBox()
-        self.comboGateway.addItems(self.gatewayList)          
+        self.comboGateway.addItems(self.gatewayList)
+
+        self.cancelOrderID = QtWidgets.QLineEdit()
 
         gridleft = QtWidgets.QGridLayout()
         gridleft.addWidget(labelSymbol, 0, 0)
@@ -790,7 +797,8 @@ class TradingWidget(QtWidgets.QFrame):
         gridleft.addWidget(labelCurrency, 8, 0)
         gridleft.addWidget(labelProductClass, 9, 0)   
         gridleft.addWidget(labelGateway, 10, 0)
-        
+        gridleft.addWidget(labelCancelOrderID, 11, 0)
+
         gridleft.addWidget(self.lineSymbol, 0, 1, 1, -1)
         gridleft.addWidget(self.lineName, 1, 1, 1, -1)
         gridleft.addWidget(self.comboDirection, 2, 1, 1, -1)
@@ -803,6 +811,7 @@ class TradingWidget(QtWidgets.QFrame):
         gridleft.addWidget(self.comboCurrency, 8, 1, 1, -1)
         gridleft.addWidget(self.comboProductClass, 9, 1, 1, -1)
         gridleft.addWidget(self.comboGateway, 10, 1, 1, -1)
+        gridleft.addWidget(self.cancelOrderID, 11, 1, 1, -1)
 
         # 右边部分
         labelBid1 = QtWidgets.QLabel(vtText.BID_1)
@@ -885,11 +894,15 @@ class TradingWidget(QtWidgets.QFrame):
 
         # 发单按钮
         buttonSendOrder = QtWidgets.QPushButton(vtText.SEND_ORDER)
+        buttonCancelOrder = QtWidgets.QPushButton(vtText.CANCEL_ORDER)
         buttonCancelAll = QtWidgets.QPushButton(vtText.CANCEL_ALL)
-        
+        buttonRefresh = QtWidgets.QPushButton(vtText.REFRESH)
+
         size = buttonSendOrder.sizeHint()
-        buttonSendOrder.setMinimumHeight(size.height()*2)   # 把按钮高度设为默认两倍
-        buttonCancelAll.setMinimumHeight(size.height()*2)
+        buttonSendOrder.setMinimumHeight(size.height()*1)   # 把按钮高度设为默认两倍
+        buttonCancelOrder.setMinimumHeight(size.height()*1)
+        buttonCancelAll.setMinimumHeight(size.height()*1)
+        buttonRefresh.setMinimumHeight(size.height()*1)
 
         # 整合布局
         hbox = QtWidgets.QHBoxLayout()
@@ -899,14 +912,18 @@ class TradingWidget(QtWidgets.QFrame):
         vbox = QtWidgets.QVBoxLayout()
         vbox.addLayout(hbox)
         vbox.addWidget(buttonSendOrder)
+        vbox.addWidget(buttonCancelOrder)
         vbox.addWidget(buttonCancelAll)
+        vbox.addWidget(buttonRefresh)
         vbox.addStretch()
 
         self.setLayout(vbox)
 
         # 关联更新
         buttonSendOrder.clicked.connect(self.sendOrder)
+        buttonCancelOrder.clicked.connect(self.cancelOrder)
         buttonCancelAll.clicked.connect(self.cancelAll)
+        buttonRefresh.clicked.connect(self.refresh)
         self.lineSymbol.returnPressed.connect(self.updateSymbol)
 
     #----------------------------------------------------------------------
@@ -1063,7 +1080,26 @@ class TradingWidget(QtWidgets.QFrame):
         req.productClass = productClass
         
         self.mainEngine.sendOrder(req, gatewayName)
-            
+
+    #----------------------------------------------------------------------
+    def cancelOrder(self):
+        """撤销指定委托"""
+        orderID = str(self.cancelOrderID.text())
+        gatewayName = unicode(self.comboGateway.currentText())
+        vtOrderID = '.'.join([gatewayName, orderID])
+        targetOrder = self.mainEngine.getOrder(vtOrderID)
+        if targetOrder:
+            req = VtCancelOrderReq()
+            req.symbol = targetOrder.symbol
+            req.exchange = targetOrder.exchange
+            req.orderID = orderID  # 报单号
+            #req.frontID = EMPTY_STRING  # 前置机号
+            #req.sessionID = EMPTY_STRING  # 会话号
+
+            self.mainEngine.cancelOrder(req, gatewayName)
+        else:
+            print "Can't find the target Order %s"  %  vtOrderID
+
     #----------------------------------------------------------------------
     def cancelAll(self):
         """一键撤销所有委托"""
@@ -1076,7 +1112,13 @@ class TradingWidget(QtWidgets.QFrame):
             req.sessionID = order.sessionID
             req.orderID = order.orderID
             self.mainEngine.cancelOrder(req, order.gatewayName)
-            
+
+    #----------------------------------------------------------------------
+    def refresh(self):
+        """刷新接口数据"""
+        gatewayName = unicode(self.comboGateway.currentText())
+        self.mainEngine.refresh(gatewayName)
+
     #----------------------------------------------------------------------
     def closePosition(self, cell):
         """根据持仓信息自动填写交易组件"""

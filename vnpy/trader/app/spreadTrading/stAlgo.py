@@ -5,7 +5,7 @@ from math import floor
 from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT, 
                                     EMPTY_STRING, EMPTY_UNICODE,
                                     DIRECTION_LONG, DIRECTION_SHORT,
-                                    STATUS_ALLTRADED, STATUS_CANCELLED, STATUS_REJECTED)
+                                    STATUS_NOTTRADED, STATUS_ALLTRADED, STATUS_CANCELLED, STATUS_REJECTED)
 
 
 
@@ -240,6 +240,15 @@ class SniperAlgo(StAlgoTemplate):
 
         vtOrderID = order.vtOrderID
         vtSymbol = order.vtSymbol
+        if order.status == STATUS_NOTTRADED:
+            ## 报单状态为 未成交还在队列中， 说明是新报单的回报
+            # 保存到字典中
+            if vtSymbol not in self.legOrderDict:
+                self.legOrderDict[vtSymbol] = [vtOrderID]
+            else:
+                self.legOrderDict[vtSymbol].append(vtOrderID)
+            return
+
         newTradedVolume = order.tradedVolume
         lastTradedVolume = self.orderTradedDict.get(vtOrderID, 0)
         
