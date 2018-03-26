@@ -513,7 +513,7 @@ class TapTdApi(TdApi):
         self.gatewayName = gateway.gatewayName  # gateway对象名称
         
         self.localNoDict = {}           # key为本地委托号，value为系统委托号
-        self.orderIdDict = {}           # key为系统委托号，value为本地委托号
+        #self.orderIdDict = {}           # key为系统委托号，value为本地委托号
 
         self.connectionStatus = False       # 连接状态
         self.loginStatus = False            # 登录状态
@@ -734,14 +734,13 @@ class TapTdApi(TdApi):
         # 创建报单数据对象
 
         #更新本地报单号 与 系统报单号的 映射关系
-        self.localID += 1
-        currentlocalNo = self.localID
-        orderId = data["OrderNo"]
-        if orderId == "":
+        orderSysID = data["OrderNo"]
+        if orderSysID == "":
             return
 
-        self.localNoDict[currentlocalNo] = orderId
-        self.orderIdDict[orderId] = currentlocalNo
+        self.localID += 1
+        localNo = str(self.localID)
+        self.localNoDict[localNo] = orderSysID
 
         order = VtOrderData()
         order.gatewayName = self.gatewayName
@@ -751,8 +750,8 @@ class TapTdApi(TdApi):
         order.exchange = exchangeMapReverse[data['ExchangeNo']]
         order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
-        order.orderID = currentlocalNo
-        order.vtOrderID = '.'.join([self.gatewayName, str(order.orderID)])
+        order.orderID = localNo
+        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
         order.offset = offsetMapReverse.get(data['PositionEffect'], OFFSET_UNKNOWN)
@@ -773,6 +772,15 @@ class TapTdApi(TdApi):
     @simple_log
     def onRtnOrder(self, data):
         """报单回报"""
+        errorCode = data['ErrorCode']
+        if errorCode != 0:
+            ## 报单错误
+            err = VtErrorData()
+            err.gatewayName = self.gatewayName
+            err.errorID = errorCode
+            err.errorMsg = data['ErrorText']
+            self.gateway.onError(err)
+            return
 
         # 创建报单数据对象
         order = VtOrderData()
@@ -783,22 +791,17 @@ class TapTdApi(TdApi):
         order.exchange = exchangeMapReverse[data['ExchangeNo']]
         order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
+        ## 系统报单号
         orderSysID = data["OrderNo"]
-        currentLocalID = self.orderIdDict.get(orderSysID, "")
-        # 更新本地报单号 与 系统报单号 的关系
-        if currentLocalID == "":
-            ## 说明当前map没有保存该报单，该报单属于新的报单，那么就建立新的关联关系
-            if self.localNoDict.get(self.localID, "") != "":
-                ##说明当前的localID已经被占用了， 可能通过其他途径进行了报单
-                self.localID += 1
-            self.localNoDict[self.localID] = orderSysID
-            self.orderIdDict[orderSysID] = self.localID
-            order.orderID = self.localID
-        else:
-            ## 说明是已知的报单，则从字典中取出本地报单号
-            order.orderID = currentLocalID
+        ##　本地报单号
+        orderLocalID = data["RefString"]
+        # 更新 本地报单号 与 系统报单号 的关系
+        # 这个直接更新， 是考虑到重复登陆本地报单号重复的问题， 应该以最新的映射为准
+        self.localNoDict[orderLocalID] = orderSysID
+
         ## order中的报单号，用本地报单号来标识
-        order.vtOrderID = '.'.join([self.gatewayName, str(order.orderID)])
+        order.orderID = orderLocalID
+        order.vtOrderID = '.'.join([self.gatewayName, order.orderID])
 
         order.direction = directionMapReverse.get(data['OrderSide'], DIRECTION_UNKNOWN)
         order.offset = offsetMapReverse.get(data['PositionEffect'], OFFSET_UNKNOWN)
@@ -998,9 +1001,10 @@ class TapTdApi(TdApi):
         req["HedgeFlag2"] = 'N'
         req["MarketLevel"] = 1
         req["OrderDeleteByDisConnFlag"] = 'N'
+        self.localID += 1
+        req["RefString"] = str(self.localID)
         print_dict(req)
         self.reqInsertOrder(req)
-        self.localID += 1
 
         # 返回订单号（字符串），便于某些算法进行动态管理
         vtOrderID = '.'.join([self.gatewayName, str(self.localID)])
