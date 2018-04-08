@@ -8,7 +8,7 @@ from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT,
                                     STATUS_NOTTRADED, STATUS_ALLTRADED, STATUS_CANCELLED, STATUS_REJECTED)
 
 ########################################################################
-class StAlgoGroupTemplate(object):
+class StAlgoGroup(object):
     """价差算法交易模板"""
     MODE_LONGSHORT = u'双向'
     MODE_LONGONLY = u'做多'
