@@ -7,7 +7,149 @@ from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT,
                                     DIRECTION_LONG, DIRECTION_SHORT,
                                     STATUS_NOTTRADED, STATUS_ALLTRADED, STATUS_CANCELLED, STATUS_REJECTED)
 
+########################################################################
+class StAlgoGroupTemplate(object):
+    """价差算法交易模板"""
+    MODE_LONGSHORT = u'双向'
+    MODE_LONGONLY = u'做多'
+    MODE_SHORTONLY = u'做空'
 
+    SPREAD_LONG = 1
+    SPREAD_SHORT = 2
+
+    #----------------------------------------------------------------------
+    def __init__(self, algoEngine, spread):
+        """Constructor"""
+        self.algoEngine = algoEngine        # 算法引擎
+        self.spreadName = spread.name       # 价差名称
+        self.spread = spread                # 价差对象
+        self.algoGroupName = EMPTY_STRING   # 算法名称
+        self.algoGroup = []                 # 算法列表
+
+    #----------------------------------------------------------------------
+    def updateSpreadTick(self, spread):
+        """"""
+        if spread.spreadName != self.spreadName:
+            return
+        for algo in self.algoGroup:
+            algo.updateSpreadTick(spread)
+
+    #----------------------------------------------------------------------
+    def updateSpreadPos(self, spread):
+        """"""
+        if spread.spreadName != self.spreadName:
+            return
+        for algo in self.algoGroup:
+            algo.updateSpreadPos(spread)
+
+    #----------------------------------------------------------------------
+    def updateTrade(self, trade):
+        """"""
+        for algo in self.algoGroup:
+            algo.updateTrade(trade)
+
+    #----------------------------------------------------------------------
+    def updateOrder(self, order):
+        """"""
+        for algo in self.algoGroup:
+            algo.updateOrder(order)
+
+    #----------------------------------------------------------------------
+    def updateTimer(self):
+        """"""
+        for algo in self.algoGroup:
+            algo.updateTimer()
+
+    #----------------------------------------------------------------------
+    def start(self, seqNum=0):
+        """seqNum默认参数为0"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].start()
+
+    #----------------------------------------------------------------------
+    def stop(self, seqNum=0):
+        """seqNum默认参数为0"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].stop()
+
+    #----------------------------------------------------------------------
+    def setBuyPrice(self, buyPrice, seqNum=0):
+        """设置买开的价格"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setBuyPrice(buyPrice)
+
+    #----------------------------------------------------------------------
+    def setSellPrice(self, sellPrice, seqNum=0):
+        """设置卖平的价格"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setSellPrice(sellPrice)
+
+    #----------------------------------------------------------------------
+    def setShortPrice(self, shortPrice, seqNum=0):
+        """设置卖开的价格"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setShortPrice(shortPrice)
+
+    #----------------------------------------------------------------------
+    def setCoverPrice(self, coverPrice, seqNum=0):
+        """设置买平的价格"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setCoverPrice(coverPrice)
+
+    #----------------------------------------------------------------------
+    def setMode(self, mode, seqNum=0):
+        """设置算法交易方向"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setMode(mode)
+
+    #----------------------------------------------------------------------
+    def setMaxOrderSize(self, maxOrderSize, seqNum=0):
+        """设置最大单笔委托数量"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setMaxOrderSize(maxOrderSize)
+
+    #----------------------------------------------------------------------
+    def setMaxPosSize(self, maxPosSize, seqNum=0):
+        """设置最大持仓数量"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setMaxPosSize(maxPosSize)
+
+    #----------------------------------------------------------------------
+    def putEvent(self):
+        """发出算法更新事件"""
+        self.algoEngine.putAlgoEvent(self)
+
+    #----------------------------------------------------------------------
+    def writeLog(self, content):
+        """输出算法日志"""
+        prefix = '  '.join([self.spreadName, self.algoName])
+        content = ':'.join([prefix, content])
+        self.algoEngine.writeLog(content)
+
+    #----------------------------------------------------------------------
+    def getAlgoParams(self):
+        """获取算法参数"""
+        algoParams = []
+        for algo in self.algoGroup:
+            algoParams.append(algo.getAlgoParams())
+        return algoParams
+
+    #----------------------------------------------------------------------
+    def setAlgoParams(self, paraList):
+        """设置算法参数,应传入一个列表，元素为字典类型"""
+        i = 0
+        for param in paraList:
+            self.algoGroup[i].setAlgoParams(param)
+            i += 1
+
+    #----------------------------------------------------------------------
+    def _isValidSeqNum(self, seqNum):
+        """判断序列号是否在范围之内"""
+        if seqNum not in range(len(self.algoGroup)):
+            self.writeLog("算法组序号错误")
+            return False
+        else:
+            return True
 
 ########################################################################
 class StAlgoTemplate(object):
