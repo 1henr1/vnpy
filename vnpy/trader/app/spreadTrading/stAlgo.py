@@ -26,6 +26,14 @@ class StAlgoGroup(object):
         self.algoGroupName = EMPTY_STRING   # 算法名称
         self.algoGroup = []                 # 算法列表
 
+        self._initAlgoGroup()
+
+    #----------------------------------------------------------------------
+    def _initAlgoGroup(self):
+        """初始化算法组，创建一个算法对象"""
+        algo = SniperAlgo(self.algoEngine, self.spread)
+        self.algoGroup.append(algo)
+
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
         """"""
@@ -137,10 +145,13 @@ class StAlgoGroup(object):
     #----------------------------------------------------------------------
     def setAlgoParams(self, paraList):
         """设置算法参数,应传入一个列表，元素为字典类型"""
-        i = 0
-        for param in paraList:
-            self.algoGroup[i].setAlgoParams(param)
-            i += 1
+        for idx in range(len(paraList)):
+            if len(self.algoGroup) > idx:
+                self.algoGroup[idx].setAlgoParams(paraList[idx])
+            else:
+                algo = SniperAlgo(self.algoEngine, self.spread)
+                algo.setAlgoParams(paraList[idx])
+                self.algoGroup.append(algo)
 
     #----------------------------------------------------------------------
     def _isValidSeqNum(self, seqNum):
