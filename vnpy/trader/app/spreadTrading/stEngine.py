@@ -17,7 +17,7 @@ from vnpy.trader.vtConstant import (DIRECTION_LONG, DIRECTION_SHORT,
 from .stBase import (StLeg, StSpread, EVENT_SPREADTRADING_TICK,
                      EVENT_SPREADTRADING_POS, EVENT_SPREADTRADING_LOG,
                      EVENT_SPREADTRADING_ALGO, EVENT_SPREADTRADING_ALGOLOG)
-from .stAlgo import SniperAlgo
+from .stAlgo import SniperAlgo, StAlgoGroup
 
 
 ########################################################################
@@ -290,8 +290,8 @@ class StAlgoEngine(object):
         self.mainEngine = mainEngine
         self.eventEngine = eventEngine
         
-        self.algoDict = {}          # spreadName:algo
-        self.vtSymbolAlgoDict = {}  # vtSymbol:algo
+        self.algoGroupDict = {}          # spreadName:algoGroup
+        self.vtSymbolAlgoGroupDict = {}  # vtSymbol:algoGroup
         
         self.registerEvent()
         
@@ -313,42 +313,42 @@ class StAlgoEngine(object):
         if not spread.bidPrice and not spread.askPrice:
             return
         
-        algo = self.algoDict.get(spread.name, None)
-        if algo:
-            algo.updateSpreadTick(spread)
+        algoGroup = self.algoDictGroup.get(spread.name, None)
+        if algoGroup:
+            algoGroup.updateSpreadTick(spread)
     
     #----------------------------------------------------------------------
     def processSpreadPosEvent(self, event):
         """处理价差持仓事件"""
         spread = event.dict_['data']
         
-        algo = self.algoDict.get(spread.name, None)
-        if algo:
-            algo.updateSpreadPos(spread)
+        algoGroup = self.algoDictGroup.get(spread.name, None)
+        if algoGroup:
+            algoGroup.updateSpreadPos(spread)
     
     #----------------------------------------------------------------------
     def processTradeEvent(self, event):
         """处理成交事件"""
         trade = event.dict_['data']
         
-        algo = self.vtSymbolAlgoDict.get(trade.vtSymbol, None)
-        if algo:
-            algo.updateTrade(trade)
+        algoGroup = self.vtSymbolAlgoGroupDict.get(trade.vtSymbol, None)
+        if algoGroup:
+            algoGroup.updateTrade(trade)
     
     #----------------------------------------------------------------------
     def processOrderEvent(self, event):
         """处理委托事件"""
         order = event.dict_['data']
-        algo = self.vtSymbolAlgoDict.get(order.vtSymbol, None)
-        
-        if algo:
-            algo.updateOrder(order)
+
+        algoGroup = self.vtSymbolAlgoGroupDict.get(order.vtSymbol, None)
+        if algoGroup:
+            algoGroup.updateOrder(order)
     
     #----------------------------------------------------------------------
     def processTimerEvent(self, event):
         """"""
-        for algo in self.algoDict.values():
-            algo.updateTimer()
+        for algoGroup in self.algoDictGroup.values():
+            algoGroup.updateTimer()
 
     #----------------------------------------------------------------------
     def sendOrder(self, vtSymbol, direction, offset, price, volume, payup=0):
@@ -443,8 +443,8 @@ class StAlgoEngine(object):
     def saveSetting(self):
         """保存算法配置"""
         setting = {}
-        for algo in self.algoDict.values():
-            setting[algo.spreadName] = algo.getAlgoParams()
+        for algoGroup in self.algoDictGroup.values():
+            setting[algoGroup.spreadName] = algoGroup.getAlgoParams()
             
         f = shelve.open(self.algoFilePath)
         f['setting'] = setting
@@ -456,12 +456,12 @@ class StAlgoEngine(object):
         # 创建算法对象
         l = self.dataEngine.getAllSpreads()
         for spread in l:
-            algo = SniperAlgo(self, spread)
-            self.algoDict[spread.name] = algo
+            algoGroup = StAlgoGroup(self, spread)
+            self.algoGroupDict[spread.name] = algoGroup
             
             # 保存腿代码和算法对象的映射
             for leg in spread.allLegs:
-                self.vtSymbolAlgoDict[leg.vtSymbol] = algo
+                self.vtSymbolAlgoGroupDict[leg.vtSymbol] = algoGroup
         
         # 加载配置
         f = shelve.open(self.algoFilePath)
@@ -471,77 +471,77 @@ class StAlgoEngine(object):
         if not setting:
             return
         
-        for algo in self.algoDict.values():
-            if algo.spreadName in setting:
-                d = setting[algo.spreadName]
-                algo.setAlgoParams(d)
+        for algoGroup in self.algoGroupDict.values():
+            if algoGroup.spreadName in setting:
+                paraList = setting[algoGroup.spreadName]
+                algoGroup.setAlgoParams(paraList)
         
     #----------------------------------------------------------------------
     def stopAll(self):
         """停止全部算法"""
-        for algo in self.algoDict.values():
-            algo.stop()
+        for algoGroup in self.algoGroupDict.values():
+            algoGroup.stop()
             
     #----------------------------------------------------------------------
-    def startAlgo(self, spreadName):
+    def startAlgo(self, spreadName, seqNum=0):
         """启动算法"""
-        algo = self.algoDict[spreadName]
-        algoActive = algo.start()
+        algoGroup = self.algoGroupDict[spreadName]
+        algoActive = algoGroup.start(seqNum)
         return algoActive
     
     #----------------------------------------------------------------------
-    def stopAlgo(self, spreadName):
+    def stopAlgo(self, spreadName, seqNum=0):
         """停止算法"""
-        algo = self.algoDict[spreadName]
-        algoActive = algo.stop()
+        algoGroup = self.algoGroupDict[spreadName]
+        algoActive = algoGroup.stop(seqNum)
         return algoActive
     
     #----------------------------------------------------------------------
     def getAllAlgoParams(self):
         """获取所有算法的参数"""
-        return [algo.getAlgoParams() for algo in self.algoDict.values()]
+        return [algoGroup.getAlgoParams() for algoGroup in self.algoGroupDict.values()]
     
     #----------------------------------------------------------------------
-    def setAlgoBuyPrice(self, spreadName, buyPrice):
+    def setAlgoBuyPrice(self, spreadName, buyPrice, seqNum=0):
         """设置算法买开价格"""
-        algo = self.algoDict[spreadName]
-        algo.setBuyPrice(buyPrice)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setBuyPrice(buyPrice, seqNum)
         
     #----------------------------------------------------------------------
-    def setAlgoSellPrice(self, spreadName, sellPrice):
+    def setAlgoSellPrice(self, spreadName, sellPrice, seqNum=0):
         """设置算法卖平价格"""
-        algo = self.algoDict[spreadName]
-        algo.setSellPrice(sellPrice)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setSellPrice(sellPrice, seqNum)
         
     #----------------------------------------------------------------------
-    def setAlgoShortPrice(self, spreadName, shortPrice):
+    def setAlgoShortPrice(self, spreadName, shortPrice, seqNum=0):
         """设置算法卖开价格"""
-        algo = self.algoDict[spreadName]
-        algo.setShortPrice(shortPrice)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setShortPrice(shortPrice, seqNum)
         
     #----------------------------------------------------------------------
-    def setAlgoCoverPrice(self, spreadName, coverPrice):
+    def setAlgoCoverPrice(self, spreadName, coverPrice, seqNum=0):
         """设置算法买平价格"""
-        algo = self.algoDict[spreadName]
-        algo.setCoverPrice(coverPrice)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setCoverPrice(coverPrice,seqNum)
     
     #----------------------------------------------------------------------
-    def setAlgoMode(self, spreadName, mode):
+    def setAlgoMode(self, spreadName, mode, seqNum=0):
         """设置算法工作模式"""
-        algo = self.algoDict[spreadName]
-        algo.setMode(mode)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setMode(mode, seqNum)
         
     #----------------------------------------------------------------------
-    def setAlgoMaxOrderSize(self, spreadName, maxOrderSize):
+    def setAlgoMaxOrderSize(self, spreadName, maxOrderSize, seqNum=0):
         """设置算法单笔委托限制"""
-        algo = self.algoDict[spreadName]
-        algo.setMaxOrderSize(maxOrderSize)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setMaxOrderSize(maxOrderSize, seqNum)
         
     #----------------------------------------------------------------------
     def setAlgoMaxPosSize(self, spreadName, maxPosSize):
         """设置算法持仓限制"""
-        algo = self.algoDict[spreadName]
-        algo.setMaxPosSize(maxPosSize)
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setMaxPosSize(maxPosSize)
 
 
 ########################################################################
