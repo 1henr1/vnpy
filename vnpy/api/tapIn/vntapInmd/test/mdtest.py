@@ -134,13 +134,13 @@ def main():
         sleep(1)
         pass
 
-    api.qryCommodity()
+    #api.qryCommodity()
 
-    req = {}
-    req["ExchangeNo"] = "SGE"
-    req["CommodityNo"] = "AG(T+D)"
-    req["CommodityType"] = "Y"
-    api.qryContract(req)
+    #req = {}
+    #req["ExchangeNo"] = "SGE"
+    #req["CommodityNo"] = "AG(T+D)"
+    #req["CommodityType"] = "Y"
+    #api.qryContract(req)
 
     #req["ExchangeNo"] = "SGE"
     #req["CommodityNo"] = "AG(T+D)"

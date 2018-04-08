@@ -121,10 +121,10 @@ class TestTdApi(TdApi):
     @simple_log
     def onRtnOrder(self, data):
         print_dict(data)
-        if data["OrderState"] == '4':
-            self.lastOrderID = data["OrderNo"]
-            print "current orderID is " + self.lastOrderID
-        pass
+        #if data["OrderState"] == '4':
+        #    self.lastOrderID = data["OrderNo"]
+        #    print "current orderID is " + self.lastOrderID
+        #pass
 
     #----------------------------------------------------------------------
     @simple_log
@@ -194,11 +194,11 @@ def main():
 
     #api.qryCommodity()
 
-    req = {}
-    req["ExchangeNo"] = "SGE"
-    req["CommodityNo"] = "AG(T+D)"
-    req["CommodityType"] = "Y"
-    api.qryContract(req)
+    #req = {}
+    #req["ExchangeNo"] = "SGE"
+    #req["CommodityNo"] = "AG(T+D)"
+    #req["CommodityType"] = "Y"
+    #api.qryContract(req)
     # OK
     # api.qryAccount()
 
@@ -237,9 +237,9 @@ def main():
 
     #req = {}
     #req["AccountNo"] = "Q1355739190"					##//< 客户资金帐号，必填
-    #req["ExchangeNo"] = "SHFE"						##//< 交易所编号，必填
-    #req["CommodityType"] = "F"					##//< 品种类型，必填
-    #req["CommodityNo"] = "AG"					##//< 品种编码类型，必填
+    #req["ExchangeNo"] = "SGE"						##//< 交易所编号，必填
+    #req["CommodityType"] = "Y"					##//< 品种类型，必填
+    #req["CommodityNo"] = "AG(T+D)"					##//< 品种编码类型，必填
     #req["ContractNo"] = "1806"						##//< 合约1，必填
     #req["ContractNo2"] = ""						##//< 合约1，必填
     #req["StrikePrice"] = ""						##//< 合约1，必填
@@ -263,10 +263,48 @@ def main():
     #req["HedgeFlag2"] = 'N'
     #req["MarketLevel"] = 1
     #req["OrderDeleteByDisConnFlag"] = 'N'
-    ##api.reqInsertOrder(req)
-    #print "insertOrder Finished"
+    #api.reqInsertOrder(req)
+
+
+
+    req = {}
+    req["AccountNo"] = "Q1355739190"					##//< 客户资金帐号，必填
+    req["ExchangeNo"] = "SHFE"						##//< 交易所编号，必填
+    req["CommodityType"] = "F"					##//< 品种类型，必填
+    req["CommodityNo"] = "AG"					##//< 品种编码类型，必填
+    req["ContractNo"] = "1806"						##//< 合约1，必填
+    req["ContractNo2"] = ""						##//< 合约1，必填
+    req["StrikePrice"] = ""						##//< 合约1，必填
+    req["StrikePrice2"] = ""						##//< 合约1，必填
+    req["OrderType"] = "2"						##//< 委托类型 必填
+    req["OrderSide"] = "S"						##//< 买入卖出
+    req["PositionEffect"] = 'O'  ## open
+    req["OrderPrice"] = 3703					##//< 委托价格1
+    req["OrderQty"] = 1						##//< 委托数量，必填
+    req["OrderSource"] = "A"						##//< 委托数量，必填
+    req["CallOrPutFlag"] = 'N'
+    req["CallOrPutFlag2"] = 'N'
+    req["TimeInForce"] = '0'
+    req["IsRiskOrder"] = 'N'
+    req["PositionEffect2"] = 'N'  ## none
+    req["HedgeFlag"] = 'T'  ## none
+    req["TacticsType"] = 'N'
+    req["TriggerCondition"] = 'N'
+    req["TriggerPriceType"] = 'N'
+    req["AddOneIsValid"] = 'N'
+    req["HedgeFlag2"] = 'N'
+    req["MarketLevel"] = 1
+    req["OrderDeleteByDisConnFlag"] = 'N'
+    req["RefInt"] = 1
+    req["RefString"] = 'A1'
+    api.reqInsertOrder(req)
+    print "1"
 
     #sleep(5)
+    #api.reqInsertOrder(req)
+    #print "2"
+
+
     # success
     #req = {}
     #req["ServerFlag"] = "A"
