@@ -551,26 +551,42 @@ class StAlgoManager(QtWidgets.QTableWidget):
                     cellDelete = QtWidgets.QTableWidgetItem(u'删除行')
                     self.setItem(row, 9, cellDelete)
 
-                spinBuyPrice = StBuyPriceSpinBox(paraDict['spreadName'], paraDict['buyPrice'])
-                spinSellPrice = StSellPriceSpinBox(paraDict['spreadName'], paraDict['sellPrice'])
-                spinShortPrice = StShortPriceSpinBox(paraDict['spreadName'], paraDict['shortPrice'])
-                spinCoverPrice = StCoverPriceSpinBox(paraDict['spreadName'], paraDict['coverPrice'])
-                spinMaxOrderSize = StMaxOrderSizeSpinBox(paraDict['spreadName'], paraDict['maxOrderSize'])
-                spinMaxPosSize = StMaxPosSizeSpinBox(paraDict['spreadName'], paraDict['maxPosSize'])
-                comboMode = StModeComboBox(paraDict['spreadName'], paraDict['mode'])
-
-                self.setCellWidget(row, 2, spinBuyPrice)
-                self.setCellWidget(row, 3, spinSellPrice)
-                self.setCellWidget(row, 4, spinCoverPrice)
-                self.setCellWidget(row, 5, spinShortPrice)
-                self.setCellWidget(row, 6, spinMaxOrderSize)
-                self.setCellWidget(row, 7, spinMaxPosSize)
-                self.setCellWidget(row, 8, comboMode)
-
-                row_manager = [spinBuyPrice, spinSellPrice, spinShortPrice, spinCoverPrice, spinMaxOrderSize, spinMaxPosSize]
-                self.tableManager.append(row_manager)
+                row_widgets = self.createRowWidgets(paraDict['spreadName'], paraDict)
+                self.setRowWidges(row, row_widgets)
+                self.tableManager.append(row_widgets)
 
                 row += 1
+
+    #----------------------------------------------------------------------
+    def createRowWidgets(self, spreadName, dict=None):
+        if dict:
+            spinBuyPrice = StBuyPriceSpinBox(spreadName, dict['buyPrice'])
+            spinSellPrice = StSellPriceSpinBox(spreadName, dict['sellPrice'])
+            spinShortPrice = StShortPriceSpinBox(spreadName, dict['shortPrice'])
+            spinCoverPrice = StCoverPriceSpinBox(spreadName, dict['coverPrice'])
+            spinMaxOrderSize = StMaxOrderSizeSpinBox(spreadName, dict['maxOrderSize'])
+            spinMaxPosSize = StMaxPosSizeSpinBox(spreadName, dict['maxPosSize'])
+            comboMode = StModeComboBox(spreadName, dict['mode'])
+        else:
+            spinBuyPrice = StBuyPriceSpinBox(spreadName)
+            spinSellPrice = StSellPriceSpinBox(spreadName)
+            spinShortPrice = StShortPriceSpinBox(spreadName)
+            spinCoverPrice = StCoverPriceSpinBox(spreadName)
+            spinMaxOrderSize = StMaxOrderSizeSpinBox(spreadName)
+            spinMaxPosSize = StMaxPosSizeSpinBox(spreadName)
+            comboMode = StModeComboBox(spreadName)
+        row_widgets = [spinBuyPrice, spinSellPrice, spinShortPrice, spinCoverPrice, spinMaxOrderSize, spinMaxPosSize, comboMode]
+        return row_widgets
+
+    #----------------------------------------------------------------------
+    def setRowWidges(self, row, row_widgets):
+        self.setCellWidget(row, 2, row_widgets[0])
+        self.setCellWidget(row, 3, row_widgets[1])
+        self.setCellWidget(row, 4, row_widgets[2])
+        self.setCellWidget(row, 5, row_widgets[3])
+        self.setCellWidget(row, 6, row_widgets[4])
+        self.setCellWidget(row, 7, row_widgets[5])
+        self.setCellWidget(row, 8, row_widgets[6])
 
     #----------------------------------------------------------------------
     def startAlgoGroup(self, spreadName):
@@ -609,28 +625,9 @@ class StAlgoManager(QtWidgets.QTableWidget):
     def insertAlgoRow(self, spreadName, row):
         """插入一个算法行"""
         self.insertRow(row)
-        #cellSpreadName = QtWidgets.QTableWidgetItem(spreadName)
-        #cellAlgoName = QtWidgets.QTableWidgetItem("Sniper")
-        spinBuyPrice = StBuyPriceSpinBox(spreadName)
-        spinSellPrice = StSellPriceSpinBox(spreadName)
-        spinShortPrice = StShortPriceSpinBox(spreadName)
-        spinCoverPrice = StCoverPriceSpinBox(spreadName)
-        spinMaxOrderSize = StMaxOrderSizeSpinBox(spreadName)
-        spinMaxPosSize = StMaxPosSizeSpinBox(spreadName)
-        comboMode = StModeComboBox(spreadName)
-
-        #self.setItem(row, 0, cellSpreadName)
-        #self.setItem(row, 1, cellAlgoName)
-        self.setCellWidget(row, 2, spinBuyPrice)
-        self.setCellWidget(row, 3, spinSellPrice)
-        self.setCellWidget(row, 4, spinCoverPrice)
-        self.setCellWidget(row, 5, spinShortPrice)
-        self.setCellWidget(row, 6, spinMaxOrderSize)
-        self.setCellWidget(row, 7, spinMaxPosSize)
-        self.setCellWidget(row, 8, comboMode)
-
-        row_manager = [spinBuyPrice, spinSellPrice, spinShortPrice, spinCoverPrice, spinMaxOrderSize, spinMaxPosSize]
-        self.tableManager.insert(row, row_manager)
+        row_widgets = self.createRowWidgets(spreadName)
+        self.setRowWidges(row, row_widgets)
+        self.tableManager.insert(row, row_widgets)
 
         cellDelete = QtWidgets.QTableWidgetItem(u'删除行')
         self.setItem(row, 9, cellDelete)
