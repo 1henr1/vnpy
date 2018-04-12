@@ -313,7 +313,7 @@ class StAlgoEngine(object):
         if not spread.bidPrice and not spread.askPrice:
             return
         
-        algoGroup = self.algoDictGroup.get(spread.name, None)
+        algoGroup = self.algoGroupDict.get(spread.name, None)
         if algoGroup:
             algoGroup.updateSpreadTick(spread)
     
@@ -322,7 +322,7 @@ class StAlgoEngine(object):
         """处理价差持仓事件"""
         spread = event.dict_['data']
         
-        algoGroup = self.algoDictGroup.get(spread.name, None)
+        algoGroup = self.algoGroupDict.get(spread.name, None)
         if algoGroup:
             algoGroup.updateSpreadPos(spread)
     
@@ -347,7 +347,7 @@ class StAlgoEngine(object):
     #----------------------------------------------------------------------
     def processTimerEvent(self, event):
         """"""
-        for algoGroup in self.algoDictGroup.values():
+        for algoGroup in self.algoGroupDict.values():
             algoGroup.updateTimer()
 
     #----------------------------------------------------------------------
@@ -443,7 +443,7 @@ class StAlgoEngine(object):
     def saveSetting(self):
         """保存算法配置"""
         setting = {}
-        for algoGroup in self.algoDictGroup.values():
+        for algoGroup in self.algoGroupDict.values():
             setting[algoGroup.spreadName] = algoGroup.getAlgoParams()
             
         f = shelve.open(self.algoFilePath)
@@ -483,12 +483,40 @@ class StAlgoEngine(object):
             algoGroup.stop()
             
     #----------------------------------------------------------------------
+    def addAlgo(self, spreadName):
+        """增加算法"""
+        algoGroup = self.algoGroupDict[spreadName]
+        seqNum = algoGroup.addAlgo()
+        return seqNum
+
+    #----------------------------------------------------------------------
+    def deleteAlgo(self, spreadName, seqNum):
+        """删除算法"""
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.deleteAlgo(seqNum)
+        return
+
+    #----------------------------------------------------------------------
+    def startAlgoGroup(self, spreadName):
+        """启动算法"""
+        algoGroup = self.algoGroupDict[spreadName]
+        algoActive = algoGroup.startAll()
+        return algoActive
+
+    #----------------------------------------------------------------------
+    def stopAlgoGroup(self, spreadName):
+        """停止算法"""
+        algoGroup = self.algoGroupDict[spreadName]
+        algoActive = algoGroup.stopAll()
+        return algoActive
+
+    #----------------------------------------------------------------------
     def startAlgo(self, spreadName, seqNum=0):
         """启动算法"""
         algoGroup = self.algoGroupDict[spreadName]
         algoActive = algoGroup.start(seqNum)
         return algoActive
-    
+
     #----------------------------------------------------------------------
     def stopAlgo(self, spreadName, seqNum=0):
         """停止算法"""

@@ -37,7 +37,7 @@ class StAlgoGroup(object):
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
         """"""
-        if spread.spreadName != self.spreadName:
+        if spread.name != self.spreadName:
             return
         for algo in self.algoGroup:
             algo.updateSpreadTick(spread)
@@ -45,7 +45,7 @@ class StAlgoGroup(object):
     #----------------------------------------------------------------------
     def updateSpreadPos(self, spread):
         """"""
-        if spread.spreadName != self.spreadName:
+        if spread.name != self.spreadName:
             return
         for algo in self.algoGroup:
             algo.updateSpreadPos(spread)
@@ -79,6 +79,20 @@ class StAlgoGroup(object):
         """seqNum默认参数为0"""
         if self._isValidSeqNum(seqNum):
             self.algoGroup[seqNum].stop()
+
+    #----------------------------------------------------------------------
+    def startAll(self):
+        """启动算法组"""
+        for algo in self.algoGroup:
+            if not algo.start():   # 有一个算法没启动成交，就算整个算法组启动失败
+                return False
+
+    #----------------------------------------------------------------------
+    def stopAll(self):
+        """关闭算法组"""
+        for algo in self.algoGroup:
+            algo.stop()
+        return False
 
     #----------------------------------------------------------------------
     def setBuyPrice(self, buyPrice, seqNum=0):
@@ -130,16 +144,31 @@ class StAlgoGroup(object):
     #----------------------------------------------------------------------
     def writeLog(self, content):
         """输出算法日志"""
-        prefix = '  '.join([self.spreadName, self.algoName])
+        prefix = '  '.join([self.spreadName, self.algoGroupName])
         content = ':'.join([prefix, content])
         self.algoEngine.writeLog(content)
+
+    #----------------------------------------------------------------------
+    def addAlgo(self):
+        """增加算法"""
+        seqNum = len(self.algoGroup)
+        algo = SniperAlgo(self.algoEngine, self.spread)
+        self.algoGroup.append(algo)
+        return algo.getAlgoParams()
+
+    #----------------------------------------------------------------------
+    def deleteAlgo(self, seqNum):
+        """删除算法"""
+        del self.algoGroup[seqNum]
 
     #----------------------------------------------------------------------
     def getAlgoParams(self):
         """获取算法参数"""
         algoParams = []
-        for algo in self.algoGroup:
-            algoParams.append(algo.getAlgoParams())
+        for seqNum, algo in enumerate(self.algoGroup):
+            dict = algo.getAlgoParams()
+            dict["seqNum"] = seqNum
+            algoParams.append(dict)
         return algoParams
 
     #----------------------------------------------------------------------
@@ -177,7 +206,7 @@ class StAlgoTemplate(object):
         """Constructor"""
         self.algoEngine = algoEngine        # 算法引擎        
         self.spreadName = spread.name       # 价差名称
-        self.spread = spread                # 价差对象      
+        self.spread = spread                # 价差对象
 
         self.algoName = EMPTY_STRING        # 算法名称
         
