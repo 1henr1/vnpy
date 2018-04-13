@@ -475,7 +475,12 @@ class StAlgoEngine(object):
             if algoGroup.spreadName in setting:
                 paraList = setting[algoGroup.spreadName]
                 algoGroup.setAlgoParams(paraList)
-        
+
+    #----------------------------------------------------------------------
+    def setAlgoGroupParams(self, spreadName, paraList):
+        algoGroup = self.algoGroupDict[spreadName]
+        algoGroup.setAlgoParams(paraList)
+
     #----------------------------------------------------------------------
     def stopAll(self):
         """停止全部算法"""

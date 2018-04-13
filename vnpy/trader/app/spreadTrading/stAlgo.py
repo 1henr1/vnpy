@@ -84,8 +84,12 @@ class StAlgoGroup(object):
     def startAll(self):
         """启动算法组"""
         for algo in self.algoGroup:
-            if not algo.start():   # 有一个算法没启动成交，就算整个算法组启动失败
+            if not algo.canStart():   # 有一个算法没启动成交，就算整个算法组启动失败
                 return False
+
+        for algo in self.algoGroup:
+            algo.start()   # 有一个算法没启动成交，就算整个算法组启动失败
+        return True
 
     #----------------------------------------------------------------------
     def stopAll(self):
@@ -174,13 +178,16 @@ class StAlgoGroup(object):
     #----------------------------------------------------------------------
     def setAlgoParams(self, paraList):
         """设置算法参数,应传入一个列表，元素为字典类型"""
-        for idx in range(len(paraList)):
+        len_paraGroup = len(paraList)
+        for idx in range(len_paraGroup):
             if len(self.algoGroup) > idx:
                 self.algoGroup[idx].setAlgoParams(paraList[idx])
             else:
                 algo = SniperAlgo(self.algoEngine, self.spread)
                 algo.setAlgoParams(paraList[idx])
                 self.algoGroup.append(algo)
+        if len(self.algoGroup) > len_paraGroup:
+            del self.algoGroup[len_paraGroup:]
 
     #----------------------------------------------------------------------
     def _isValidSeqNum(self, seqNum):
@@ -526,7 +533,13 @@ class SniperAlgo(StAlgoTemplate):
         self.writeLog(u'算法启动')
         
         return self.active
-    
+
+    #----------------------------------------------------------------------
+    def canStart(self):
+        if not self.checkPrice():
+            return False
+        return True
+
     #----------------------------------------------------------------------
     def stop(self):
         """停止"""
