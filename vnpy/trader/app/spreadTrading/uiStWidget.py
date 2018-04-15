@@ -302,7 +302,7 @@ class StMaxPosSizeSpinBox(QtWidgets.QSpinBox):
         self.spreadName = spreadName
 
         self.size = size
-        self.setRange(-10000, 10000)
+        self.setRange(0, 10000)
         self.setValue(size)
 
         self.valueChanged.connect(self.setSize)
@@ -334,7 +334,7 @@ class StMaxOrderSizeSpinBox(QtWidgets.QSpinBox):
         self.spreadName = spreadName
 
         self.size = size
-        self.setRange(-10000, 10000)
+        self.setRange(0, 10000)
         self.setValue(size)
 
         self.valueChanged.connect(self.setSize)
