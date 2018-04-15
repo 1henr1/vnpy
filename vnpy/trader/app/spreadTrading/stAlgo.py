@@ -123,6 +123,12 @@ class StAlgoGroup(object):
             self.algoGroup[seqNum].setCoverPrice(coverPrice)
 
     #----------------------------------------------------------------------
+    def setTriggerVolume(self, triggerVolume, seqNum=0):
+        """设置触发数量"""
+        if self._isValidSeqNum(seqNum):
+            self.algoGroup[seqNum].setTriggerVolume(triggerVolume)
+
+    #----------------------------------------------------------------------
     def setMode(self, mode, seqNum=0):
         """设置算法交易方向"""
         if self._isValidSeqNum(seqNum):
@@ -224,6 +230,7 @@ class StAlgoTemplate(object):
         self.sellPrice = EMPTY_FLOAT
         self.shortPrice = EMPTY_FLOAT
         self.coverPrice = EMPTY_FLOAT
+        self.triggerVolume = EMPTY_FLOAT
         
         self.maxPosSize = EMPTY_INT         # 最大单边持仓量
         self.maxOrderSize = EMPTY_INT       # 最大单笔委托量
@@ -282,7 +289,12 @@ class StAlgoTemplate(object):
     def setCoverPrice(self, coverPrice):
         """设置买平的价格"""
         self.coverPrice = coverPrice
-    
+
+    #----------------------------------------------------------------------
+    def setTriggerVolume(self, triggerVolume):
+        """设置买平的价格"""
+        self.triggerVolume = triggerVolume
+
     #----------------------------------------------------------------------
     def setMode(self, mode):
         """设置算法交易方向"""
@@ -320,6 +332,7 @@ class StAlgoTemplate(object):
             "sellPrice": self.sellPrice,
             "shortPrice": self.shortPrice,
             "coverPrice": self.coverPrice,
+            "triggerVolume": self.triggerVolume,
             "maxOrderSize": self.maxOrderSize,
             "maxPosSize": self.maxPosSize,
             "mode": self.mode
@@ -333,6 +346,7 @@ class StAlgoTemplate(object):
         self.sellPrice = d.get('sellPrice', EMPTY_FLOAT)
         self.shortPrice = d.get('shortPrice', EMPTY_FLOAT)
         self.coverPrice = d.get('coverPrice', EMPTY_FLOAT)
+        self.triggerVolume = d.get('triggerVolume', EMPTY_FLOAT)
         self.maxOrderSize = d.get('maxOrderSize', EMPTY_INT)
         self.maxPosSize = d.get('maxPosSize', EMPTY_INT)
         self.mode = d.get('mode', self.MODE_LONGSHORT)
