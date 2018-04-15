@@ -400,13 +400,15 @@ class SniperAlgo(StAlgoTemplate):
             # 买入
             if (spread.netPos >= 0 and 
                 spread.netPos < self.maxPosSize and
-                spread.askPrice <= self.buyPrice):
+                spread.askPrice <= self.buyPrice and
+                spread.askVolume >= self.triggerVolume):
                 self.quoteActiveLeg(self.SPREAD_LONG)
                 self.writeLog(u'买入开仓')
             
             # 卖出
             elif (spread.netPos > 0 and
-                  spread.bidPrice >= self.sellPrice):
+                  spread.bidPrice >= self.sellPrice and
+                  spread.bidVolume >= self.triggerVolume):
                 self.quoteActiveLeg(self.SPREAD_SHORT)
                 self.writeLog(u'卖出平仓')
         
@@ -415,13 +417,15 @@ class SniperAlgo(StAlgoTemplate):
             # 做空
             if (spread.netPos <= 0 and
                 spread.netPos > -self.maxPosSize and
-                spread.bidPrice >= self.shortPrice):
+                spread.bidPrice >= self.shortPrice and
+                spread.bidVolume >= self.triggerVolume):
                 self.quoteActiveLeg(self.SPREAD_SHORT)
                 self.writeLog(u'卖出开仓')
             
             # 平空
             elif (spread.netPos < 0 and
-                  spread.askPrice <= self.coverPrice):
+                  spread.askPrice <= self.coverPrice and
+                  spread.askVolume >= self.triggerVolume):
                 self.quoteActiveLeg(self.SPREAD_LONG)
                 self.writeLog(u'买入平仓')
     
