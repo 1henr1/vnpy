@@ -40,7 +40,10 @@ class StAlgoGroup(object):
         if spread.name != self.spreadName:
             return
         for algo in self.algoGroup:
-            algo.updateSpreadTick(spread)
+            # 如果算法组中的一个算法正在运作，并发送了主动报单，则后面的算法先不要工作，避免多个算法同时发送主动单，可能超过持仓限额
+            if algo.updateSpreadTick(spread):
+                return
+
 
     #----------------------------------------------------------------------
     def updateSpreadPos(self, spread):
@@ -383,18 +386,22 @@ class SniperAlgo(StAlgoTemplate):
         
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
-        """价差行情更新"""
+        """价差行情更新,
+        返回true表示当前算法有未成交的主动报单, 算法组后面的算法暂时先不要执行
+        返回false表示当前算法无未成交的主动报单
+        """
         self.spread = spread
         
         # 若算法没有启动则直接返回
         if not self.active:
-            return
+            return False
         
         # 若当前已有主动腿委托则直接返回
         if (self.activeVtSymbol in self.legOrderDict and
             self.legOrderDict[self.activeVtSymbol]):
-            return
+            return True
 
+        ret = False
         # 允许做多
         if self.mode == self.MODE_LONGSHORT or self.mode == self.MODE_LONGONLY:
             # 买入
@@ -402,14 +409,14 @@ class SniperAlgo(StAlgoTemplate):
                 spread.netPos < self.maxPosSize and
                 spread.askPrice <= self.buyPrice and
                 spread.askVolume >= self.triggerVolume):
-                self.quoteActiveLeg(self.SPREAD_LONG)
+                ret |= self.quoteActiveLeg(self.SPREAD_LONG)
                 self.writeLog(u'买入开仓')
             
             # 卖出
             elif (spread.netPos > 0 and
                   spread.bidPrice >= self.sellPrice and
                   spread.bidVolume >= self.triggerVolume):
-                self.quoteActiveLeg(self.SPREAD_SHORT)
+                ret |= self.quoteActiveLeg(self.SPREAD_SHORT)
                 self.writeLog(u'卖出平仓')
         
         # 允许做空
@@ -419,15 +426,16 @@ class SniperAlgo(StAlgoTemplate):
                 spread.netPos > -self.maxPosSize and
                 spread.bidPrice >= self.shortPrice and
                 spread.bidVolume >= self.triggerVolume):
-                self.quoteActiveLeg(self.SPREAD_SHORT)
+                ret |= self.quoteActiveLeg(self.SPREAD_SHORT)
                 self.writeLog(u'卖出开仓')
             
             # 平空
             elif (spread.netPos < 0 and
                   spread.askPrice <= self.coverPrice and
                   spread.askVolume >= self.triggerVolume):
-                self.quoteActiveLeg(self.SPREAD_LONG)
+                ret |= self.quoteActiveLeg(self.SPREAD_LONG)
                 self.writeLog(u'买入平仓')
+        return ret
     
     #----------------------------------------------------------------------
     def updateSpreadPos(self, spread):
@@ -447,14 +455,19 @@ class SniperAlgo(StAlgoTemplate):
 
         vtOrderID = order.vtOrderID
         vtSymbol = order.vtSymbol
-        if order.status == STATUS_NOTTRADED:
-            ## 报单状态为 未成交还在队列中， 说明是新报单的回报
-            # 保存到字典中
-            if vtSymbol not in self.legOrderDict:
-                self.legOrderDict[vtSymbol] = [vtOrderID]
-            else:
-                self.legOrderDict[vtSymbol].append(vtOrderID)
+        vtOrderIDList = self.legOrderDict.get(vtSymbol, None)
+        if vtOrderIDList == None or vtOrderID not in vtOrderIDList:
+            ## 因为算法组的存在， 这个报单是由其他算法处理的， 本算法不处理， 直接返回
             return
+
+        ##if order.status == STATUS_NOTTRADED:
+        ##    ## 报单状态为 未成交还在队列中， 说明是新报单的回报
+        ##    # 保存到字典中
+        ##    if vtSymbol not in self.legOrderDict:
+        ##        self.legOrderDict[vtSymbol] = [vtOrderID]
+        ##    else:
+        ##        self.legOrderDict[vtSymbol].append(vtOrderID)
+        ##    return
 
         newTradedVolume = order.tradedVolume
         lastTradedVolume = self.orderTradedDict.get(vtOrderID, 0)
@@ -624,7 +637,7 @@ class SniperAlgo(StAlgoTemplate):
                 spreadVolume = min(spreadVolume, spread.longPos)
             
         if spreadVolume <= 0:
-            return
+            return False
         
         # 加上价差方向
         if direction == self.SPREAD_SHORT:
@@ -637,6 +650,7 @@ class SniperAlgo(StAlgoTemplate):
         self.writeLog(u'发出新的主动腿%s狙击单' %self.activeVtSymbol)
         
         self.quoteCount = 0         # 重置主动腿报价撤单等待计数
+        return True
 
     #----------------------------------------------------------------------
     def hedgePassiveLeg(self, vtSymbol):
