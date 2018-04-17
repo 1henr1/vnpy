@@ -479,6 +479,7 @@ class TapMdApi(MdApi):
                 self.login()
         
     #----------------------------------------------------------------------
+    @simple_log
     def subscribe(self, subscribeReq):
         """订阅合约"""
         # 这里的设计是，如果尚未登录就调用了订阅方法
@@ -486,9 +487,9 @@ class TapMdApi(MdApi):
         if self.loginStatus:
             req = {}
             index = subscribeReq.symbol.index(" ")
-            req["ExchangeNo"] = subscribeReq.exchange
+            req["ExchangeNo"] = exchangeMap[subscribeReq.exchange]
             req["CommodityNo"] = subscribeReq.symbol[:index]
-            req["CommodityType"] = subscribeReq.productClass
+            req["CommodityType"] = productClassMap[subscribeReq.productClass]
             req["ContractNo1"] = subscribeReq.symbol[(index+1):]
             self.subscribeMarketData(req)
         self.subscribedSymbols.add(subscribeReq)

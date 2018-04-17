@@ -163,7 +163,7 @@ def main():
     req["ExchangeNo"] = "COMEX"
     req["CommodityNo"] = "SI"
     req["CommodityType"] = "F"
-    req["ContractNo1"] = "1803"
+    req["ContractNo1"] = "1805"
     print api.subscribeMarketData(req)
 
     #req = {}

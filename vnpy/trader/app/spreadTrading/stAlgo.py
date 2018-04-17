@@ -7,6 +7,15 @@ from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT,
                                     DIRECTION_LONG, DIRECTION_SHORT,
                                     STATUS_NOTTRADED, STATUS_ALLTRADED, STATUS_CANCELLED, STATUS_REJECTED)
 
+#----------------------------------------------------------------------
+def simple_log(func):
+    """简单装饰器用于输出函数名"""
+    def wrapper(*args, **kw):
+        print ""
+        print str(func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
 ########################################################################
 class StAlgoGroup(object):
     """价差算法交易模板"""
@@ -34,6 +43,7 @@ class StAlgoGroup(object):
         algo = SniperAlgo(self.algoEngine, self.spread)
         self.algoGroup.append(algo)
 
+    @simple_log
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
         """"""
@@ -43,7 +53,6 @@ class StAlgoGroup(object):
             # 如果算法组中的一个算法正在运作，并发送了主动报单，则后面的算法先不要工作，避免多个算法同时发送主动单，可能超过持仓限额
             if algo.updateSpreadTick(spread):
                 return
-
 
     #----------------------------------------------------------------------
     def updateSpreadPos(self, spread):

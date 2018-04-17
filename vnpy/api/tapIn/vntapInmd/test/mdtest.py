@@ -148,12 +148,12 @@ def main():
     #req["ContractNo1"] = ""
     #print api.unSubscribeMarketData(req)
 
-    #req = {}
-    #req["ExchangeNo"] = "SGE"
-    #req["CommodityNo"] = "AG(T+D)"
-    #req["CommodityType"] = "Y"
-    #req["ContractNo1"] = ""
-    #print api.subscribeMarketData(req)
+    req = {}
+    req["ExchangeNo"] = "SGE"
+    req["CommodityNo"] = "AG(T+D)"
+    req["CommodityType"] = "Y"
+    req["ContractNo1"] = ""
+    print api.subscribeMarketData(req)
 
     #req = {}
     ##req["ExchangeNo"] = "COMEX"
