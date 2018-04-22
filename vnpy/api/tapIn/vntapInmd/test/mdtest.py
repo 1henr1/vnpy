@@ -153,8 +153,7 @@ def main():
     req["ExchangeNo"] = "SGE"
     req["CommodityNo"] = "AG(T+D)"
     req["CommodityType"] = 'Y'
-    print type(req["CommodityType"])
-    req["ContractNo1"] = ""
+    req["ContractNo1"] = "AG(T+D)"
     print api.subscribeMarketData(req)
 
     #req = {}

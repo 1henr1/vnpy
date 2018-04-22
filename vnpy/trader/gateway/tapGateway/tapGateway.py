@@ -493,8 +493,16 @@ class TapMdApi(MdApi):
             req["CommodityNo"] = subscribeReq.symbol[:index]
             req["CommodityType"] = productClassMap[subscribeReq.productClass]
             req["ContractNo1"] = subscribeReq.symbol[(index+1):]
-            self.subscribeMarketData(req)
-        self.subscribedSymbols.add(subscribeReq)
+            errorCode = self.subscribeMarketData(req)
+            if errorCode != 0:
+                ## 订阅行情错误
+                err = VtErrorData()
+                err.gatewayName = self.gatewayName
+                err.errorID = errorCode
+                err.errorMsg = u'订阅行情错误'
+                self.gateway.onError(err)
+                return
+            self.subscribedSymbols.add(subscribeReq)
 
     #----------------------------------------------------------------------
     def login(self):
