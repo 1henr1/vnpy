@@ -172,6 +172,7 @@ class TapInGateway(VtGateway):
             mdPassword = str(setting['mdPassword'])
             mdAddress = str(setting['mdAddress'])
             mdPort = setting['mdPort']
+            mdDllLocation = str(setting['mdDllLocation'])
             tdAuthCode = str(setting['tdAuthCode'])
             tdUserID = str(setting['tdUserID'])
             tdPassword = str(setting['tdPassword'])
@@ -186,7 +187,7 @@ class TapInGateway(VtGateway):
             return            
         
         # 创建行情和交易接口对象
-        self.mdApi.connect(mdAuthCode, mdUserID, mdPassword, mdAddress, mdPort)
+        self.mdApi.connect(mdAuthCode, mdUserID, mdPassword, mdAddress, mdPort, mdDllLocation)
         self.tdApi.connect(tdAuthCode, tdUserID, tdPassword, tdAddress, tdPort)
 
         # 初始化并启动查询
@@ -435,7 +436,7 @@ class TapMdApi(MdApi):
         pass
 
     #----------------------------------------------------------------------
-    def connect(self, authCode, userID, password, address, port):
+    def connect(self, authCode, userID, password, address, port, dllLocation):
         """初始化连接"""
         self.userID = userID                # 账号
         self.password = password            # 密码
@@ -448,6 +449,7 @@ class TapMdApi(MdApi):
             req = {}
             req["AuthCode"] = authCode
             req["KeyOperationLogPath"] = path
+            req["DllLocation"] = dllLocation
             self.createTapInMdApi(req)
 
             # 注册服务器地址

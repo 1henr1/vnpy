@@ -7,5 +7,6 @@
     "mdAddress": "123.15.58.21",
     "mdPort": 7171,
     "mdUserID": "ES",
-    "mdPassword": "123456"
+    "mdPassword": "123456",
+	"mdDllLocation": "C:\\Anaconda2\\Lib\\site-packages\\vnpy-1.8.0-py2.7.egg\\vnpy\\api\\tap\\TapQuoteAPI.dll"
 }
