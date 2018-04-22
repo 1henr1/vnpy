@@ -7,6 +7,8 @@
 #include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <Windows.h>
+#include <tchar.h>
 
 #ifdef _DEBUG
 FILE *fp = NULL;
@@ -595,8 +597,28 @@ int MdApi::createTapMdApi(dict req)
 	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
 #endif
 
+	char pDllName[MAX_PATH];
+	getStr(req, "DllLocation", pDllName);
+	printf("Use DLL Location = %s \n", pDllName);
+
+	HMODULE m_dll = LoadLibrary(pDllName);
+	if (!m_dll)
+	{
+		cout << GetLastError() << endl;
+		cout << "Fail to LoadLibrary " << endl;
+		getchar();
+		return -2;
+	}
+	
 	//取得API的版本信息
-	cout << GetTapQuoteAPIVersion() << endl;
+	typedef const TAPICHAR* (*GET_VERSION_FUNC)();
+	GET_VERSION_FUNC pGetVersion = (GET_VERSION_FUNC)GetProcAddress(m_dll, "GetTapQuoteAPIVersion");
+	cout << pGetVersion() << endl;
+	//cout << GetTapQuoteAPIVersion() << endl;
+
+	typedef ITapQuoteAPI* (*CREATE_QUOTEAPI_FUNC) (const TapAPIApplicationInfo *appInfo, TAPIINT32 &iResult);
+	CREATE_QUOTEAPI_FUNC pCreateQuoteAPI = (CREATE_QUOTEAPI_FUNC)(GetProcAddress(m_dll, "CreateTapQuoteAPI"));
+
 
 	//创建API实例
 	TAPIINT32 iResult = TAPIERROR_SUCCEED;
@@ -604,7 +626,8 @@ int MdApi::createTapMdApi(dict req)
 	memset(&stAppInfo, 0, sizeof(stAppInfo));
 	getStr(req, "AuthCode", stAppInfo.AuthCode);
 	getStr(req, "KeyOperationLogPath", stAppInfo.KeyOperationLogPath);
-	api = CreateTapQuoteAPI(&stAppInfo, iResult);
+	//api = CreateTapQuoteAPI(&stAppInfo, iResult);
+	api = pCreateQuoteAPI(&stAppInfo, iResult);
 	if (NULL == api){
 		cout << "创建API实例失败，错误码：" << iResult << endl;
 		return -1;
@@ -680,6 +703,9 @@ int MdApi::subscribeMarketData(dict req)
 	getStr(req, "ContractNo1", stContract.ContractNo1);
 	stContract.CallOrPutFlag1 = TAPI_CALLPUT_FLAG_NONE;
 	stContract.CallOrPutFlag2 = TAPI_CALLPUT_FLAG_NONE;
+#ifdef _DEBUG
+	fprintf(fp, "CommodityType = %c \n", stContract.Commodity.CommodityType); fflush(fp);
+#endif
 	return api->SubscribeQuote(&m_sessionID, &stContract);
 
 }
