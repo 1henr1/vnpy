@@ -19,6 +19,22 @@ from .stBase import (StLeg, StSpread, EVENT_SPREADTRADING_TICK,
                      EVENT_SPREADTRADING_ALGO, EVENT_SPREADTRADING_ALGOLOG)
 from .stAlgo import SniperAlgo, StAlgoGroup
 
+#----------------------------------------------------------------------
+def simple_log(func):
+    """简单装饰器用于输出函数名"""
+    def wrapper(*args, **kw):
+        print ""
+        print str(func.__name__)
+        return func(*args, **kw)
+    return wrapper
+
+#----------------------------------------------------------------------
+def print_dict(d):
+    """按照键值打印一个字典"""
+    for key,value in d.items():
+        print key + ':' + str(value),
+    print
+
 
 ########################################################################
 class StDataEngine(object):
@@ -220,11 +236,11 @@ class StDataEngine(object):
         else:
             leg.shortPos = pos.position
         leg.netPos = leg.longPos - leg.shortPos
-        
+
         # 更新价差持仓
         spread = self.vtSymbolSpreadDict[pos.vtSymbol]
         spread.calculatePos()
-        
+
         # 推送价差持仓更新
         self.putSpreadPosEvent(spread)
         
@@ -349,6 +365,12 @@ class StAlgoEngine(object):
         """"""
         for algoGroup in self.algoGroupDict.values():
             algoGroup.updateTimer()
+
+    #----------------------------------------------------------------------
+    def qryPosition(self, vtSymbol):
+        """查询特定接口的持仓"""
+        contract = self.mainEngine.getContract(vtSymbol)
+        self.mainEngine.qryPosition(contract.gatewayName)
 
     #----------------------------------------------------------------------
     def sendOrder(self, vtSymbol, direction, offset, price, volume, payup=0):

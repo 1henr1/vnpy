@@ -43,6 +43,12 @@ class StAlgoGroup(object):
         algo = SniperAlgo(self.algoEngine, self.spread)
         self.algoGroup.append(algo)
 
+        self.qryPosition(self.spread)
+
+    def qryPosition(self, spread):
+        for leg in spread.allLegs:
+            self.algoEngine.qryPosition(leg.vtSymbol)
+
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
         """"""

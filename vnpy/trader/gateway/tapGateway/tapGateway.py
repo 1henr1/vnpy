@@ -722,9 +722,10 @@ class TapTdApi(TdApi):
             pos = VtPositionData()
             self.posDict[posName] = pos
 
-            pos.gatewayName = self.gatewayName
+            pos.exchange = exchangeMapReverse[data['ExchangeNo']]
+            pos.exchange = data["ExchangeNo"]
             pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
-            pos.vtSymbol = '.'.join([pos.symbol , pos.gatewayName])
+            pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
             pos.direction = posiDirectionMapReverse.get(data['MatchSide'], '')
             pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
 
@@ -887,9 +888,10 @@ class TapTdApi(TdApi):
         else:
             pos = VtPositionData()
             self.posDict[posName] = pos
+            pos.exchange = exchangeMapReverse[data['ExchangeNo']]
             pos.gatewayName = self.gatewayName
             pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
-            pos.vtSymbol = '.'.join([pos.symbol , pos.gatewayName])
+            pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
             pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
 
         if trade.direction == DIRECTION_LONG:
@@ -972,9 +974,16 @@ class TapTdApi(TdApi):
     #----------------------------------------------------------------------
     def qryPositionGateway(self):
         """查询持仓"""
-        req = {}
-        req["AccountNo"] =  self.accountID
-        self.qryPosition(req)
+        ## 等于空， 说明是第一次，则先交易系统查询
+        if not self.posDict:
+            req = {}
+            req["AccountNo"] =  self.accountID
+            self.qryPosition(req)
+            return
+
+        ##　非空，表示已经维护了，则直接返回
+        for pos in self.posDict.values():
+            self.gateway.onPosition(pos)
 
     #----------------------------------------------------------------------
     @simple_log
