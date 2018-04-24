@@ -369,7 +369,7 @@ class TapMdApi(MdApi):
         tick.gatewayName = self.gatewayName
 
         if data["CommodityNo"] == "AG(T+D)":
-            data["ContractNo1"] == "AG(T+D)"
+            data["ContractNo1"] = "AG(T+D)"
         tick.symbol = data['CommodityNo'] + " " + data["ContractNo1"]
         tick.exchange =  exchangeMapReverse.get(data['ExchangeNo'], '')
         tick.vtSymbol = '.'.join([tick.symbol, tick.exchange])
