@@ -598,8 +598,8 @@ class TapTdApi(TdApi):
     #----------------------------------------------------------------------
 
     def onRspQryAccount(self, errorCode,  isLast,  data):
-        if errorCode == 0:
-            self.accountID = data["AccountNo"]
+        ##if errorCode == 0:
+         ##   self.accountID = data["AccountNo"]
             #self.writeLog(text.ACCOUNT_ID_RECEIVED)
         pass
 
@@ -850,12 +850,13 @@ class TapTdApi(TdApi):
         
         trade.tradeID = data['MatchNo']
         trade.vtTradeID = '.'.join([self.gatewayName, trade.tradeID])
-        
-        orderSysID = data['OrderNo']
-        trade.orderID = self.orderIdDict.get(orderSysID, "")
-        if trade.orderID == "":
-            print "can't find %s related localID" % orderSysID
-        trade.vtOrderID = '.'.join([self.gatewayName, str(trade.orderID)])
+
+        ## 系统报单号
+        orderSysID = data["OrderNo"]
+        ##　本地报单号
+        orderLocalID = data["RefString"]
+
+        trade.vtOrderID = '.'.join([self.gatewayName, orderLocalID])
         
         # 方向
         trade.direction = directionMapReverse.get(data['MatchSide'], '')
@@ -921,6 +922,7 @@ class TapTdApi(TdApi):
         self.address = address              # 服务器地址
         self.port = port                    # 服务器端口
         self.authCode = authCode            # 验证码
+        self.accountID = userID
 
         # 如果尚未建立服务器连接，则进行连接
         if not self.connectionStatus:
@@ -1018,9 +1020,10 @@ class TapTdApi(TdApi):
         req["MarketLevel"] = 1
         req["OrderDeleteByDisConnFlag"] = 'N'
         self.localID += 1
+        print self.gatewayName
         req["RefString"] = str(self.localID)
         print_dict(req)
-        self.reqInsertOrder(req)
+        print self.reqInsertOrder(req)
 
         # 返回订单号（字符串），便于某些算法进行动态管理
         vtOrderID = '.'.join([self.gatewayName, str(self.localID)])

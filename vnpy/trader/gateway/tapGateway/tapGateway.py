@@ -992,6 +992,7 @@ class TapTdApi(TdApi):
         req["OrderPrice"] = orderReq.price					##//< 委托价格1
         req["OrderQty"] = orderReq.volume						##//< 委托数量，必填
         req["OrderSource"] = "A"
+        print self.gatewayNamet 
         print_dict(req)
         localID = self.reqInsertOrder(req)
 
