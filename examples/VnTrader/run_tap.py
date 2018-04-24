@@ -46,7 +46,7 @@ def main():
     me.addGateway(tapInGateway)
 
     # 添加上层应用
-    # me.addApp(riskManager)
+    me.addApp(riskManager)
     # me.addApp(ctaStrategy)
     me.addApp(spreadTrading)
     
