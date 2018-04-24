@@ -43,7 +43,6 @@ class StAlgoGroup(object):
         algo = SniperAlgo(self.algoEngine, self.spread)
         self.algoGroup.append(algo)
 
-    @simple_log
     #----------------------------------------------------------------------
     def updateSpreadTick(self, spread):
         """"""
