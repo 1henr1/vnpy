@@ -232,9 +232,9 @@ class StDataEngine(object):
         direction = pos.direction
         
         if direction == DIRECTION_LONG:
-            leg.longPos = pos.position
+            leg.longPos = pos.position + pos.ydPosition
         else:
-            leg.shortPos = pos.position
+            leg.shortPos = pos.position + pos.ydPosition
         leg.netPos = leg.longPos - leg.shortPos
 
         # 更新价差持仓

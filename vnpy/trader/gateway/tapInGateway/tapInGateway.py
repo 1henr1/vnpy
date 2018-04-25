@@ -529,7 +529,7 @@ class TapTdApi(TdApi):
         self.gatewayName = gateway.gatewayName  # gateway对象名称
         
         self.localNoDict = {}           # key为本地委托号，value为系统委托号
-        #self.orderIdDict = {}           # key为系统委托号，value为本地委托号
+        self.orderIdDict = {}           # key为系统委托号，value为本地委托号
 
         self.connectionStatus = False       # 连接状态
         self.loginStatus = False            # 登录状态
@@ -758,6 +758,7 @@ class TapTdApi(TdApi):
         self.localID += 1
         localNo = str(self.localID)
         self.localNoDict[localNo] = orderSysID
+        self.orderIdDict[orderSysID] = localNo
 
         order = VtOrderData()
         order.gatewayName = self.gatewayName
@@ -815,6 +816,7 @@ class TapTdApi(TdApi):
         # 更新 本地报单号 与 系统报单号 的关系
         # 这个直接更新， 是考虑到重复登陆本地报单号重复的问题， 应该以最新的映射为准
         self.localNoDict[orderLocalID] = orderSysID
+        self.orderIdDict[orderSysID] = orderLocalID
 
         ## order中的报单号，用本地报单号来标识
         order.orderID = orderLocalID
@@ -855,8 +857,7 @@ class TapTdApi(TdApi):
         ## 系统报单号
         orderSysID = data["OrderNo"]
         ##　本地报单号
-        orderLocalID = data["RefString"]
-
+        orderLocalID = self.orderIdDict[orderSysID]
         trade.vtOrderID = '.'.join([self.gatewayName, orderLocalID])
         
         # 方向

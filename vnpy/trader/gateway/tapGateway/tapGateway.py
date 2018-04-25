@@ -721,9 +721,8 @@ class TapTdApi(TdApi):
         else:
             pos = VtPositionData()
             self.posDict[posName] = pos
-
+            pos.gatewayName = self.gatewayName
             pos.exchange = exchangeMapReverse[data['ExchangeNo']]
-            pos.exchange = data["ExchangeNo"]
             pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
             pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
             pos.direction = posiDirectionMapReverse.get(data['MatchSide'], '')
