@@ -53,7 +53,7 @@ offsetMap = {}
 offsetMap[OFFSET_OPEN] = defineDict['TAPI_PositionEffect_OPEN']
 offsetMap[OFFSET_CLOSE] = defineDict['TAPI_PositionEffect_COVER']
 offsetMap[OFFSET_CLOSETODAY] = defineDict['TAPI_PositionEffect_COVER_TODAY']
-#offsetMap[OFFSET_CLOSEYESTERDAY] = defineDict['']
+offsetMap[OFFSET_CLOSEYESTERDAY] = defineDict['TAPI_PositionEffect_COVER']
 offsetMapReverse = {v:k for k,v in offsetMap.items()}
 
 # 交易所类型映射
@@ -858,8 +858,10 @@ class TapTdApi(TdApi):
         orderSysID = data["OrderNo"]
         ##　本地报单号
         orderLocalID = self.orderIdDict[orderSysID]
+
+        trade.orderID = orderLocalID
         trade.vtOrderID = '.'.join([self.gatewayName, orderLocalID])
-        
+
         # 方向
         trade.direction = directionMapReverse.get(data['MatchSide'], '')
             

@@ -184,40 +184,41 @@ class StDataEngine(object):
     #----------------------------------------------------------------------
     def processTradeEvent(self, event):
         """处理成交推送"""
+
         # 检查成交是否需要处理
-        trade = event.dict_['data']
-        if trade.vtSymbol not in self.legDict:
-            return
-        
-        # 更新腿持仓
-        leg = self.legDict[trade.vtSymbol]
-        direction = trade.direction
-        offset = trade.offset
-        
-        if direction == DIRECTION_LONG:
-            if offset == OFFSET_OPEN:
-                leg.longPos += trade.volume
-            else:
-                leg.shortPos -= trade.volume
-        else:
-            if offset == OFFSET_OPEN:
-                leg.shortPos += trade.volume
-            else:
-                leg.longPos -= trade.volume
-        leg.netPos = leg.longPos - leg.shortPos
-                
-        # 更新价差持仓
-        spread = self.vtSymbolSpreadDict[trade.vtSymbol]
-        spread.calculatePos()
-        
-        # 推送价差持仓更新
-        event1 = Event(EVENT_SPREADTRADING_POS+spread.name)
-        event1.dict_['data'] = spread
-        self.eventEngine.put(event1)
-        
-        event2 = Event(EVENT_SPREADTRADING_POS)
-        event2.dict_['data'] = spread
-        self.eventEngine.put(event2)
+        # 成交不需要单独处理
+        ## trade = event.dict_['data']
+        ## if trade.vtSymbol not in self.legDict:
+        ##     return
+        ##
+        ## # 更新腿持仓
+        ## leg = self.legDict[trade.vtSymbol]
+        ## direction = trade.direction
+        ## offset = trade.offset
+        ##
+        ## if direction == DIRECTION_LONG:
+        ##     if offset == OFFSET_OPEN:
+        ##         leg.longPos += trade.volume
+        ##     else:
+        ##         leg.shortPos -= trade.volume
+        ## else:
+        ##     if offset == OFFSET_OPEN:
+        ##         leg.shortPos += trade.volume
+        ##     else:
+        ##         leg.longPos -= trade.volume
+        ## leg.netPos = leg.longPos - leg.shortPos
+        ##
+        ## # 更新价差持仓
+        ## spread = self.vtSymbolSpreadDict[trade.vtSymbol]
+        ## spread.calculatePos()
+        ##
+        ## # 推送价差持仓更新
+        ## event1 = Event(EVENT_SPREADTRADING_POS+spread.name)
+        ## event1.dict_['data'] = spread
+        ## self.eventEngine.put(event1)
+        ## event2 = Event(EVENT_SPREADTRADING_POS)
+        ## event2.dict_['data'] = spread
+        ## self.eventEngine.put(event2)
     
     #----------------------------------------------------------------------
     def processPosEvent(self, event):

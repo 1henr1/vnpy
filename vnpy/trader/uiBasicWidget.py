@@ -682,6 +682,7 @@ class TradingWidget(QtWidgets.QFrame):
                     EXCHANGE_CBOT ,
                     EXCHANGE_CME ,
                     EXCHANGE_COMEX ,
+                    EXCHANGE_SGE,
                     EXCHANGE_EUREX ,
                     EXCHANGE_HKEX ,
                     EXCHANGE_HKMEX ,
@@ -706,7 +707,8 @@ class TradingWidget(QtWidgets.QFrame):
                         PRODUCT_FUTURES,
                         PRODUCT_OPTION,
                         PRODUCT_FOREX,
-                        PRODUCT_SPOT]
+                        PRODUCT_SPOT,
+                        PRODUCT_SPOT_TRADINGDEFER]
     
     gatewayList = ['']
 
