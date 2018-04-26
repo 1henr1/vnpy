@@ -891,7 +891,7 @@ class TapTdApi(TdApi):
             pos.gatewayName = self.gatewayName
             pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
             pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
-            pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
+            pos.vtPositionName = '.'.join([pos.vtSymbol])
 
         if trade.direction == DIRECTION_LONG:
             pos.position = pos.position + trade.volume               # 持仓量
@@ -902,8 +902,6 @@ class TapTdApi(TdApi):
             pos.direction = DIRECTION_LONG
         elif pos.position < 0:
             pos.direction = DIRECTION_SHORT
-        else:
-            pos.direction = EMPTY_STRING
 
         self.gateway.onPosition(pos)
         ## 先推送Position再推送trade，是为了在价差交易中，因Position更新慢导致多发报单的情况

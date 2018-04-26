@@ -908,10 +908,12 @@ class TapTdApi(TdApi):
         if trade.offset == OFFSET_OPEN:
             pos.position += trade.volume
         else:
-            if trade.offset == OFFSET_CLOSE:
+            if trade.offset == OFFSET_CLOSE and pos.ydPosition > 0:
                 pos.ydPosition -= trade.volume
+                pos.ydPosition = max(pos.ydPosition, 0)
             else:
                 pos.position -= trade.volume
+                pos.position = max(pos.position, 0)
 
         self.gateway.onPosition(pos)
 
