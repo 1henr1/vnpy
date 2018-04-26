@@ -878,7 +878,7 @@ class TapTdApi(TdApi):
         trade.tradeTime = datetime.strptime(data['MatchDateTime'], '%Y-%m-%d %H:%M:%S')   # python的datetime时间对象
 
         # 推送
-        self.gateway.onTrade(trade)
+        # self.gateway.onTrade(trade)
 
         # 通过成交来更新持仓
         posName = '.'.join([data['CommodityNo'], data['ContractNo']])
@@ -904,7 +904,10 @@ class TapTdApi(TdApi):
             pos.direction = DIRECTION_SHORT
         else:
             pos.direction = EMPTY_STRING
+
         self.gateway.onPosition(pos)
+        ## 先推送Position再推送trade，是为了在价差交易中，因Position更新慢导致多发报单的情况
+        self.gateway.onTrade(trade)
 
     #----------------------------------------------------------------------
     def connect(self, authCode, userID, password, address, port ):
