@@ -907,12 +907,16 @@ class TapTdApi(TdApi):
                 if short_pos.position < 0:
                     long_pos.position = abs(short_pos.position)
                     short_pos.position = 0
+            else:
+                long_pos.position += trade.volume
         else:
             if long_pos.position > 0:
                 long_pos.position -= trade.volume
                 if long_pos.position < 0:
                     short_pos.position = abs(long_pos.position)
                     long_pos.position = 0
+            else:
+                short_pos.position += trade.volume
 
         self.gateway.onPosition(long_pos)
         self.gateway.onPosition(short_pos)
