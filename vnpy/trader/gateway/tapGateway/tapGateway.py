@@ -717,36 +717,36 @@ class TapTdApi(TdApi):
 
         posName = '.'.join([data['CommodityNo'], data['ContractNo']])
         if posName in self.posDict:
-            pos = self.posDict[posName]
+            [long_pos, short_pos] = self.posDict[posName]
         else:
-            pos = VtPositionData()
-            self.posDict[posName] = pos
-            pos.gatewayName = self.gatewayName
-            pos.exchange = exchangeMapReverse[data['ExchangeNo']]
-            pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
-            pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
-            pos.direction = posiDirectionMapReverse.get(data['MatchSide'], '')
-            pos.vtPositionName = '.'.join([pos.vtSymbol, pos.direction])
+            long_pos = VtPositionData()
+            short_pos = VtPositionData()
+            self.posDict[posName] = [long_pos, short_pos]
+            long_pos.gatewayName = self.gatewayName
+            long_pos.exchange = exchangeMapReverse[data['ExchangeNo']]
+            long_pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
+            long_pos.vtSymbol = '.'.join([long_pos.symbol , long_pos.exchange])
+            long_pos.direction = DIRECTION_LONG
+            long_pos.vtPositionName = '.'.join([long_pos.vtSymbol, DIRECTION_LONG])
+            short_pos.gatewayName = self.gatewayName
+            short_pos.exchange = exchangeMapReverse[data['ExchangeNo']]
+            short_pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
+            short_pos.vtSymbol = '.'.join([short_pos.symbol , short_pos.exchange])
+            short_pos.direction = DIRECTION_SHORT
+            short_pos.vtPositionName = '.'.join([short_pos.vtSymbol, DIRECTION_SHORT])
 
-        # 计算成本
-        if data["MatchSide"] == directionMap.get(DIRECTION_LONG):
-            pos.position = pos.position + data["PositionQty"]               # 持仓量
+        direction = posiDirectionMapReverse.get(data['MatchSide'], '')
+        if direction == DIRECTION_LONG:
+            long_pos.position += data["PositionQty"]
         else:
-            pos.position = pos.position - data["PositionQty"]               # 持仓量
-
-        #pos.price = 0
-        #pos.ydPosition = pos.position            # 昨持仓
-        #pos.positionProfit =  data["PositionProfit"]       # 持仓盈亏
-        #pos.frozen = 0                 # 冻结数量
+            short_pos.position += data["PositionQty"]
 
         # 查询回报结束
         if isLast:
             # 遍历推送
-            for pos in self.posDict.values():
-                self.gateway.onPosition(pos)
-
-            # 清空缓存
-            #self.posDict.clear()
+            for long_pos, short_pos in self.posDict.values():
+                self.gateway.onPosition(long_pos)
+                self.gateway.onPosition(short_pos)
 
     #----------------------------------------------------------------------
     def onRtnPosition(self, data):
@@ -883,27 +883,39 @@ class TapTdApi(TdApi):
         # 通过成交来更新持仓
         posName = '.'.join([data['CommodityNo'], data['ContractNo']])
         if posName in self.posDict:
-            pos = self.posDict[posName]
+            [long_pos, short_pos] = self.posDict[posName]
         else:
-            pos = VtPositionData()
-            self.posDict[posName] = pos
-            pos.exchange = exchangeMapReverse[data['ExchangeNo']]
-            pos.gatewayName = self.gatewayName
-            pos.symbol = data['CommodityNo'] + " " + data['ContractNo']
-            pos.vtSymbol = '.'.join([pos.symbol , pos.exchange])
-            pos.vtPositionName = '.'.join([pos.vtSymbol])
+            long_pos = VtPositionData()
+            short_pos = VtPositionData()
+            self.posDict[posName] = [long_pos, short_pos]
+            long_pos.gatewayName = self.gatewayName
+            long_pos.exchange = trade.exchange
+            long_pos.symbol = trade.symbol
+            long_pos.vtSymbol = trade.vtSymbol
+            long_pos.direction = DIRECTION_LONG
+            long_pos.vtPositionName = '.'.join([long_pos.vtSymbol, DIRECTION_LONG])
+            short_pos.gatewayName = self.gatewayName
+            short_pos.exchange = trade.exchange
+            short_pos.symbol = trade.symbol
+            short_pos.vtSymbol = trade.vtSymbol
+            short_pos.direction = DIRECTION_SHORT
+            short_pos.vtPositionName = '.'.join([short_pos.vtSymbol, DIRECTION_SHORT])
 
         if trade.direction == DIRECTION_LONG:
-            pos.position = pos.position + trade.volume               # 持仓量
+            if short_pos.position > 0:
+                short_pos.position -= trade.volume
+                if short_pos.position < 0:
+                    long_pos.position = abs(short_pos.position)
+                    short_pos.position = 0
         else:
-            pos.position = pos.position - trade.volume               # 持仓量
+            if long_pos.position > 0:
+                long_pos.position -= trade.volume
+                if long_pos.position < 0:
+                    short_pos.position = abs(long_pos.position)
+                    long_pos.position = 0
 
-        if pos.position > 0:
-            pos.direction = DIRECTION_LONG
-        elif pos.position < 0:
-            pos.direction = DIRECTION_SHORT
-
-        self.gateway.onPosition(pos)
+        self.gateway.onPosition(long_pos)
+        self.gateway.onPosition(short_pos)
         ## 先推送Position再推送trade，是为了在价差交易中，因Position更新慢导致多发报单的情况
         self.gateway.onTrade(trade)
 
@@ -982,8 +994,9 @@ class TapTdApi(TdApi):
             return
 
         ##　非空，表示已经维护了，则直接返回
-        for pos in self.posDict.values():
-            self.gateway.onPosition(pos)
+        for long_pos, short_pos in self.posDict.values():
+            self.gateway.onPosition(long_pos)
+            self.gateway.onPosition(short_pos)
 
     #----------------------------------------------------------------------
     @simple_log
