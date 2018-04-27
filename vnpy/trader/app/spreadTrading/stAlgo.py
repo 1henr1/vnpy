@@ -250,6 +250,8 @@ class StAlgoTemplate(object):
         self.triggerVolume = EMPTY_FLOAT
         
         self.maxPosSize = EMPTY_INT         # 最大单边持仓量
+        self.triggerPos = EMPTY_INT         # 单边持仓触发量
+        self.maxPosLimitSize = EMPTY_INT    # 仓位限制下的最大委托量
         self.maxOrderSize = EMPTY_INT       # 最大单笔委托量
     
     #----------------------------------------------------------------------
@@ -321,7 +323,13 @@ class StAlgoTemplate(object):
     def setMaxOrderSize(self, maxOrderSize):
         """设置最大单笔委托数量"""
         self.maxOrderSize = maxOrderSize
-        
+
+    #----------------------------------------------------------------------
+    def setTriggerPos(self, triggerPos):
+        """设置持仓触发量和最小平仓量"""
+        self.triggerPos = triggerPos
+        self.maxPosLimitSize = self.maxPosSize - self.triggerPos
+
     #----------------------------------------------------------------------
     def setMaxPosSize(self, maxPosSize):
         """设置最大持仓数量"""
@@ -427,7 +435,7 @@ class SniperAlgo(StAlgoTemplate):
                 self.writeLog(u'买入开仓')
             
             # 卖出
-            elif (spread.netPos > 0 and
+            elif (spread.netPos > self.triggerPos and
                   spread.bidPrice >= self.sellPrice and
                   spread.bidVolume >= self.triggerVolume):
                 ret |= self.quoteActiveLeg(self.SPREAD_SHORT)
@@ -444,7 +452,7 @@ class SniperAlgo(StAlgoTemplate):
                 self.writeLog(u'卖出开仓')
             
             # 平空
-            elif (spread.netPos < 0 and
+            elif (spread.netPos < -self.triggerPos and
                   spread.askPrice <= self.coverPrice and
                   spread.askVolume >= self.triggerVolume):
                 ret |= self.quoteActiveLeg(self.SPREAD_LONG)
@@ -636,7 +644,8 @@ class SniperAlgo(StAlgoTemplate):
         if direction == self.SPREAD_LONG:
             spreadVolume = min(spread.askVolume,
                                self.maxPosSize - spread.netPos,
-                               self.maxOrderSize)
+                               self.maxOrderSize,
+                               self.maxPosLimitSize)
             
             # 有价差空头持仓的情况下，则本次委托最多平完空头
             if spread.shortPos > 0:
@@ -644,7 +653,8 @@ class SniperAlgo(StAlgoTemplate):
         else:
             spreadVolume = min(spread.bidVolume,
                                self.maxPosSize + spread.netPos,
-                               self.maxOrderSize)
+                               self.maxOrderSize,
+                               self.maxPosLimitSize)
             
             # 有价差多头持仓的情况下，则本次委托最多平完多头
             if spread.longPos > 0:
