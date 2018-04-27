@@ -104,6 +104,31 @@ class StAlgoGroup(object):
             if not algo.canStart():   # 有一个算法没启动成交，就算整个算法组启动失败
                 return False
 
+        [lastBuy, lastSell, lastShort, lastCover, lastPos] = [0, 0, 0, 0, 0]
+        for algo in self.algoEngine:
+            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_LONG:
+                ## check long
+                if self.buyPrice > lastBuy:
+                    self.writeLog('')
+                    return False
+                if self.sellPrice > lastSell:
+                    self.writeLog('')
+                    return False
+                if self.shortPrice < lastShort:
+                    self.writeLog('')
+                    return False
+                if self.coverPrice < lastCover:
+                    self.writeLog('')
+                    return False
+                if self.maxPosSize < lastPos:
+                    self.writeLog('')
+                    return False
+                pass
+
+            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_SHORT:
+                ## check short
+                pass
+
         for algo in self.algoGroup:
             algo.start()   # 有一个算法没启动成交，就算整个算法组启动失败
         return True
