@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+import sys
 from math import floor
 
 from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT, 
@@ -104,30 +105,33 @@ class StAlgoGroup(object):
             if not algo.canStart():   # 有一个算法没启动成交，就算整个算法组启动失败
                 return False
 
-        [lastBuy, lastSell, lastShort, lastCover, lastPos] = [0, 0, 0, 0, 0]
-        for algo in self.algoEngine:
-            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_LONG:
+        [lastBuy, lastSell, lastShort, lastCover, lastPos] = [sys.maxint, sys.maxint, -sys.maxint, -sys.maxint, 0]
+        for algo in self.algoGroup:
+            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_LONGONLY:
                 ## check long
-                if self.buyPrice > lastBuy:
-                    self.writeLog('')
+                if algo.buyPrice > lastBuy:
+                    self.writeLog(u'启动失败，允许多头交易时多开价必须是递减的')
                     return False
-                if self.sellPrice > lastSell:
-                    self.writeLog('')
+                if algo.sellPrice > lastSell:
+                    self.writeLog(u'启动失败，允许多头交易时多平价必须是递减的')
                     return False
-                if self.shortPrice < lastShort:
-                    self.writeLog('')
-                    return False
-                if self.coverPrice < lastCover:
-                    self.writeLog('')
-                    return False
-                if self.maxPosSize < lastPos:
-                    self.writeLog('')
-                    return False
-                pass
+                [lastBuy, lastSell] = [algo.buyPrice, algo.sellPrice]
 
-            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_SHORT:
+            if algo.mode == algo.MODE_LONGSHORT or algo.mode == algo.MODE_SHORTONLY:
                 ## check short
-                pass
+                if algo.shortPrice < lastShort:
+                    self.writeLog(u'启动失败，允许空头交易时空开价必须是递增的')
+                    return False
+                if algo.coverPrice < lastCover:
+                    self.writeLog(u'启动失败，允许空头交易时空平价必须是递增的')
+                    return False
+                [lastShort, lastCover] = [algo.shortPrice, algo.coverPrice]
+
+            if algo.maxPosSize <= lastPos:
+                self.writeLog(u'启动失败，持仓量必须是严格递增的')
+                return False
+            algo.setTriggerPos(lastPos)
+            lastPos = algo.maxPosSize
 
         for algo in self.algoGroup:
             algo.start()   # 有一个算法没启动成交，就算整个算法组启动失败
@@ -276,7 +280,7 @@ class StAlgoTemplate(object):
         
         self.maxPosSize = EMPTY_INT         # 最大单边持仓量
         self.triggerPos = EMPTY_INT         # 单边持仓触发量
-        self.maxPosLimitSize = EMPTY_INT    # 仓位限制下的最大委托量
+        self.posLimitOrderSize = EMPTY_INT    # 仓位限制下的最大委托量
         self.maxOrderSize = EMPTY_INT       # 最大单笔委托量
     
     #----------------------------------------------------------------------
@@ -353,7 +357,7 @@ class StAlgoTemplate(object):
     def setTriggerPos(self, triggerPos):
         """设置持仓触发量和最小平仓量"""
         self.triggerPos = triggerPos
-        self.maxPosLimitSize = self.maxPosSize - self.triggerPos
+        self.posLimitOrderSize = self.maxPosSize - self.triggerPos
 
     #----------------------------------------------------------------------
     def setMaxPosSize(self, maxPosSize):
@@ -670,7 +674,7 @@ class SniperAlgo(StAlgoTemplate):
             spreadVolume = min(spread.askVolume,
                                self.maxPosSize - spread.netPos,
                                self.maxOrderSize,
-                               self.maxPosLimitSize)
+                               self.posLimitOrderSize)
             
             # 有价差空头持仓的情况下，则本次委托最多平完空头
             if spread.shortPos > 0:
@@ -679,7 +683,7 @@ class SniperAlgo(StAlgoTemplate):
             spreadVolume = min(spread.bidVolume,
                                self.maxPosSize + spread.netPos,
                                self.maxOrderSize,
-                               self.maxPosLimitSize)
+                               self.posLimitOrderSize)
             
             # 有价差多头持仓的情况下，则本次委托最多平完多头
             if spread.longPos > 0:
