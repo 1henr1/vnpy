@@ -139,7 +139,7 @@ class StBuyPriceSpinBox(QtWidgets.QDoubleSpinBox):
         self.spreadName = spreadName
 
         self.price = price
-        self.setDecimals(4)
+        self.setDecimals(3)
         self.setRange(-10000, 10000)
         self.setValue(price)
 
@@ -172,7 +172,7 @@ class StSellPriceSpinBox(QtWidgets.QDoubleSpinBox):
         self.spreadName = spreadName
 
         self.price = price
-        self.setDecimals(4)
+        self.setDecimals(3)
         self.setRange(-10000, 10000)
         self.setValue(price)
 
@@ -205,7 +205,7 @@ class StShortPriceSpinBox(QtWidgets.QDoubleSpinBox):
         self.spreadName = spreadName
 
         self.price = price
-        self.setDecimals(4)
+        self.setDecimals(3)
         self.setRange(-10000, 10000)
         self.setValue(price)
 
@@ -238,7 +238,7 @@ class StCoverPriceSpinBox(QtWidgets.QDoubleSpinBox):
         self.spreadName = spreadName
 
         self.price = price
-        self.setDecimals(4)
+        self.setDecimals(3)
         self.setRange(-10000, 10000)
         self.setValue(price)
 

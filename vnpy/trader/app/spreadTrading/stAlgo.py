@@ -128,7 +128,7 @@ class StAlgoGroup(object):
                 [lastShort, lastCover] = [algo.shortPrice, algo.coverPrice]
 
             if algo.maxPosSize <= lastPos:
-                self.writeLog(u'启动失败，持仓量必须是严格递增的')
+                self.writeLog(u'启动失败，持仓上限必须是严格递增的')
                 return False
             algo.setTriggerPos(lastPos)
             lastPos = algo.maxPosSize
