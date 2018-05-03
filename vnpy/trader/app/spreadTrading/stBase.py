@@ -64,7 +64,9 @@ class StSpread(object):
         self.longPos = EMPTY_INT
         self.shortPos = EMPTY_INT
         self.netPos = EMPTY_INT
-        
+
+        self.tradingPeriod = []         # 可交易时间段(支持多段)
+
     #----------------------------------------------------------------------
     def initSpread(self):
         """初始化价差"""
@@ -171,7 +173,23 @@ class StSpread(object):
     def addPassiveLeg(self, leg):
         """添加被动腿"""
         self.passiveLegs.append(leg)
-        
+
+    #----------------------------------------------------------------------
+    def addTradingPeriod(self, tradingPeriod):
+        """添加被动腿"""
+        self.tradingPeriod = tradingPeriod
+
+    #----------------------------------------------------------------------
+    def isTradingPeriod(self):
+        """判断是否在交易时间内"""
+        for period in self.tradingPeriod:
+            startTime = period[0]
+            endTime = period[1]
+            currTime = self.time[:8]
+            if currTime >= startTime and currTime <= endTime:
+                return True
+        return False
+
         
     
     

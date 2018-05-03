@@ -17,6 +17,25 @@
                 "multiplier": 1,
                 "payup": 0
             }
-        ]
+        ],
+		
+		"tradingPeriod": [
+			{
+				"startTime": "00:00:00",
+				"endTime": "02:30:00"
+			},
+			{
+				"startTime": "09:00:00",
+				"endTime": "11:30:00"
+			},
+			{
+				"startTime": "13:30:00",
+				"endTime": "15:30:00"
+			},
+			{
+				"startTime": "20:00:00",
+				"endTime": "24:00:00"
+			}
+		]
     }
 ]

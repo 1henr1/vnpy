@@ -35,6 +35,7 @@ class StAlgoGroup(object):
         self.spread = spread                # 价差对象
         self.algoGroupName = EMPTY_STRING   # 算法名称
         self.algoGroup = []                 # 算法列表
+        self.isTradingPeriod = False        # 标识是否处于可交易时间段
 
         self._initAlgoGroup()
 
@@ -55,6 +56,17 @@ class StAlgoGroup(object):
         """"""
         if spread.name != self.spreadName:
             return
+
+        if spread.isTradingPeriod():
+            if not self.isTradingPeriod:
+                self.isTradingPeriod = True
+                self.writeLog('已进入可交易时间， 请设置好策略参数 ')
+        else:
+            if self.isTradingPeriod:
+                self.isTradingPeriod = False
+                self.writeLog('当前是非交易时间， 系统不再下单')
+            return
+
         for algo in self.algoGroup:
             # 如果算法组中的一个算法正在运作，并发送了主动报单，则后面的算法先不要工作，避免多个算法同时发送主动单，可能超过持仓限额
             if algo.updateSpreadTick(spread):

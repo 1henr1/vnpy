@@ -99,7 +99,8 @@ class StDataEngine(object):
                 existingSpread = self.vtSymbolSpreadDict[vtSymbol]
                 msg = u'%s合约已经存在于%s价差中' %(vtSymbol, existingSpread.name)
                 return result, msg
-    
+
+
         # 创建价差
         spread = StSpread()
         spread.name = setting['name']        
@@ -117,7 +118,12 @@ class StDataEngine(object):
         spread.addActiveLeg(activeLeg)
         self.legDict[activeLeg.vtSymbol] = activeLeg
         self.vtSymbolSpreadDict[activeLeg.vtSymbol] = spread
-        
+
+        tradingPeriod = []
+        for period in setting['tradingPeriod']:
+            tradingPeriod.append([period['startTime'], period['endTime']])
+        spread.addTradingPeriod(tradingPeriod)
+
         self.subscribeMarketData(activeLeg.vtSymbol)
         
         # 创建被动腿
@@ -227,7 +233,7 @@ class StDataEngine(object):
         pos = event.dict_['data']
         if pos.vtSymbol not in self.legDict:
             return
-        
+
         # 更新腿持仓
         leg = self.legDict[pos.vtSymbol]
         direction = pos.direction
