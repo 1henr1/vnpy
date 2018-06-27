@@ -32,6 +32,8 @@ int main(int argc, char* argv[])
 	objQuote.SetAPI(pAPI);
 	objQuote.RunTest();
 
+	while (true);
+
 
 	return 0;
 }

@@ -62,6 +62,10 @@ void Quote::RunTest()
 		return;
 	}
 
+	
+	//m_uiSessionID = 0;
+	//m_pAPI->QryCommodity(&m_uiSessionID);
+
 	m_uiSessionID = 0;
 	TapAPICommodity com;
 	memset(&com, 0, sizeof(com));
@@ -120,6 +124,7 @@ void TAP_CDECL Quote::OnDisconnect(TAPIINT32 reasonCode)
 void TAP_CDECL Quote::OnRspQryCommodity(TAPIUINT32 sessionID, TAPIINT32 errorCode, TAPIYNFLAG isLast, const TapAPIQuoteCommodityInfo *info)
 {
 	cout << __FUNCTION__ << " is called." << endl;
+	cout << "Commodity:" << info->Commodity.ExchangeNo << " " << info->Commodity.CommodityType << " " << info->Commodity.CommodityNo << endl;
 }
 
 void TAP_CDECL Quote::OnRspQryContract(TAPIUINT32 sessionID, TAPIINT32 errorCode, TAPIYNFLAG isLast, const TapAPIQuoteContractInfo *info)
