@@ -41,6 +41,8 @@ class TestMdApi(MdApi):
     #----------------------------------------------------------------------
     @simple_log
     def onRspLogin(self,  errorCode,  data):
+        print errorCode
+        print_dict(data)
         pass
 
     #----------------------------------------------------------------------
@@ -123,13 +125,13 @@ def main():
     api.createTapInMdApi(req)
     
     # 注册前置机地址
-    api.setHostAddress("222.88.40.170", 6161 )
+    api.setHostAddress("61.163.243.173", 6160 )
 
     # 登录服务器
     req = {}
     req["UserID"] =  "Q1355739190"
     req["Password"] =  "743295"
-    api.reqUserLogin(req)
+    print api.reqUserLogin(req)
 
     while (not api.isApiReady):
         sleep(1)

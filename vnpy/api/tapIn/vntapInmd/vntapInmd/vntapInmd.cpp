@@ -272,6 +272,9 @@ void MdApi::processTask()
 
 void MdApi::processRspLogin(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
+#endif
 	PyLock lock;
 	int errorCode = any_cast<int>(task.task_error);
 
@@ -295,6 +298,9 @@ void MdApi::processRspLogin(Task task)
 }
 void MdApi::processAPIReady(Task task)
 {
+#ifdef _DEBUG
+	fprintf(fp, "Entering %s:%d \n", __FUNCTION__, __LINE__); fflush(fp);
+#endif
 	PyLock lock;
 	this->onAPIReady();
 }
