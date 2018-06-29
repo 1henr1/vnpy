@@ -58,4 +58,6 @@ vn.trader/dist/*
 *.bak
 */Debug/*
 
+SocketBin*
+
 

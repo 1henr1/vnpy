@@ -21,7 +21,6 @@ public:
 	void t_insertOrder();
 	void t_canncelOrder();
 	void t_qryFund();
-	void t_qryAccount();
 	void t_qryPostion();
 	void t_modify();
 	void t_qryCommdity();

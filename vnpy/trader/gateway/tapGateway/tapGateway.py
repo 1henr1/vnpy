@@ -166,12 +166,13 @@ class TapGateway(VtGateway):
         # 解析json文件
         setting = json.load(f)
         try:
-            authCode = str(setting['authCode'])
+            mdAuthCode = str(setting['mdAuthCode'])
             mdUserID = str(setting['mdUserID'])
             mdPassword = str(setting['mdPassword'])
             mdAddress = str(setting['mdAddress'])
             mdPort = setting['mdPort']
             mdDllLocation = str(setting['mdDllLocation'])
+            tdAuthCode = str(setting['tdAuthCode'])
             tdUserID = str(setting['tdUserID'])
             tdPassword = str(setting['tdPassword'])
             tdAddress = str(setting['tdAddress'])
@@ -185,8 +186,8 @@ class TapGateway(VtGateway):
             return            
         
         # 创建行情和交易接口对象
-        self.mdApi.connect(authCode, mdUserID, mdPassword, mdAddress, mdPort, mdDllLocation)
-        self.tdApi.connect(authCode, tdUserID, tdPassword, tdAddress, tdPort)
+        self.mdApi.connect(mdAuthCode, mdUserID, mdPassword, mdAddress, mdPort, mdDllLocation)
+        self.tdApi.connect(tdAuthCode, tdUserID, tdPassword, tdAddress, tdPort)
 
         # 初始化并启动查询
         # self.initQuery()

@@ -4,6 +4,12 @@ import json
 import csv
 import os
 import platform
+import numpy as np
+import pyqtgraph as pg
+from pymongo import MongoClient
+from pymongo.errors import *
+from datetime import datetime, timedelta
+from PyQt4 import QtGui
 from collections import OrderedDict
 
 from vnpy.event import *
@@ -11,13 +17,15 @@ from .vtEvent import *
 from .vtFunction import *
 from .vtGateway import *
 from . import vtText
-from .uiQt import QtGui, QtWidgets, QtCore, BASIC_FONT
+from .uiQt import QtWidgets, QtCore, BASIC_FONT
 from .vtFunction import jsonPathDict
 from .vtConstant import *
 
 
+
 COLOR_RED = QtGui.QColor('red')
 COLOR_GREEN = QtGui.QColor('green')
+
 
 
 ########################################################################
@@ -1390,5 +1398,4 @@ class SettingEditor(QtWidgets.QWidget):
         # 显示界面
         super(SettingEditor, self).show()
 
-    
     

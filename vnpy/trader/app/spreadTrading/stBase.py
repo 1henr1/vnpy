@@ -49,7 +49,8 @@ class StSpread(object):
         """Constructor"""
         self.name = EMPTY_UNICODE       # 名称
         self.symbol = EMPTY_STRING      # 代码（基于组成腿计算）
-        
+        self.vtSymbol = EMPTY_STRING    # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
+
         self.activeLeg = None           # 主动腿
         self.passiveLegs = []           # 被动腿（支持多条）
         self.allLegs = []               # 所有腿
@@ -60,7 +61,9 @@ class StSpread(object):
         self.bidVolume = EMPTY_INT
         self.askVolume = EMPTY_INT
         self.time = EMPTY_STRING
-        
+        self.date = EMPTY_STRING                # 日期 20151009
+        self.datetime = None                    # python的datetime时间对象
+
         self.longPos = EMPTY_INT
         self.shortPos = EMPTY_INT
         self.netPos = EMPTY_INT
@@ -89,7 +92,15 @@ class StSpread(object):
             legSymbolList.append(legSymbol)
         
         self.symbol = ''.join(legSymbolList)
-        
+        self.vtSymbol = '.'.join([self.symbol, 'spread'])    # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
+
+    #----------------------------------------------------------------------
+    def calculateTime(self, tick):
+        """计算时间"""
+        self.date = tick.date
+        self.time = tick.time
+        self.datetime = tick.datetime
+
     #----------------------------------------------------------------------
     def calculatePrice(self):
         """计算价格"""

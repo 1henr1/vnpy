@@ -269,7 +269,7 @@ def main():
     print api.createTapTraderApi(req)
 
     # 注册前置机地址
-    api.setHostAddress("222.88.40.171" , 8383)
+    api.setHostAddress("123.161.206.213" , 8383)
 
     # 登录服务器
     req = {}

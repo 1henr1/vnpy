@@ -823,8 +823,6 @@ void TdApi::processRspQryFund(Task task) {
 	data["FrozenFee"] = task_data.FrozenFee;						///< 冻结手续费
 	data["FrozenDeposit"] = task_data.FrozenDeposit;					///< 冻结保证金
 	data["AccountFee"] = task_data.AccountFee;						///< 客户手续费包含交割手续费
-	data["ExchangeFee"] = task_data.ExchangeFee;					///< 汇兑手续费
-	data["AccountDeliveryFee"] = task_data.AccountDeliveryFee;				///< 客户交割手续费
 	data["PremiumIncome"] = task_data.PremiumIncome;					///< 权利金收取
 	data["PremiumPay"] = task_data.PremiumPay;						///< 权利金支付
 	data["CloseProfit"] = task_data.CloseProfit;					///< 平仓盈亏
@@ -874,8 +872,6 @@ void TdApi::processRtnFund(Task task) {
 	data["FrozenFee"] = task_data.FrozenFee;						///< 冻结手续费
 	data["FrozenDeposit"] = task_data.FrozenDeposit;					///< 冻结保证金
 	data["AccountFee"] = task_data.AccountFee;						///< 客户手续费包含交割手续费
-	data["ExchangeFee"] = task_data.ExchangeFee;					///< 汇兑手续费
-	data["AccountDeliveryFee"] = task_data.AccountDeliveryFee;				///< 客户交割手续费
 	data["PremiumIncome"] = task_data.PremiumIncome;					///< 权利金收取
 	data["PremiumPay"] = task_data.PremiumPay;						///< 权利金支付
 	data["CloseProfit"] = task_data.CloseProfit;					///< 平仓盈亏

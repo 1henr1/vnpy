@@ -125,7 +125,7 @@ def main():
     api.createTapInMdApi(req)
     
     # 注册前置机地址
-    api.setHostAddress("61.163.243.173", 6160 )
+    api.setHostAddress("123.161.206.213", 6161 )
 
     # 登录服务器
     req = {}

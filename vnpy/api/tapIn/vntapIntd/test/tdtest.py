@@ -176,7 +176,7 @@ def main():
     api.createTapInTraderApi(req)
 
     # 注册前置机地址
-    api.setHostAddress("123.15.58.21" , 6060)
+    api.setHostAddress("61.163.243.173",6160)
 
     # 登录服务器
     req = {}
@@ -192,7 +192,7 @@ def main():
     #req["OrderQryType"] = 'A'
     #api.qryOrder(req)
 
-    #api.qryCommodity()
+    api.qryCommodity()
 
     #req = {}
     #req["ExchangeNo"] = "SGE"
@@ -297,7 +297,7 @@ def main():
     req["OrderDeleteByDisConnFlag"] = 'N'
     req["RefInt"] = 1
     req["RefString"] = 'A1'
-    api.reqInsertOrder(req)
+    #api.reqInsertOrder(req)
     print "1"
 
     #sleep(5)

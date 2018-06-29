@@ -26,7 +26,7 @@ if system == 'Windows':
     from vnpy.trader.gateway import (tapGateway, tapInGateway)
 
 # 加载上层应用
-from vnpy.trader.app import (riskManager, ctaStrategy, spreadTrading)
+from vnpy.trader.app import (riskManager, curveDrawer, spreadTrading, dataRecorder)
 
 
 #----------------------------------------------------------------------
@@ -49,7 +49,9 @@ def main():
     me.addApp(riskManager)
     # me.addApp(ctaStrategy)
     me.addApp(spreadTrading)
-    
+    me.addApp(dataRecorder)
+    me.addApp(curveDrawer)
+
     # 创建主窗口
     mw = MainWindow(me, ee)
     mw.showMaximized()

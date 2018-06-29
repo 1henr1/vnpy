@@ -53,7 +53,7 @@ class MainWindow(QtWidgets.QMainWindow):
         widgetPositionM, dockPositionM = self.createDock(PositionMonitor, vtText.POSITION, QtCore.Qt.BottomDockWidgetArea)
         widgetAccountM, dockAccountM = self.createDock(AccountMonitor, vtText.ACCOUNT, QtCore.Qt.BottomDockWidgetArea)
         widgetTradingW, dockTradingW = self.createDock(TradingWidget, vtText.TRADING, QtCore.Qt.LeftDockWidgetArea)
-    
+
         self.tabifyDockWidget(dockTradeM, dockErrorM)
         self.tabifyDockWidget(dockTradeM, dockLogM)
         self.tabifyDockWidget(dockPositionM, dockAccountM)
@@ -119,7 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
             function = self.createOpenAppFunction(appDetail)
             action = self.createAction(appDetail['appDisplayName'], function, loadIconPath(appDetail['appIco']))
             appMenu.addAction(action)
-        
+
         # 帮助
         helpMenu = menubar.addMenu(vtText.HELP)
         helpMenu.addAction(self.createAction(vtText.CONTRACT_SEARCH, self.openContract, loadIconPath('contract.ico')))
@@ -217,7 +217,7 @@ class MainWindow(QtWidgets.QMainWindow):
         except KeyError:
             self.widgetDict['aboutW'] = AboutWidget(self)
             self.widgetDict['aboutW'].show()
-    
+
     #----------------------------------------------------------------------
     def openContract(self):
         """打开合约查询"""

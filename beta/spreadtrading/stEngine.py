@@ -165,7 +165,8 @@ class StDataEngine(object):
         # 更新价差价格
         spread = self.vtSymbolSpreadDict[tick.vtSymbol]
         spread.calculatePrice()
-        
+        spread.calculateTime(tick)
+
         # 发出事件
         self.putSpreadTickEvent(spread)
     

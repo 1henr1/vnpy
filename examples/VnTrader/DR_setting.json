@@ -1,13 +1,19 @@
 {
     "working": true,
+	
+	"spreadtick":
+    [
+        ["SI 1809", "COMEX"]
+    ],
 
     "tick":
     [
-        ["bch_usdt", "OKEX"]
+        ["SI 1809", "COMEX"],
+		["AG(T+D) AG(T+D)", "SGE"]
     ],
 
     "bar":
     [
-        ["bch_usdt", "OKEX"]
+        ["SI 1809", "COMEX"]
     ]
 }

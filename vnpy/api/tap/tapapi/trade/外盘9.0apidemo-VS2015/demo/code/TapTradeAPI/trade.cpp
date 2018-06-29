@@ -34,7 +34,6 @@ void Trade::printHelp()
 		<<"--->4 : qry hold test\n"
 		<<"--->5 : modify order test\n"
 		<<"--->6 : qry commdity\n"
-		<<"--->7 : qry account\n"
 		<<"--->H : help\n"
 		<<"----------------------------------\n"
 		<<endl;
@@ -55,7 +54,6 @@ void Trade::loopCmd()
 			case '4': this->t_qryPostion();break;
 			case '5': this->t_modify();break;
 			case '6': this->t_qryCommdity(); break;
-			case '7': this->t_qryAccount(); break;
 			case 'H': this->printHelp();break;
 			default:
 				break;
@@ -118,18 +116,6 @@ void Trade::t_qryFund()
 
 	TAPIINT32 iErr = TAPIERROR_SUCCEED;
 	iErr = m_pAPI->QryFund(&m_uiSessionID,&req);
-	if(iErr!= TAPIERROR_SUCCEED){
-		cout<<"t_qryFund Error:"<<iErr<<endl;
-	}
-}
-
-void Trade::t_qryAccount()
-{
-	TapAPIAccQryReq req;
-	memset(&req,0,sizeof(req));
-
-	TAPIINT32 iErr = TAPIERROR_SUCCEED;
-	iErr = m_pAPI->QryAccount(&m_uiSessionID,&req);
 	if(iErr!= TAPIERROR_SUCCEED){
 		cout<<"t_qryFund Error:"<<iErr<<endl;
 	}
@@ -267,14 +253,6 @@ void TAP_CDECL Trade::OnRspSetReservedInfo( TAPIUINT32 sessionID, TAPIINT32 erro
 void TAP_CDECL Trade::OnRspQryAccount( TAPIUINT32 sessionID, TAPIUINT32 errorCode, TAPIYNFLAG isLast, const TapAPIAccountInfo *info )
 {
 	cout << __FUNCTION__ << " is called." << endl;
-	cout << info->AccountNo << "资金账号," 
-		<< info->AccountType << " 账号类型," 
-		<< info->AccountState << "账号状态," 
-		<< info->AccountTradeRight << "交易状态," 
-		<< info->CommodityGroupNo << "可交易品种组," 
-		<< info->AccountShortName << "账号简称," 
-		<< info->AccountEnShortName << endl;
-
 }
 
 void TAP_CDECL Trade::OnRspQryFund( TAPIUINT32 sessionID, TAPIINT32 errorCode, TAPIYNFLAG isLast, const TapAPIFundData *info )
@@ -285,8 +263,7 @@ void TAP_CDECL Trade::OnRspQryFund( TAPIUINT32 sessionID, TAPIINT32 errorCode, T
 
 	if(isLast=='Y') return;
 
-	cout<<"账户名称:"<<info->AccountNo<<","
-		<<"币种:"<<info->CurrencyNo<<","
+	cout<<"币种:"<<info->CurrencyNo<<","
 		<<"权益:"<<info->Balance<<","
 		<<"可用:"<<info->Available<<","
 		<<"非LME浮盈:"<<info->PositionProfit<<","
@@ -297,13 +274,7 @@ void TAP_CDECL Trade::OnRspQryFund( TAPIUINT32 sessionID, TAPIINT32 errorCode, T
 
 void TAP_CDECL Trade::OnRtnFund( const TapAPIFundData *info )
 {
-//	cout << __FUNCTION__ << " is called." << endl;
-//	cout<<"账户名称:"<<info->AccountNo<<","
-//		<<"币种:"<<info->CurrencyNo<<","
-//		<<"权益:"<<info->Balance<<","
-//		<<"可用:"<<info->Available<<","
-//		<<"非LME浮盈:"<<info->PositionProfit<<","
-//		<<"LME浮盈:"<<info->LmePositionProfit<<endl;
+	//cout << __FUNCTION__ << " is called." << endl;
 }
 
 void TAP_CDECL Trade::OnRspQryExchange( TAPIUINT32 sessionID, TAPIINT32 errorCode, TAPIYNFLAG isLast, const TapAPIExchangeInfo *info )
