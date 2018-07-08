@@ -31,7 +31,8 @@ class CandlestickItem(pg.GraphicsObject):
         # w = (self.data[1][0] - self.data[0][0]) / 3.
         w = 0.2
         for (t, open, close, min, max) in self.data:
-            p.drawLine(QtCore.QPointF(t, min), QtCore.QPointF(t, max))
+            if min != max:
+                p.drawLine(QtCore.QPointF(t, min), QtCore.QPointF(t, max))
             if open > close:
                 p.setBrush(pg.mkBrush('g'))
             else:
@@ -74,8 +75,8 @@ class CurveWidget(QtWidgets.QWidget):
     EMASlowAlpha = 0.0083  # 慢速EMA的参数,120
     fastEMA = 0        # 快速EMA的数值
     slowEMA = 0        # 慢速EMA的数值
-    listfastEMA = []
-    listslowEMA = []
+    #listfastEMA = []
+    #listslowEMA = []
 
     # K线缓存对象
     barOpen = 0
@@ -88,11 +89,11 @@ class CurveWidget(QtWidgets.QWidget):
 
     # 保存K线数据的列表对象
     listBar = []
-    listClose = []
-    listHigh = []
-    listLow = []
-    listOpen = []
-    listOpenInterest = []
+    # listClose = []
+    # listHigh = []
+    # listLow = []
+    # listOpen = []
+    # listOpenInterest = []
 
     # 是否完成了历史数据的读取
     initCompleted = False
@@ -128,7 +129,7 @@ class CurveWidget(QtWidgets.QWidget):
 
         self.vbl_2 = QtGui.QVBoxLayout()
         self.initplotKline()  # plotKline初始化
-        self.initplotTendency()  # plot分时图的初始化
+        #self.initplotTendency()  # plot分时图的初始化
 
         # 整体布局
         self.hbl = QtGui.QHBoxLayout()
@@ -147,6 +148,7 @@ class CurveWidget(QtWidgets.QWidget):
         self.pw1.setLimits(xMax=5)
         self.pw1.setDownsampling(mode='peak')
         self.pw1.setClipToView(True)
+        self.pw1.showGrid(x=True, y=True)
 
         self.curve1 = self.pw1.plot()
         self.curve2 = self.pw1.plot()
@@ -160,9 +162,11 @@ class CurveWidget(QtWidgets.QWidget):
         self.vbl_2.addWidget(self.pw2)
         self.pw2.setDownsampling(mode='peak')
         self.pw2.setClipToView(True)
+        self.pw2.showGrid(x=True, y=True)
 
-        self.curve5 = self.pw2.plot()
-        self.curve6 = self.pw2.plot()
+
+        #self.curve5 = self.pw2.plot()
+        #self.curve6 = self.pw2.plot()
 
         self.candle = CandlestickItem(self.listBar)
         self.pw2.addItem(self.candle)
@@ -171,6 +175,7 @@ class CurveWidget(QtWidgets.QWidget):
         # self.pw2.addItem(self.arrow)
 
     #----------------------------------------------------------------------
+    '''
     def initplotTendency(self):
         """"""
         self.pw3 = pg.PlotWidget(name='Plot3')
@@ -181,6 +186,7 @@ class CurveWidget(QtWidgets.QWidget):
         self.pw3.setXLink('Plot2')   # X linked with Plot2
 
         self.curve7 = self.pw3.plot()
+    '''
 
     #----------------------------------------------------------------------
     def initHistoricalData(self,startDate=None):
@@ -267,24 +273,28 @@ class CurveWidget(QtWidgets.QWidget):
     #----------------------------------------------------------------------
     def plotKline(self):
         """K线图"""
+        self.initCompleted = True
         if self.initCompleted:
             # 均线
-            self.curve5.setData(self.listfastEMA, pen=(255, 0, 0), name="Red curve")
-            self.curve6.setData(self.listslowEMA, pen=(0, 255, 0), name="Green curve")
+            #self.curve5.setData(self.listfastEMA, pen=(255, 0, 0), name="Red curve")
+            #self.curve6.setData(self.listslowEMA, pen=(0, 255, 0), name="Green curve")
 
             # 画K线
             self.pw2.removeItem(self.candle)
             self.candle = CandlestickItem(self.listBar)
             self.pw2.addItem(self.candle)
-            self.plotText()   # 显示开仓信号位置
+            # self.plotText()   # 显示开仓信号位置
 
     #----------------------------------------------------------------------
+    '''
     def plotTendency(self):
         """"""
         if self.initCompleted:
             self.curve7.setData(self.listOpenInterest, pen=(255, 255, 255), name="White curve")
+    '''
 
     #----------------------------------------------------------------------
+    '''
     def plotText(self):
         lenClose = len(self.listClose)
 
@@ -299,6 +309,7 @@ class CurveWidget(QtWidgets.QWidget):
                 # self.pw2.removeItem(self.arrow)
                 self.arrow = pg.ArrowItem(pos=(lenClose-1, self.listHigh[-1]), angle=-90, brush=(0, 255, 0))
                 self.pw2.addItem(self.arrow)
+    '''
 
     #----------------------------------------------------------------------
     def updateMarketData(self, event):
@@ -384,18 +395,18 @@ class CurveWidget(QtWidgets.QWidget):
             tmp = self.listlastPrice
             self.listlastPrice = np.empty(self.listlastPrice.shape[0] * 2)
             self.listlastPrice[:tmp.shape[0]] = tmp
-
             tmp = self.listfastMA
             self.listfastMA = np.empty(self.listfastMA.shape[0] * 2)
             self.listfastMA[:tmp.shape[0]] = tmp
-
             tmp = self.listmidMA
             self.listmidMA = np.empty(self.listmidMA.shape[0] * 2)
             self.listmidMA[:tmp.shape[0]] = tmp
-
             tmp = self.listslowMA
             self.listslowMA = np.empty(self.listslowMA.shape[0] * 2)
             self.listslowMA[:tmp.shape[0]] = tmp
+
+        # 调用画图函数
+        self.plotTick()      # tick图
 
         # K线数据
         # 假设是收到的第一个TICK
@@ -411,30 +422,30 @@ class CurveWidget(QtWidgets.QWidget):
         else:
             # 如果是当前一分钟内的数据
             if self.ticktime.minute == self.barTime.minute:
-                if self.ticktime.second >= 30 and self.barTime.second < 30: # 判断30秒周期K线
-                    # 先保存K线收盘价
-                    self.num += 1
-                    self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
-                    # 初始化新的K线数据
-                    self.barOpen = tick.lastPrice
-                    self.barHigh = tick.lastPrice
-                    self.barLow = tick.lastPrice
-                    self.barClose = tick.lastPrice
-                    self.barTime = self.ticktime
-                    self.barOpenInterest = tick.openInterest
+                #if self.ticktime.second >= 30 and self.barTime.second < 30: # 判断30秒周期K线
+                #    # 先保存K线收盘价
+                #    self.num += 1
+                #    self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+                #    # 初始化新的K线数据
+                #    self.barOpen = tick.lastPrice
+                #    self.barHigh = tick.lastPrice
+                #    self.barLow = tick.lastPrice
+                #    self.barClose = tick.lastPrice
+                #    self.barTime = self.ticktime
+                #    self.barOpenInterest = tick.openInterest
                 # 汇总TICK生成K线
                 self.barHigh = max(self.barHigh, tick.lastPrice)
                 self.barLow = min(self.barLow, tick.lastPrice)
                 self.barClose = tick.lastPrice
                 self.barTime = self.ticktime
-                self.listBar.pop()
-                self.listfastEMA.pop()
-                self.listslowEMA.pop()
-                self.listOpen.pop()
-                self.listClose.pop()
-                self.listHigh.pop()
-                self.listLow.pop()
-                self.listOpenInterest.pop()
+                self.listBar.pop()  # 这里pop是为了使得最后一个数据在一分钟内也是实时的
+                # self.listfastEMA.pop()
+                # self.listslowEMA.pop()
+                # self.listOpen.pop()
+                # self.listClose.pop()
+                # self.listHigh.pop()
+                # self.listLow.pop()
+                #self.listOpenInterest.pop()
                 self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
             # 如果是新一分钟的数据
             else:
@@ -452,26 +463,25 @@ class CurveWidget(QtWidgets.QWidget):
     #----------------------------------------------------------------------
     def onBar(self, n, o, c, l, h, oi):
         self.listBar.append((n, o, c, l, h))
-        self.listOpen.append(o)
-        self.listClose.append(c)
-        self.listHigh.append(h)
-        self.listLow.append(l)
-        self.listOpenInterest.append(oi)
+        # self.listOpen.append(o)
+        # self.listClose.append(c)
+        # self.listHigh.append(h)
+        # self.listLow.append(l)
+        #self.listOpenInterest.append(oi)
 
-        #计算K线图EMA均线
-        if self.fastEMA:
-            self.fastEMA = c*self.EMAFastAlpha + self.fastEMA*(1-self.EMAFastAlpha)
-            self.slowEMA = c*self.EMASlowAlpha + self.slowEMA*(1-self.EMASlowAlpha)
-        else:
-            self.fastEMA = c
-            self.slowEMA = c
-        self.listfastEMA.append(self.fastEMA)
-        self.listslowEMA.append(self.slowEMA)
+        ##计算K线图EMA均线
+        #if self.fastEMA:
+        #    self.fastEMA = c*self.EMAFastAlpha + self.fastEMA*(1-self.EMAFastAlpha)
+        #    self.slowEMA = c*self.EMASlowAlpha + self.slowEMA*(1-self.EMASlowAlpha)
+        #else:
+        #    self.fastEMA = c
+        #    self.slowEMA = c
+        # self.listfastEMA.append(self.fastEMA)
+        # self.listslowEMA.append(self.slowEMA)
 
         # 调用画图函数
-        self.plotTick()      # tick图
         self.plotKline()     # K线图
-        self.plotTendency()  # K线副图，持仓量
+        #self.plotTendency()  # K线副图，持仓量
 
     #----------------------------------------------------------------------
     def __connectMongo(self):
