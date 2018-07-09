@@ -491,7 +491,7 @@ class CurveWidget(QtWidgets.QWidget):
     def registerEvent(self):
         """注册事件监听"""
         self.signal.connect(self.updateMarketData)
-        self.__eventEngine.register(EVENT_TICK, self.signal.emit)
+        #self.__eventEngine.register(EVENT_TICK, self.signal.emit)
         self.__eventEngine.register(EVENT_SPREAD_TICK, self.signal.emit)
 
 

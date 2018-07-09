@@ -103,9 +103,9 @@ class StSpread(object):
     #----------------------------------------------------------------------
     def calculateTime(self, tick):
         """计算时间"""
-        self.date = tick.date
-        self.time = tick.time
-        self.datetime = tick.datetime
+        self.date = datetime.now().strftime('%Y-%m-%d')
+        self.time = datetime.now().strftime('%H:%M:%S.%f')
+        self.datetime = datetime.now()
 
     #----------------------------------------------------------------------
     def calculatePrice(self):

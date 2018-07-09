@@ -178,6 +178,7 @@ class StDataEngine(object):
 
         # 发出事件
         self.putSpreadTickEvent(spread)
+        self.putTickEvent(spread)
 
     #----------------------------------------------------------------------
     def putSpreadTickEvent(self, spread):
@@ -190,11 +191,15 @@ class StDataEngine(object):
         event2.dict_['data'] = spread
         self.eventEngine.put(event2)
 
+    #----------------------------------------------------------------------
+    def putTickEvent(self, spread):
+        """发出价差行情更新事件"""
         spreadtick = spread.convert2tick()
+        if spreadtick.lastVolume == 0:
+            return
         event1 = Event(EVENT_SPREAD_TICK)
         event1.dict_['data'] = spreadtick
         self.eventEngine.put(event1)
-
 
     #----------------------------------------------------------------------
     def processTradeEvent(self, event):
