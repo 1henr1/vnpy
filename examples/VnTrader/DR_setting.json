@@ -1,19 +1,14 @@
 {
     "working": true,
-	
-	"spreadtick":
-    [
-        ["SI 1809", "COMEX"]
-    ],
 
     "tick":
     [
         ["SI 1809", "COMEX"],
-		["AG(T+D) AG(T+D)", "SGE"]
+		["AG(T+D) AG(T+D)", "SGE"],
+		["SI-AG", "spread"]
     ],
 
     "bar":
     [
-        ["SI 1809", "COMEX"]
     ]
 }

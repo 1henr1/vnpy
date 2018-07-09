@@ -171,18 +171,19 @@ class DrEngine(object):
     def procecssTickEvent(self, event):
         """处理行情事件"""
         tick = event.dict_['data']
-        vtSymbol = tick.vtSymbol
-        
+
         # 生成datetime对象
         if not tick.datetime:
-            tick.datetime = datetime.strptime(' '.join([tick.date, tick.time]), '%Y%m%d %H:%M:%S.%f')            
+            return
+        #    tick.datetime = datetime.strptime(' '.join([tick.date, tick.time]), '%Y%m%d %H:%M:%S.%f')
 
         self.onTick(tick)
-        
-        bm = self.bgDict.get(vtSymbol, None)
-        if bm:
-            bm.updateTick(tick)
-        
+
+        #vtSymbol = tick.vtSymbol
+        #bm = self.bgDict.get(vtSymbol, None)
+        #if bm:
+        #    bm.updateTick(tick)
+
     #----------------------------------------------------------------------
     def onTick(self, tick):
         """Tick更新"""
@@ -223,7 +224,6 @@ class DrEngine(object):
     #----------------------------------------------------------------------
     def registerEvent(self):
         """注册事件监听"""
-        #self.eventEngine.register(EVENT_SPREADTRADING_TICK, self.procecssTickEvent)
         self.eventEngine.register(EVENT_TICK, self.procecssTickEvent)
  
     #----------------------------------------------------------------------

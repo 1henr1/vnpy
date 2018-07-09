@@ -168,14 +168,18 @@ class StDataEngine(object):
         leg.askPrice = tick.askPrice1
         leg.bidVolume = tick.bidVolume1
         leg.askVolume = tick.askVolume1
-        
+        leg.lastPrice = tick.lastPrice # 最新成交价
+        leg.lastVolume = tick.lastVolume # 最新成交量
+
         # 更新价差价格
         spread = self.vtSymbolSpreadDict[tick.vtSymbol]
         spread.calculatePrice()
-        
+        spread.calculateTime(tick)
+
         # 发出事件
         self.putSpreadTickEvent(spread)
-    
+        self.putTickEvent(spread)
+
     #----------------------------------------------------------------------
     def putSpreadTickEvent(self, spread):
         """发出价差行情更新事件"""
@@ -185,8 +189,16 @@ class StDataEngine(object):
         
         event2 = Event(EVENT_SPREADTRADING_TICK)
         event2.dict_['data'] = spread
-        self.eventEngine.put(event2)        
-    
+        self.eventEngine.put(event2)
+
+    #----------------------------------------------------------------------
+    def putTickEvent(self, spread):
+        """发出行情更新事件"""
+        spreadtick = spread.convert2tick()
+        event1 = Event(EVENT_TICK)
+        event1.dict_['data'] = spreadtick
+        self.eventEngine.put(event1)
+
     #----------------------------------------------------------------------
     def processTradeEvent(self, event):
         """处理成交推送"""

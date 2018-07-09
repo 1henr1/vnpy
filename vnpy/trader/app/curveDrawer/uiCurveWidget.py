@@ -16,6 +16,14 @@ from PyQt4 import QtGui
 
 from vnpy.event import *
 
+#----------------------------------------------------------------------
+def print_dict(d):
+    """按照键值打印一个字典"""
+    for key,value in d.items():
+        print key + ':' + str(value),
+    print
+#----------------------------------------------------------------------
+
 class CandlestickItem(pg.GraphicsObject):
     def __init__(self, data):
         pg.GraphicsObject.__init__(self)
@@ -89,10 +97,10 @@ class CurveWidget(QtWidgets.QWidget):
 
     # 保存K线数据的列表对象
     listBar = []
-    # listClose = []
-    # listHigh = []
-    # listLow = []
-    # listOpen = []
+    listClose = []
+    listHigh = []
+    listLow = []
+    listOpen = []
     # listOpenInterest = []
 
     # 是否完成了历史数据的读取
@@ -283,85 +291,62 @@ class CurveWidget(QtWidgets.QWidget):
             self.pw2.removeItem(self.candle)
             self.candle = CandlestickItem(self.listBar)
             self.pw2.addItem(self.candle)
-            # self.plotText()   # 显示开仓信号位置
-
-    #----------------------------------------------------------------------
-    '''
-    def plotTendency(self):
-        """"""
-        if self.initCompleted:
-            self.curve7.setData(self.listOpenInterest, pen=(255, 255, 255), name="White curve")
-    '''
-
-    #----------------------------------------------------------------------
-    '''
-    def plotText(self):
-        lenClose = len(self.listClose)
-
-        if lenClose >= 5:                                       # Fractal Signal
-            if self.listClose[-1] > self.listClose[-2] and self.listClose[-3] > self.listClose[-2] and self.listClose[-4] > self.listClose[-2] and self.listClose[-5] > self.listClose[-2] and self.listfastEMA[-1] > self.listslowEMA[-1]:
-                ## Draw an arrowhead next to the text box
-                # self.pw2.removeItem(self.arrow)
-                self.arrow = pg.ArrowItem(pos=(lenClose-1, self.listLow[-1]), angle=90, brush=(255, 0, 0))
-                self.pw2.addItem(self.arrow)
-            elif self.listClose[-1] < self.listClose[-2] and self.listClose[-3] < self.listClose[-2] and self.listClose[-4] < self.listClose[-2] and self.listClose[-5] < self.listClose[-2] and self.listfastEMA[-1] < self.listslowEMA[-1]:
-                ## Draw an arrowhead next to the text box
-                # self.pw2.removeItem(self.arrow)
-                self.arrow = pg.ArrowItem(pos=(lenClose-1, self.listHigh[-1]), angle=-90, brush=(0, 255, 0))
-                self.pw2.addItem(self.arrow)
-    '''
+            self.pw2.setYRange(min(self.listLow), max(self.listHigh))
 
     #----------------------------------------------------------------------
     def updateMarketData(self, event):
         """更新行情"""
         data = event.dict_['data']
+        if data.vtSymbol != self.symbol:
+            return
+
         tick = VtTickData()
         # 代码相关
-        tick.symbol = data['symbol'] # 合约代码
-        tick.exchange = data['exchange'] # 交易所代码
-        tick.vtSymbol = data['vtSymbol'] # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
+        tick.symbol = data.symbol # 合约代码
+        tick.exchange = data.exchange # 交易所代码
+        tick.vtSymbol = data.vtSymbol # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
 
         # 成交数据
-        tick.lastPrice = data['lastPrice'] # 最新成交价
-        tick.lastVolume = data['lastVolume'] # 最新成交量
-        tick.volume =  data['volume']# 今天总成交量
-        tick.openInterest = data['openInterest'] # 持仓量
-        tick.time = data['time'] # 时间 11:20:56.5
-        tick.date = data['date'] # 日期 20151009
-        tick.datetime = data['datetime']                    # python的datetime时间对象
+        tick.lastPrice = data.lastPrice # 最新成交价
+        tick.lastVolume = data.lastVolume # 最新成交量
+        tick.volume =  data.volume# 今天总成交量
+        tick.openInterest = data.openInterest # 持仓量
+        tick.time = data.time # 时间 11:20:56.5
+        tick.date = data.date # 日期 20151009
+        tick.datetime = data.datetime                    # python的datetime时间对象
 
         # 常规行情
-        tick.openPrice =  data['openPrice']   # 今日开盘价
-        tick.highPrice =  data['highPrice']   # 今日最高价
-        tick.lowPrice =  data['lowPrice']  # 今日最低价
-        tick.preClosePrice = data['preClosePrice']   # 昨收盘价
-        tick.upperLimit = data['upperLimit']  # 涨停价
-        tick.lowerLimit = data['lowerLimit']  # 跌停价
+        tick.openPrice =  data.openPrice   # 今日开盘价
+        tick.highPrice =  data.highPrice   # 今日最高价
+        tick.lowPrice =  data.lowPrice  # 今日最低价
+        tick.preClosePrice = data.preClosePrice   # 昨收盘价
+        tick.upperLimit = data.upperLimit  # 涨停价
+        tick.lowerLimit = data.lowerLimit  # 跌停价
 
         # 五档行情
-        tick.bidPrice1 = data['bidPrice1']
-        tick.bidPrice2 = data['bidPrice2']
-        tick.bidPrice3 = data['bidPrice3']
-        tick.bidPrice4 = data['bidPrice4']
-        tick.bidPrice5 = data['bidPrice5']
+        tick.bidPrice1 = data.bidPrice1
+        tick.bidPrice2 = data.bidPrice2
+        tick.bidPrice3 = data.bidPrice3
+        tick.bidPrice4 = data.bidPrice4
+        tick.bidPrice5 = data.bidPrice5
 
-        tick.askPrice1 = data['askPrice1']
-        tick.askPrice2 = data['askPrice2']
-        tick.askPrice3 = data['askPrice3']
-        tick.askPrice4 = data['askPrice4']
-        tick.askPrice5 = data['askPrice5']
+        tick.askPrice1 = data.askPrice1
+        tick.askPrice2 = data.askPrice2
+        tick.askPrice3 = data.askPrice3
+        tick.askPrice4 = data.askPrice4
+        tick.askPrice5 = data.askPrice5
 
-        tick.bidVolume1 = data['bidVolume1']
-        tick.bidVolume2 = data['bidVolume2']
-        tick.bidVolume3 = data['bidVolume3']
-        tick.bidVolume4 = data['bidVolume4']
-        tick.bidVolume5 = data['bidVolume5']
+        tick.bidVolume1 = data.bidVolume1
+        tick.bidVolume2 = data.bidVolume2
+        tick.bidVolume3 = data.bidVolume3
+        tick.bidVolume4 = data.bidVolume4
+        tick.bidVolume5 = data.bidVolume5
 
-        tick.askVolume1 = data['askVolume1']
-        tick.askVolume2 = data['askVolume2']
-        tick.askVolume3 = data['askVolume3']
-        tick.askVolume4 = data['askVolume4']
-        tick.askVolume5 = data['askVolume5']
+        tick.askVolume1 = data.askVolume1
+        tick.askVolume2 = data.askVolume2
+        tick.askVolume3 = data.askVolume3
+        tick.askVolume4 = data.askVolume4
+        tick.askVolume5 = data.askVolume5
 
         self.onTick(tick)  # tick数据更新
 
@@ -441,10 +426,10 @@ class CurveWidget(QtWidgets.QWidget):
                 self.listBar.pop()  # 这里pop是为了使得最后一个数据在一分钟内也是实时的
                 # self.listfastEMA.pop()
                 # self.listslowEMA.pop()
-                # self.listOpen.pop()
-                # self.listClose.pop()
-                # self.listHigh.pop()
-                # self.listLow.pop()
+                self.listOpen.pop()
+                self.listClose.pop()
+                self.listHigh.pop()
+                self.listLow.pop()
                 #self.listOpenInterest.pop()
                 self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
             # 如果是新一分钟的数据
@@ -463,10 +448,10 @@ class CurveWidget(QtWidgets.QWidget):
     #----------------------------------------------------------------------
     def onBar(self, n, o, c, l, h, oi):
         self.listBar.append((n, o, c, l, h))
-        # self.listOpen.append(o)
-        # self.listClose.append(c)
-        # self.listHigh.append(h)
-        # self.listLow.append(l)
+        self.listOpen.append(o)
+        self.listClose.append(c)
+        self.listHigh.append(h)
+        self.listLow.append(l)
         #self.listOpenInterest.append(oi)
 
         ##计算K线图EMA均线
