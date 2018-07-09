@@ -9,7 +9,7 @@ from vnpy.trader.uiBasicWidget import (BasicMonitor, BasicCell, PnlCell,
 
 from .stBase import (EVENT_SPREADTRADING_TICK, EVENT_SPREADTRADING_POS,
                      EVENT_SPREADTRADING_LOG, EVENT_SPREADTRADING_ALGO,
-                     EVENT_SPREADTRADING_ALGOLOG)
+                     EVENT_SPREADTRADING_ALGOLOG, EVENT_SPREAD_TICK)
 from .stAlgo import StAlgoTemplate
 
 

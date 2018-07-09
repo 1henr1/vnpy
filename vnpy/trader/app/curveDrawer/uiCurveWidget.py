@@ -106,8 +106,8 @@ class CurveWidget(QtWidgets.QWidget):
     # 是否完成了历史数据的读取
     initCompleted = False
     # 初始化时读取的历史数据的起始日期(可以选择外部设置)
-    startDate = "2018-07-05"
-    symbol = 'SI 1809.COMEX'
+    startDate = "2018-07-09"
+    symbol = 'SI-AG.spread'
 
 
     #----------------------------------------------------------------------
@@ -183,24 +183,10 @@ class CurveWidget(QtWidgets.QWidget):
         # self.pw2.addItem(self.arrow)
 
     #----------------------------------------------------------------------
-    '''
-    def initplotTendency(self):
-        """"""
-        self.pw3 = pg.PlotWidget(name='Plot3')
-        self.vbl_2.addWidget(self.pw3)
-        self.pw3.setDownsampling(mode='peak')
-        self.pw3.setClipToView(True)
-        self.pw3.setMaximumHeight(200)
-        self.pw3.setXLink('Plot2')   # X linked with Plot2
-
-        self.curve7 = self.pw3.plot()
-    '''
-
-    #----------------------------------------------------------------------
     def initHistoricalData(self,startDate=None):
         """初始历史数据"""
 
-        startDate = "2018-07-05"
+        startDate = self.startDate
         td = timedelta(days=1)     # 读取3天的历史TICK数据
 
         if startDate:
@@ -506,6 +492,7 @@ class CurveWidget(QtWidgets.QWidget):
         """注册事件监听"""
         self.signal.connect(self.updateMarketData)
         self.__eventEngine.register(EVENT_TICK, self.signal.emit)
+        self.__eventEngine.register(EVENT_SPREAD_TICK, self.signal.emit)
 
 
 

@@ -225,7 +225,8 @@ class DrEngine(object):
     def registerEvent(self):
         """注册事件监听"""
         self.eventEngine.register(EVENT_TICK, self.procecssTickEvent)
- 
+        self.eventEngine.register(EVENT_SPREAD_TICK, self.procecssTickEvent)
+
     #----------------------------------------------------------------------
     def insertData(self, dbName, collectionName, data):
         """插入数据到数据库（这里的data可以是VtTickData或者VtBarData）"""

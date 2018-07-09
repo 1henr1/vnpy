@@ -16,7 +16,7 @@ from vnpy.trader.vtConstant import (DIRECTION_LONG, DIRECTION_SHORT,
 
 from .stBase import (StLeg, StSpread, EVENT_SPREADTRADING_TICK,
                      EVENT_SPREADTRADING_POS, EVENT_SPREADTRADING_LOG,
-                     EVENT_SPREADTRADING_ALGO, EVENT_SPREADTRADING_ALGOLOG)
+                     EVENT_SPREADTRADING_ALGO, EVENT_SPREADTRADING_ALGOLOG, EVENT_SPREAD_TICK)
 from .stAlgo import SniperAlgo, StAlgoGroup
 
 #----------------------------------------------------------------------
@@ -178,7 +178,6 @@ class StDataEngine(object):
 
         # 发出事件
         self.putSpreadTickEvent(spread)
-        self.putTickEvent(spread)
 
     #----------------------------------------------------------------------
     def putSpreadTickEvent(self, spread):
@@ -191,13 +190,11 @@ class StDataEngine(object):
         event2.dict_['data'] = spread
         self.eventEngine.put(event2)
 
-    #----------------------------------------------------------------------
-    def putTickEvent(self, spread):
-        """发出行情更新事件"""
         spreadtick = spread.convert2tick()
-        event1 = Event(EVENT_TICK)
+        event1 = Event(EVENT_SPREAD_TICK)
         event1.dict_['data'] = spreadtick
         self.eventEngine.put(event1)
+
 
     #----------------------------------------------------------------------
     def processTradeEvent(self, event):

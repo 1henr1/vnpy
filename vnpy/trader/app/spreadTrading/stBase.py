@@ -12,6 +12,7 @@ from vnpy.trader.vtConstant import (EMPTY_INT, EMPTY_FLOAT,
 
 
 EVENT_SPREADTRADING_TICK = 'eSpreadTradingTick.'
+EVENT_SPREAD_TICK = 'eSpreadTick.'
 EVENT_SPREADTRADING_POS = 'eSpreadTradingPos.'
 EVENT_SPREADTRADING_LOG = 'eSpreadTradingLog'
 EVENT_SPREADTRADING_ALGO = 'eSpreadTradingAlgo.'
@@ -52,7 +53,7 @@ class StSpread(object):
         """Constructor"""
         self.name = EMPTY_UNICODE       # 名称
         self.symbol = EMPTY_STRING      # 代码（基于组成腿计算）
-        self.vtSymbol = EMPTY_STRING    # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
+        self.vtSymbol = EMPTY_STRING    # name.spread
 
         self.activeLeg = None           # 主动腿
         self.passiveLegs = []           # 被动腿（支持多条）
