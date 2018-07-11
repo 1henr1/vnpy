@@ -329,18 +329,17 @@ class TapMdApi(MdApi):
     #----------------------------------------------------------------------
     def onAPIReady(self):
         self.isApiReady = True
-        self.connectionStatus = True
+        self.loginStatus = True
+        self.gateway.mdConnected = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
-
-        pass
 
     #----------------------------------------------------------------------
     def onDisconnect(self, reasonCode):
-        self.connectionStatus = False
         self.loginStatus = False
         self.gateway.mdConnected = False
         self.writeLog(text.DATA_SERVER_DISCONNECTED)
-        pass
+
+        self.login()
 
     #----------------------------------------------------------------------
     def onRspQryCommodity(self,  errorCode,  isLast,  data):
@@ -439,30 +438,29 @@ class TapMdApi(MdApi):
     #----------------------------------------------------------------------
     def connect(self, authCode, userID, password, address, port, dllLocation):
         """初始化连接"""
-        self.userID = userID                # 账号
-        self.password = password            # 密码
-        self.address = address              # 服务器地址
-        self.port = port
-        
+        if self.loginStatus:
+            return
+
         # 如果尚未建立服务器连接，则进行连接
         if not self.connectionStatus:
+            self.userID = userID                # 账号
+            self.password = password            # 密码
+            self.address = address              # 服务器地址
+            self.port = port
             path = getTempPath(self.gatewayName + '_')
             req = {}
             req["AuthCode"] = authCode
             req["KeyOperationLogPath"] = path
             req["DllLocation"] = dllLocation
-            self.createTapInMdApi(req)
+
+            if self.createTapInMdApi(req) == 0:
+                self.connectionStatus = True
 
             # 注册服务器地址
             self.setHostAddress(self.address, self.port)
 
-            # 初始化连接，成功会调用onFrontConnected
-            self.login()
+        self.login()
             
-        # 若已经连接但尚未登录，则进行登录
-        else:
-            self.close()
-            self.connectionStatus = False
 
     #----------------------------------------------------------------------
     @simple_log
@@ -575,7 +573,8 @@ class TapTdApi(TdApi):
     @simple_log
     def onAPIReady(self,):
         self.isApiReady = True
-        self.connectionStatus = True
+        self.loginStatus = True
+        self.gateway.tdConnected = True
         self.writeLog(text.TRADING_SERVER_CONNECTED)
 
         ##API准备好后，查询基础数据
@@ -589,10 +588,11 @@ class TapTdApi(TdApi):
     #----------------------------------------------------------------------
     def onDisconnect(self, reasonCode):
         """服务器断开"""
-        self.connectionStatus = False
         self.loginStatus = False
         self.gateway.tdConnected = False
         self.writeLog(text.TRADING_SERVER_DISCONNECTED)
+
+        self.login()
 
     #----------------------------------------------------------------------
 
@@ -926,26 +926,29 @@ class TapTdApi(TdApi):
     #----------------------------------------------------------------------
     def connect(self, authCode, userID, password, address, port ):
         """初始化连接"""
-        self.userID = userID                # 账号
-        self.password = password            # 密码
-        self.address = address              # 服务器地址
-        self.port = port                    # 服务器端口
-        self.authCode = authCode            # 验证码
-        self.accountID = userID
+        if self.loginStatus:
+            return
 
         # 如果尚未建立服务器连接，则进行连接
         if not self.connectionStatus:
+            self.userID = userID                # 账号
+            self.password = password            # 密码
+            self.address = address              # 服务器地址
+            self.port = port                    # 服务器端口
+            self.authCode = authCode            # 验证码
+            self.accountID = userID
             path = getTempPath(self.gatewayName + '_')
             req = {}
             req["AuthCode"] = authCode
             req["KeyOperationLogPath"] = path
-            self.createTapInTraderApi(req)
+
+            if self.createTapInTraderApi(req) == 0:
+                self.connectionStatus = True
 
             # 注册服务器地址
             self.setHostAddress(self.address, self.port)
 
-            self.login()
-
+        self.login()
 
     #----------------------------------------------------------------------
     def login(self):
