@@ -97,7 +97,8 @@ class StSpread(object):
                 legSymbol = '%s*%s' %(leg.multiplier, leg.vtSymbol)
             legSymbolList.append(legSymbol)
         
-        self.symbol = ''.join(legSymbolList)
+        #self.symbol = ''.join(legSymbolList)
+        self.symbol = self.name
         self.vtSymbol = '.'.join([self.name, 'spread'])    # 合约在vt系统中的唯一代码，通常是 合约代码.交易所代码
 
     #----------------------------------------------------------------------

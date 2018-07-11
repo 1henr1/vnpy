@@ -127,18 +127,18 @@ class DrEngine(object):
                 for setting in l:
                     symbol = setting[0]
                     gateway = setting[1]
-                    vtSymbol = symbol
+                    vtSymbol = '.'.join([symbol, gateway])
 
-                    req = VtSubscribeReq()
-                    req.symbol = symbol                    
+                    #req = VtSubscribeReq()
+                    #req.symbol = symbol
 
-                    if len(setting)>=3:
-                        req.exchange = setting[2]
-                        vtSymbol = '.'.join([symbol, req.exchange])
+                    #if len(setting)>=3:
+                    #    req.exchange = setting[2]
+                    #    vtSymbol = '.'.join([symbol, req.exchange])
 
-                    if len(setting)>=5:
-                        req.currency = setting[3]
-                        req.productClass = setting[4]                    
+                    #if len(setting)>=5:
+                    #    req.currency = setting[3]
+                    #    req.productClass = setting[4]
 
                     #self.mainEngine.subscribe(req, gateway)
                     
@@ -179,10 +179,9 @@ class DrEngine(object):
 
         self.onTick(tick)
 
-        #vtSymbol = tick.vtSymbol
-        #bm = self.bgDict.get(vtSymbol, None)
-        #if bm:
-        #    bm.updateTick(tick)
+        bm = self.bgDict.get(tick.vtSymbol, None)
+        if bm:
+            bm.updateTick(tick)
 
     #----------------------------------------------------------------------
     def onTick(self, tick):
