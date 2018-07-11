@@ -4,9 +4,11 @@
 行情曲线绘制模块相关的GUI控制组件
 '''
 
+import json
 from vnpy.trader.uiQt import QtWidgets, QtCore
 from vnpy.trader.vtEvent import *
 from vnpy.trader.vtObject import *
+from vnpy.trader.vtFunction import todayDate, getJsonPath
 import numpy as np
 import pyqtgraph as pg
 from pymongo import MongoClient
@@ -106,7 +108,7 @@ class CurveWidget(QtWidgets.QWidget):
     # 是否完成了历史数据的读取
     initCompleted = False
     # 初始化时读取的历史数据的起始日期(可以选择外部设置)
-    startDate = "2018-07-09"
+    startDate = "2018-07-11"
     symbol = 'SI-AG.spread'
 
 
@@ -122,15 +124,30 @@ class CurveWidget(QtWidgets.QWidget):
         self.__mongoConnection = None
         self.__mongoTickDB = None
 
+        # 对象字典
+        self.tickSymbolSet = set()
+        self.barSymbolSet = set()
+
+
+        # K线合成器字典
+        self.bgDict = {}
+
+        # 配置文件
+        self.settingFileName = 'CurveDrawer_setting.json'
+        self.settingFilePath = getJsonPath(self.settingFileName, __file__)
+
         # 调用函数
         self.__connectMongo()
         self.initUi()
-        self.registerEvent()
 
     #----------------------------------------------------------------------
     def initUi(self):
         """初始化界面"""
         self.setWindowTitle(u'Price')
+
+        # 创建按钮
+        buttonInit = QtWidgets.QPushButton(u'初始化')
+        buttonInit.clicked.connect(self.init)
 
         self.vbl_1 = QtGui.QVBoxLayout()
         self.initplotTick()  # plotTick初始化
@@ -141,11 +158,50 @@ class CurveWidget(QtWidgets.QWidget):
 
         # 整体布局
         self.hbl = QtGui.QHBoxLayout()
+        self.hbl.addWidget(buttonInit)
         self.hbl.addLayout(self.vbl_1)
         self.hbl.addLayout(self.vbl_2)
         self.setLayout(self.hbl)
 
-        self.initHistoricalData()  # 下载历史数据
+    def init(self):
+        """初始化"""
+        self.loadSetting()
+        ## 读取历史数据
+        self.initHistoricalData()
+        ## 注册事件， 开始实时绘制
+        self.registerEvent()
+        pass
+
+    #----------------------------------------------------------------------
+    def loadSetting(self):
+        """加载配置"""
+        with open(self.settingFilePath) as f:
+            drSetting = json.load(f)
+
+            # 如果working设为False则不启动行情绘制功能
+            working = drSetting['working']
+            if not working:
+                return
+
+            # Tick记录配置
+            if 'tick' in drSetting:
+                l = drSetting['tick']
+
+                for setting in l:
+                    symbol = setting[0]
+                    gateway = setting[1]
+                    vtSymbol = ".".join([symbol, gateway])
+                    self.tickSymbolSet.add(vtSymbol)
+
+            # Bar记录配置
+            if 'bar' in drSetting:
+                l = drSetting['bar']
+
+                for setting in l:
+                    symbol = setting[0]
+                    gateway = setting[1]
+                    vtSymbol = ".".join([symbol, gateway])
+                    self.barSymbolSet.add(vtSymbol)
 
     #----------------------------------------------------------------------
     def initplotTick(self):
@@ -183,18 +239,40 @@ class CurveWidget(QtWidgets.QWidget):
         # self.pw2.addItem(self.arrow)
 
     #----------------------------------------------------------------------
-    def initHistoricalData(self,startDate=None):
+    def initHistoricalData(self, startDate=None):
         """初始历史数据"""
 
-        startDate = self.startDate
-        td = timedelta(days=1)     # 读取3天的历史TICK数据
+        ## 对bar下载历史数据
+        for vtSymbol in self.barSymbolSet:
+            if startDate:
+                cx = self.loadTick(self.symbol, startDate)
+            else:
+                td = timedelta(days=1)     # 读取1天的历史数据
+                today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+                cx = self.loadTick(vtSymbol, today-td)
 
-        if startDate:
-            cx = self.loadTick(self.symbol, startDate)
-        else:
-            today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-            cx = self.loadTick(self.symbol, today-td)
+            if cx:
+                for data in cx:
+                    bar = VtBarData()
 
+                    bar.vtSymbol = data["vtSymbol"]  # vt系统代码
+                    bar.symbol = data["symbol"]          # 代码
+                    bar.exchange = data["exchange"]        # 交易所
+
+                    bar.open = data["open"]             # OHLC
+                    bar.high = data["high"]
+                    bar.low = data["low"]
+                    bar.close = data["close"]
+
+                    bar.date = data["date"]            # bar开始的时间，日期
+                    bar.time = data["time"]            # 时间
+                    bar.datetime = data["datetime"]                # python的datetime时间对象
+
+                    bar.volume = data["volume"]             # 成交量
+                    bar.openInterest = data["openInterest"]       # 持仓量
+
+                    self.onBar(bar)
+        """
         if cx:
             for data in cx:
                 tick = VtTickData()
@@ -247,6 +325,7 @@ class CurveWidget(QtWidgets.QWidget):
                 tick.askVolume5 = data['askVolume5']
 
                 self.onTick(tick)
+        """
 
         self.initCompleted = True    # 读取历史数据完成
 
@@ -393,31 +472,20 @@ class CurveWidget(QtWidgets.QWidget):
         else:
             # 如果是当前一分钟内的数据
             if self.ticktime.minute == self.barTime.minute:
-                #if self.ticktime.second >= 30 and self.barTime.second < 30: # 判断30秒周期K线
-                #    # 先保存K线收盘价
-                #    self.num += 1
-                #    self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
-                #    # 初始化新的K线数据
-                #    self.barOpen = tick.lastPrice
-                #    self.barHigh = tick.lastPrice
-                #    self.barLow = tick.lastPrice
-                #    self.barClose = tick.lastPrice
-                #    self.barTime = self.ticktime
-                #    self.barOpenInterest = tick.openInterest
                 # 汇总TICK生成K线
                 self.barHigh = max(self.barHigh, tick.lastPrice)
                 self.barLow = min(self.barLow, tick.lastPrice)
                 self.barClose = tick.lastPrice
                 self.barTime = self.ticktime
-                self.listBar.pop()  # 这里pop是为了使得最后一个数据在一分钟内也是实时的
+                #self.listBar.pop()  # 这里pop是为了使得最后一个数据在一分钟内也是实时的
                 # self.listfastEMA.pop()
                 # self.listslowEMA.pop()
-                self.listOpen.pop()
-                self.listClose.pop()
-                self.listHigh.pop()
-                self.listLow.pop()
+                # self.listOpen.pop()
+                # self.listClose.pop()
+                # self.listHigh.pop()
+                # self.listLow.pop()
                 #self.listOpenInterest.pop()
-                self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+                #self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
             # 如果是新一分钟的数据
             else:
                 # 先保存K线收盘价
@@ -439,16 +507,6 @@ class CurveWidget(QtWidgets.QWidget):
         self.listHigh.append(h)
         self.listLow.append(l)
         #self.listOpenInterest.append(oi)
-
-        ##计算K线图EMA均线
-        #if self.fastEMA:
-        #    self.fastEMA = c*self.EMAFastAlpha + self.fastEMA*(1-self.EMAFastAlpha)
-        #    self.slowEMA = c*self.EMASlowAlpha + self.slowEMA*(1-self.EMASlowAlpha)
-        #else:
-        #    self.fastEMA = c
-        #    self.slowEMA = c
-        # self.listfastEMA.append(self.fastEMA)
-        # self.listslowEMA.append(self.slowEMA)
 
         # 调用画图函数
         self.plotKline()     # K线图

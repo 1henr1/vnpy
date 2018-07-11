@@ -224,7 +224,7 @@ class CdEngine(object):
     def registerEvent(self):
         """注册事件监听"""
         #self.eventEngine.register(EVENT_SPREADTRADING_TICK, self.procecssTickEvent)
-        self.eventEngine.register(EVENT_TICK, self.procecssTickEvent)
+        #self.eventEngine.register(EVENT_TICK, self.procecssTickEvent)
  
     #----------------------------------------------------------------------
     def insertData(self, dbName, collectionName, data):

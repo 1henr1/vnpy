@@ -3,16 +3,11 @@
 
     "tick":
     [
+        ["SI-AG", "spread"]
     ],
 
     "bar":
     [
-        ["BTC_CNY_SPOT", "OKCOIN"],
-        ["LTC_CNY_SPOT", "OKCOIN"],
-        ["ETH_CNY_SPOT", "OKCOIN"]
-    ],
-
-    "active":
-    {
-    }
+        ["SI-AG", "spread"]
+    ]
 }
