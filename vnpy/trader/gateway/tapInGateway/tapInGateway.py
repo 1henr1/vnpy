@@ -146,7 +146,7 @@ class TapInGateway(VtGateway):
         self.mdConnected = False        # 行情API连接状态，登录完成后为True
         self.tdConnected = False        # 交易API连接状态
         
-        self.qryEnabled = False         # 循环查询
+        self.qryEnabled = True         # 循环查询
         
         self.fileName = self.gatewayName + '_connect.json'
         self.filePath = getJsonPath(self.fileName, __file__)        
@@ -166,17 +166,17 @@ class TapInGateway(VtGateway):
         # 解析json文件
         setting = json.load(f)
         try:
-            mdAuthCode = str(setting['mdAuthCode'])
-            mdUserID = str(setting['mdUserID'])
-            mdPassword = str(setting['mdPassword'])
-            mdAddress = str(setting['mdAddress'])
-            mdPort = setting['mdPort']
-            mdDllLocation = str(setting['mdDllLocation'])
-            tdAuthCode = str(setting['tdAuthCode'])
-            tdUserID = str(setting['tdUserID'])
-            tdPassword = str(setting['tdPassword'])
-            tdAddress = str(setting['tdAddress'])
-            tdPort = setting['tdPort']
+            self.mdAuthCode = str(setting['mdAuthCode'])
+            self.mdUserID = str(setting['mdUserID'])
+            self.mdPassword = str(setting['mdPassword'])
+            self.mdAddress = str(setting['mdAddress'])
+            self.mdPort = setting['mdPort']
+            self.mdDllLocation = str(setting['mdDllLocation'])
+            self.tdAuthCode = str(setting['tdAuthCode'])
+            self.tdUserID = str(setting['tdUserID'])
+            self.tdPassword = str(setting['tdPassword'])
+            self.tdAddress = str(setting['tdAddress'])
+            self.tdPort = setting['tdPort']
 
         except KeyError:
             log = VtLogData()
@@ -186,11 +186,20 @@ class TapInGateway(VtGateway):
             return            
         
         # 创建行情和交易接口对象
-        self.mdApi.connect(mdAuthCode, mdUserID, mdPassword, mdAddress, mdPort, mdDllLocation)
-        self.tdApi.connect(tdAuthCode, tdUserID, tdPassword, tdAddress, tdPort)
+        self.mdApi.connect(self.mdAuthCode,
+                           self.mdUserID,
+                           self.mdPassword,
+                           self.mdAddress,
+                           self.mdPort,
+                           self.mdDllLocation)
+        self.tdApi.connect(self.tdAuthCode,
+                           self.tdUserID,
+                           self.tdPassword,
+                           self.tdAddress,
+                           self.tdPort)
 
         # 初始化并启动查询
-        # self.initQuery()
+        self.initQuery()
     
     #----------------------------------------------------------------------
     def subscribe(self, subscribeReq):
@@ -229,16 +238,34 @@ class TapInGateway(VtGateway):
             self.mdApi.close()
         if self.tdConnected:
             self.tdApi.close()
-        
+
+    #----------------------------------------------------------------------
+    def checkLogin(self):
+        if self.mdConnected == False:
+            self.mdApi.connect(self.mdAuthCode,
+                               self.mdUserID,
+                               self.mdPassword,
+                               self.mdAddress,
+                               self.mdPort,
+                               self.mdDllLocation)
+
+        if self.tdConnected == False:
+            self.tdApi.connect(self.tdAuthCode,
+                               self.tdUserID,
+                               self.tdPassword,
+                               self.tdAddress,
+                               self.tdPort)
+
     #----------------------------------------------------------------------
     def initQuery(self):
         """初始化连续查询"""
         if self.qryEnabled:
             # 需要循环的查询函数列表
-            self.qryFunctionList = [self.qryAccount, self.qryPosition]
-            
+            #self.qryFunctionList = [self.qryAccount, self.qryPosition]
+            self.qryFunctionList = [self.checkLogin]
+
             self.qryCount = 0           # 查询触发倒计时
-            self.qryTrigger = 2         # 查询触发点
+            self.qryTrigger = 10         # 查询触发点
             self.qryNextFunction = 0    # 上次运行的查询函数索引
             
             self.startQuery()
@@ -299,6 +326,8 @@ class TapMdApi(MdApi):
         self.tradingDate = EMPTY_STRING     # 交易日期字符串
         self.tickTime = None                # 最新行情time对象
 
+        self.isApiReady = False
+
     #----------------------------------------------------------------------
     def onRspLogin(self,  errorCode,  data):
         """登陆回报"""
@@ -306,17 +335,7 @@ class TapMdApi(MdApi):
         if errorCode == 0:
             self.loginStatus = True
             self.gateway.mdConnected = True
-
             self.writeLog(text.DATA_SERVER_LOGIN)
-
-            # 重新订阅之前订阅的合约
-            for subscribeReq in self.subscribedSymbols:
-                self.subscribe(subscribeReq)
-
-            # 获取交易日
-            # self.tradingDate = data['TradingDay']
-            # self.tradingDt = datetime.strptime(self.tradingDate, '%Y%m%d')
-
         # 否则，推送错误信息
         else:
             err = VtErrorData()
@@ -324,7 +343,10 @@ class TapMdApi(MdApi):
             err.errorID = errorCode
             err.errorMsg = ""
             self.gateway.onError(err)
-        pass
+
+            ##if self.isApiReady:
+            ##    time.sleep(1)
+            ##    self.login()
 
     #----------------------------------------------------------------------
     def onAPIReady(self):
@@ -333,12 +355,19 @@ class TapMdApi(MdApi):
         self.gateway.mdConnected = True
         self.writeLog(text.DATA_SERVER_CONNECTED)
 
+        # 重新订阅之前订阅的合约
+        for subscribeReq in self.subscribedSymbols:
+            self.subscribe(subscribeReq)
+
     #----------------------------------------------------------------------
+    @simple_log
     def onDisconnect(self, reasonCode):
+        print "Disconnect Reason " + str(reasonCode)
         self.loginStatus = False
         self.gateway.mdConnected = False
         self.writeLog(text.DATA_SERVER_DISCONNECTED)
 
+        time.sleep(2)
         self.login()
 
     #----------------------------------------------------------------------
@@ -492,6 +521,9 @@ class TapMdApi(MdApi):
     #----------------------------------------------------------------------
     def login(self):
         """登录"""
+        if self.loginStatus:
+            return
+
         # 如果填入了用户名密码等，则登录
         if self.userID and self.password:
             req = {}
@@ -532,7 +564,8 @@ class TapTdApi(TdApi):
         self.loginStatus = False            # 登录状态
         self.authStatus = False             # 验证状态
         self.loginFailed = False            # 登录失败（账号密码错误）
-        
+        self.isApiReady = False             # 标识API是否曾经连接成功过
+
         self.userID = EMPTY_STRING          # 账号
         self.password = EMPTY_STRING        # 密码
         self.brokerID = EMPTY_STRING        # 经纪商代码
@@ -567,7 +600,11 @@ class TapTdApi(TdApi):
             self.gateway.onError(err)
 
             # 标识登录失败，防止用错误信息连续重复登录
-            self.loginFailed =  True
+            # self.loginFailed =  True
+
+            # if self.isApiReady:
+            #     time.sleep(1)
+            #     self.login()
 
     #----------------------------------------------------------------------
     @simple_log
@@ -586,12 +623,15 @@ class TapTdApi(TdApi):
         pass
 
     #----------------------------------------------------------------------
+    @simple_log
     def onDisconnect(self, reasonCode):
         """服务器断开"""
+        print "Disconnect Reason " + str(reasonCode)
         self.loginStatus = False
         self.gateway.tdConnected = False
         self.writeLog(text.TRADING_SERVER_DISCONNECTED)
 
+        time.sleep(2)
         self.login()
 
     #----------------------------------------------------------------------
@@ -954,7 +994,9 @@ class TapTdApi(TdApi):
     def login(self):
         """连接服务器"""
         # 如果之前有过登录失败，则不再进行尝试
-        if self.loginFailed:
+        # if self.loginFailed:
+        #    return
+        if self.loginStatus:
             return
 
         # 如果填入了用户名密码等，则登录
@@ -1068,9 +1110,3 @@ class TapTdApi(TdApi):
         log.gatewayName = self.gatewayName
         log.logContent = content
         self.gateway.onLog(log)        
-
-
-
-
-
-    
