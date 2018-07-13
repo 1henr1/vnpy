@@ -64,20 +64,13 @@ class CurveWidget(QtWidgets.QWidget):
     """用于显示价格走势图"""
     signal = QtCore.pyqtSignal(type(Event()))
 
-    # tick图的相关参数、变量
-    listlastPrice = np.empty(1000)
-
     fastMA = 0
     midMA = 0
     slowMA = 0
-    listfastMA = np.empty(1000)
-    listmidMA = np.empty(1000)
-    listslowMA = np.empty(1000)
     tickFastAlpha = 0.0333    # 快速均线的参数,30
     tickMidAlpha = 0.0167     # 中速均线的参数,60
     tickSlowAlpha = 0.0083    # 慢速均线的参数,120
 
-    ptr = 0
     ticktime = None  # tick数据时间
 
     # K线图EMA均线的参数、变量
@@ -85,32 +78,6 @@ class CurveWidget(QtWidgets.QWidget):
     EMASlowAlpha = 0.0083  # 慢速EMA的参数,120
     fastEMA = 0        # 快速EMA的数值
     slowEMA = 0        # 慢速EMA的数值
-    #listfastEMA = []
-    #listslowEMA = []
-
-    # K线缓存对象
-    barOpen = 0
-    barHigh = 0
-    barLow = 0
-    barClose = 0
-    barTime = None
-    barOpenInterest = 0
-    num = 0
-
-    # 保存K线数据的列表对象
-    listBar = []
-    listClose = []
-    listHigh = []
-    listLow = []
-    listOpen = []
-    # listOpenInterest = []
-
-    # 是否完成了历史数据的读取
-    initCompleted = False
-    # 初始化时读取的历史数据的起始日期(可以选择外部设置)
-    startDate = "2018-07-11"
-    symbol = 'SI-AG.spread'
-
 
     #----------------------------------------------------------------------
     def __init__(self,  mainEngine, eventEngine, parent=None):
@@ -127,7 +94,6 @@ class CurveWidget(QtWidgets.QWidget):
         # 对象字典
         self.tickSymbolSet = set()
         self.barSymbolSet = set()
-
 
         # K线合成器字典
         self.bgDict = {}
@@ -154,7 +120,6 @@ class CurveWidget(QtWidgets.QWidget):
 
         self.vbl_2 = QtGui.QVBoxLayout()
         self.initplotKline()  # plotKline初始化
-        #self.initplotTendency()  # plot分时图的初始化
 
         # 整体布局
         self.hbl = QtGui.QHBoxLayout()
@@ -166,11 +131,39 @@ class CurveWidget(QtWidgets.QWidget):
     def init(self):
         """初始化"""
         self.loadSetting()
+        ## 初始化绘图数据
+        self.initData()
         ## 读取历史数据
         self.initHistoricalData()
         ## 注册事件， 开始实时绘制
         self.registerEvent()
-        pass
+
+    def initData(self):
+        self.ptr = 0
+        self.num = 0
+
+        # tick图的相关参数、变量
+        self.listlastPrice = np.empty(1000)
+        self.listfastMA = np.empty(1000)
+        self.listmidMA = np.empty(1000)
+        self.listslowMA = np.empty(1000)
+        # K线缓存对象
+        self.barOpen = 0
+        self.barHigh = 0
+        self.barLow = 0
+        self.barClose = 0
+        self.barTime = None
+        self.barOpenInterest = 0
+        # 保存K线数据的列表对象
+        self.listBar = []
+        self.listClose = []
+        self.listHigh = []
+        self.listLow = []
+        self.listOpen = []
+        # listOpenInterest = []
+
+        # 是否完成了历史数据的读取
+        self.initCompleted = False
 
     #----------------------------------------------------------------------
     def loadSetting(self):
@@ -271,7 +264,7 @@ class CurveWidget(QtWidgets.QWidget):
                     bar.volume = data["volume"]             # 成交量
                     bar.openInterest = data["openInterest"]       # 持仓量
 
-                    self.onBar(bar)
+                    self.onBar(bar.open, bar.close, bar.low, bar.high, bar.openInterest)
         """
         if cx:
             for data in cx:
@@ -362,7 +355,8 @@ class CurveWidget(QtWidgets.QWidget):
     def updateMarketData(self, event):
         """更新行情"""
         data = event.dict_['data']
-        if data.vtSymbol != self.symbol:
+        vtSymbol = data.vtSymbol
+        if vtSymbol not in self.tickSymbolSet:
             return
 
         tick = VtTickData()
@@ -468,7 +462,7 @@ class CurveWidget(QtWidgets.QWidget):
             self.barClose = tick.lastPrice
             self.barTime = self.ticktime
             self.barOpenInterest = tick.openInterest
-            self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+            self.onBar(self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
         else:
             # 如果是当前一分钟内的数据
             if self.ticktime.minute == self.barTime.minute:
@@ -489,8 +483,7 @@ class CurveWidget(QtWidgets.QWidget):
             # 如果是新一分钟的数据
             else:
                 # 先保存K线收盘价
-                self.num += 1
-                self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+                self.onBar(self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
                 # 初始化新的K线数据
                 self.barOpen = tick.lastPrice
                 self.barHigh = tick.lastPrice
@@ -500,13 +493,14 @@ class CurveWidget(QtWidgets.QWidget):
                 self.barOpenInterest = tick.openInterest
 
     #----------------------------------------------------------------------
-    def onBar(self, n, o, c, l, h, oi):
-        self.listBar.append((n, o, c, l, h))
+    def onBar(self, o, c, l, h, oi):
+        self.listBar.append((self.num, o, c, l, h))
         self.listOpen.append(o)
         self.listClose.append(c)
         self.listHigh.append(h)
         self.listLow.append(l)
         #self.listOpenInterest.append(oi)
+        self.num += 1
 
         # 调用画图函数
         self.plotKline()     # K线图
@@ -518,7 +512,7 @@ class CurveWidget(QtWidgets.QWidget):
         try:
             self.__mongoConnection = MongoClient()
             self.__mongoConnected = True
-            self.__mongoTickDB = self.__mongoConnection['VnTrader_Tick_Db']
+            self.__mongoTickDB = self.__mongoConnection['VnTrader_1Min_Db']
         except ConnectionFailure:
             pass
 
@@ -538,9 +532,10 @@ class CurveWidget(QtWidgets.QWidget):
 
             # 如果输入了读取TICK的最后日期
             if endDate:
-                cx = collection.find({'date': {'$gte': startDate, '$lte': endDate}})
+                cx = collection.find({'date': {'$gte': startDate.strftime('%Y-%m-%d'),
+                                               '$lte': endDate.strftime('%Y-%m-%d')}})
             else:
-                cx = collection.find({'date': {'$gte': startDate}})
+                cx = collection.find({'date': {'$gte': startDate.strftime('%Y-%m-%d')}})
             return cx
         else:
             return None

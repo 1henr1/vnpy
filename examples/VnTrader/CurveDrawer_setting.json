@@ -1,0 +1,13 @@
+{
+    "working": true,
+
+    "tick":
+    [
+        ["SI-AG", "spread"]
+    ],
+
+    "bar":
+    [
+        ["SI-AG", "spread"]
+    ]
+}
