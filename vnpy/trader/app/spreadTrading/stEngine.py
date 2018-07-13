@@ -194,6 +194,9 @@ class StDataEngine(object):
     #----------------------------------------------------------------------
     def putTickEvent(self, spread):
         """发出价差行情更新事件"""
+        ## 首先判断是否是可交易阶段
+        if not spread.isTradingPeriod:
+            return
         spreadtick = spread.convert2tick()
         if spreadtick.lastVolume == 0:
             return
