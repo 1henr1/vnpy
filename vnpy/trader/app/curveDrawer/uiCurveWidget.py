@@ -59,6 +59,46 @@ class CandlestickItem(pg.GraphicsObject):
         ## (in this case, QPicture does all the work of computing the bouning rect for us)
         return QtCore.QRectF(self.picture.boundingRect())
 
+
+########################################################################
+# 时间序列，横坐标支持
+########################################################################
+class MyStringAxis(pg.AxisItem):
+    """时间序列横坐标支持"""
+
+    # 初始化
+    #----------------------------------------------------------------------
+    def __init__(self, xdict, *args, **kwargs):
+        pg.AxisItem.__init__(self, *args, **kwargs)
+        self.minVal = 0
+        self.maxVal = 0
+        self.xdict  = xdict
+        self.x_values = np.asarray(xdict.keys())
+        self.x_strings = xdict.values()
+        self.setPen(color=(255, 255, 255, 255), width=0.8)
+        self.setStyle(autoExpandTextSpace=True)
+
+    # 更新坐标映射表
+    #----------------------------------------------------------------------
+    def update_xdict(self, xdict):
+        self.xdict.update(xdict)
+        self.x_values  = np.asarray(self.xdict.keys())
+        self.x_strings = self.xdict.values()
+
+    # 将原始横坐标转换为时间字符串,第一个坐标包含日期
+    #----------------------------------------------------------------------
+    def tickStrings(self, values, scale, spacing):
+        strings = []
+        for v in values:
+            vs = v * scale
+            if vs in self.x_values:
+                vstr = self.x_strings[int(vs)]
+                vstr = vstr.strftime('%m%d %H:%M:%S')
+            else:
+                vstr = ""
+            strings.append(vstr)
+        return strings
+
 ########################################################################
 class CurveWidget(QtWidgets.QWidget):
     """用于显示价格走势图"""
@@ -71,7 +111,7 @@ class CurveWidget(QtWidgets.QWidget):
     tickMidAlpha = 0.0167     # 中速均线的参数,60
     tickSlowAlpha = 0.0083    # 慢速均线的参数,120
 
-    ticktime = None  # tick数据时间
+    # ticktime = None  # tick数据时间
 
     # K线图EMA均线的参数、变量
     EMAFastAlpha = 0.0167    # 快速EMA的参数,60
@@ -97,6 +137,7 @@ class CurveWidget(QtWidgets.QWidget):
 
         # K线合成器字典
         self.bgDict = {}
+        self.listBar = []
 
         # 配置文件
         self.settingFileName = 'CurveDrawer_setting.json'
@@ -115,8 +156,8 @@ class CurveWidget(QtWidgets.QWidget):
         buttonInit = QtWidgets.QPushButton(u'初始化')
         buttonInit.clicked.connect(self.init)
 
-        self.vbl_1 = QtGui.QVBoxLayout()
-        self.initplotTick()  # plotTick初始化
+        #self.vbl_1 = QtGui.QVBoxLayout()
+        #self.initplotTick()  # plotTick初始化
 
         self.vbl_2 = QtGui.QVBoxLayout()
         self.initplotKline()  # plotKline初始化
@@ -124,7 +165,7 @@ class CurveWidget(QtWidgets.QWidget):
         # 整体布局
         self.hbl = QtGui.QHBoxLayout()
         self.hbl.addWidget(buttonInit)
-        self.hbl.addLayout(self.vbl_1)
+        #self.hbl.addLayout(self.vbl_1)
         self.hbl.addLayout(self.vbl_2)
         self.setLayout(self.hbl)
 
@@ -140,7 +181,9 @@ class CurveWidget(QtWidgets.QWidget):
 
     def initData(self):
         self.ptr = 0
-        self.num = 0
+        self.barNum = 0
+
+        self.bar = VtBarData()
 
         # tick图的相关参数、变量
         self.listlastPrice = np.empty(1000)
@@ -215,21 +258,17 @@ class CurveWidget(QtWidgets.QWidget):
     #----------------------------------------------------------------------
     def initplotKline(self):
         """Kline"""
-        self.pw2 = pg.PlotWidget(name='Plot2')  # K线图
+        xdict = {}
+        self.axisTime = MyStringAxis(xdict, orientation='bottom')
+
+        self.pw2 = pg.PlotWidget(name='Plot2', axisItems={'bottom': self.axisTime})  # K线图
         self.vbl_2.addWidget(self.pw2)
         self.pw2.setDownsampling(mode='peak')
         self.pw2.setClipToView(True)
         self.pw2.showGrid(x=True, y=True)
 
-
-        #self.curve5 = self.pw2.plot()
-        #self.curve6 = self.pw2.plot()
-
         self.candle = CandlestickItem(self.listBar)
         self.pw2.addItem(self.candle)
-        ## Draw an arrowhead next to the text box
-        # self.arrow = pg.ArrowItem()
-        # self.pw2.addItem(self.arrow)
 
     #----------------------------------------------------------------------
     def initHistoricalData(self, startDate=None):
@@ -242,29 +281,30 @@ class CurveWidget(QtWidgets.QWidget):
             else:
                 td = timedelta(days=1)     # 读取1天的历史数据
                 today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-                cx = self.loadTick(vtSymbol, today-td)
+                cx = self.loadTick(vtSymbol, today-td, today)
 
             if cx:
                 for data in cx:
-                    bar = VtBarData()
+                    #bar = VtBarData()
 
-                    bar.vtSymbol = data["vtSymbol"]  # vt系统代码
-                    bar.symbol = data["symbol"]          # 代码
-                    bar.exchange = data["exchange"]        # 交易所
+                    self.bar.vtSymbol = data["vtSymbol"]  # vt系统代码
+                    self.bar.symbol = data["symbol"]          # 代码
+                    self.bar.exchange = data["exchange"]        # 交易所
 
-                    bar.open = data["open"]             # OHLC
-                    bar.high = data["high"]
-                    bar.low = data["low"]
-                    bar.close = data["close"]
+                    self.bar.open = data["open"]             # OHLC
+                    self.bar.high = data["high"]
+                    self.bar.low = data["low"]
+                    self.bar.close = data["close"]
 
-                    bar.date = data["date"]            # bar开始的时间，日期
-                    bar.time = data["time"]            # 时间
-                    bar.datetime = data["datetime"]                # python的datetime时间对象
+                    self.bar.date = data["date"]            # bar开始的时间，日期
+                    self.bar.time = data["time"]            # 时间
+                    self.bar.datetime = data["datetime"]                # python的datetime时间对象
 
-                    bar.volume = data["volume"]             # 成交量
-                    bar.openInterest = data["openInterest"]       # 持仓量
+                    self.bar.volume = data["volume"]             # 成交量
+                    self.bar.openInterest = data["openInterest"]       # 持仓量
 
-                    self.onBar(bar.open, bar.close, bar.low, bar.high, bar.openInterest)
+                    self.onBar(self.bar)
+                    #self.onBar(bar.open, bar.close, bar.low, bar.high, bar.openInterest)
         """
         if cx:
             for data in cx:
@@ -328,13 +368,13 @@ class CurveWidget(QtWidgets.QWidget):
         self.initCompleted = True
         if self.initCompleted:
             self.curve1.setData(self.listlastPrice[:self.ptr])
-            self.curve2.setData(self.listfastMA[:self.ptr], pen=(255, 0, 0), name="Red curve")
-            self.curve3.setData(self.listmidMA[:self.ptr], pen=(0, 255, 0), name="Green curve")
-            self.curve4.setData(self.listslowMA[:self.ptr], pen=(0, 0, 255), name="Blue curve")
+            #self.curve2.setData(self.listfastMA[:self.ptr], pen=(255, 0, 0), name="Red curve")
+            #self.curve3.setData(self.listmidMA[:self.ptr], pen=(0, 255, 0), name="Green curve")
+            #self.curve4.setData(self.listslowMA[:self.ptr], pen=(0, 0, 255), name="Blue curve")
             self.curve1.setPos(-self.ptr, 0)
-            self.curve2.setPos(-self.ptr, 0)
-            self.curve3.setPos(-self.ptr, 0)
-            self.curve4.setPos(-self.ptr, 0)
+            #self.curve2.setPos(-self.ptr, 0)
+            #self.curve3.setPos(-self.ptr, 0)
+            #self.curve4.setPos(-self.ptr, 0)
 
     #----------------------------------------------------------------------
     def plotKline(self):
@@ -349,7 +389,7 @@ class CurveWidget(QtWidgets.QWidget):
             self.pw2.removeItem(self.candle)
             self.candle = CandlestickItem(self.listBar)
             self.pw2.addItem(self.candle)
-            self.pw2.setYRange(min(self.listLow), max(self.listHigh))
+            # self.pw2.setYRange(min(self.listLow), max(self.listHigh))
 
     #----------------------------------------------------------------------
     def updateMarketData(self, event):
@@ -409,15 +449,12 @@ class CurveWidget(QtWidgets.QWidget):
 
         self.onTick(tick)  # tick数据更新
 
-        # # 将数据插入MongoDB数据库，实盘建议另开程序记录TICK数据
-        # self.__recordTick(data)
-
     #----------------------------------------------------------------------
     def onTick(self, tick):
         """tick数据更新"""
 
         # 首先生成datetime.time格式的时间（便于比较）,从字符串时间转化为time格式的时间
-        self.ticktime = tick.datetime   # python的datetime时间对象
+        #self.ticktime = tick.datetime   # python的datetime时间对象
 
         # 计算tick图的相关参数
         if self.ptr == 0:
@@ -450,57 +487,66 @@ class CurveWidget(QtWidgets.QWidget):
             self.listslowMA[:tmp.shape[0]] = tmp
 
         # 调用画图函数
-        self.plotTick()      # tick图
+        # self.plotTick()      # tick图
 
         # K线数据
         # 假设是收到的第一个TICK
-        if self.barOpen == 0:
+        if self.bar.datetime == None:
             # 初始化新的K线数据
-            self.barOpen = tick.lastPrice
-            self.barHigh = tick.lastPrice
-            self.barLow = tick.lastPrice
-            self.barClose = tick.lastPrice
-            self.barTime = self.ticktime
-            self.barOpenInterest = tick.openInterest
-            self.onBar(self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+            self.bar.vtSymbol = tick.vtSymbol  # vt系统代码
+            # bar.symbol = data["symbol"]          # 代码
+            # bar.exchange = data["exchange"]        # 交易所
+            self.bar.open = tick.lastPrice             # OHLC
+            self.bar.high = tick.lastPrice
+            self.bar.low = tick.lastPrice
+            self.bar.close = tick.lastPrice
+            self.bar.date = tick.datetime.strftime('%Y-%m-%d')            # bar开始的时间，日期
+            self.bar.time = tick.datetime.strftime('%H:%M:%S')            # 时间
+            self.bar.datetime = tick.datetime                # python的datetime时间对象
+            # bar.volume = data["volume"]             # 成交量
+            # bar.openInterest = data["openInterest"]       # 持仓量
+
+            # self.barOpen = tick.lastPrice
+            # self.barHigh = tick.lastPrice
+            # self.barLow = tick.lastPrice
+            # self.barClose = tick.lastPrice
+            # self.barTime = self.ticktime
+            # self.barOpenInterest = tick.openInterest
+            # self.onBar(self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+            self.lastClose = tick.lastPrice
+            self.onBar(self.bar)
         else:
             # 如果是当前一分钟内的数据
-            if self.ticktime.minute == self.barTime.minute:
+            if tick.datetime.minute == self.bar.datetime.minute:
                 # 汇总TICK生成K线
-                self.barHigh = max(self.barHigh, tick.lastPrice)
-                self.barLow = min(self.barLow, tick.lastPrice)
-                self.barClose = tick.lastPrice
-                self.barTime = self.ticktime
-                #self.listBar.pop()  # 这里pop是为了使得最后一个数据在一分钟内也是实时的
-                # self.listfastEMA.pop()
-                # self.listslowEMA.pop()
-                # self.listOpen.pop()
-                # self.listClose.pop()
-                # self.listHigh.pop()
-                # self.listLow.pop()
-                #self.listOpenInterest.pop()
-                #self.onBar(self.num, self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+                self.bar.high = max(self.bar.high, tick.lastPrice)
+                self.bar.low = min(self.bar.low, tick.lastPrice)
+                self.bar.close = tick.lastPrice
+                self.bar.datetime = tick.datetime
             # 如果是新一分钟的数据
             else:
                 # 先保存K线收盘价
-                self.onBar(self.barOpen, self.barClose, self.barLow, self.barHigh, self.barOpenInterest)
+                self.lastClose = self.bar.close
+                self.onBar(self.bar)
                 # 初始化新的K线数据
-                self.barOpen = tick.lastPrice
-                self.barHigh = tick.lastPrice
-                self.barLow = tick.lastPrice
-                self.barClose = tick.lastPrice
-                self.barTime = self.ticktime
-                self.barOpenInterest = tick.openInterest
+                self.bar.open = self.lastClose
+                self.bar.high = max(self.lastClose, tick.lastPrice)
+                self.bar.low = min(self.lastClose, tick.lastPrice)
+                self.bar.close = tick.lastPrice
+                self.bar.datetime = tick.datetime
+                #self.barOpenInterest = tick.openInterest
 
     #----------------------------------------------------------------------
-    def onBar(self, o, c, l, h, oi):
-        self.listBar.append((self.num, o, c, l, h))
-        self.listOpen.append(o)
-        self.listClose.append(c)
-        self.listHigh.append(h)
-        self.listLow.append(l)
+    def onBar(self, bar):
+        self.listBar.append((self.barNum, bar.open, bar.close, bar.low, bar.high))
+        self.listOpen.append(bar.open)
+        self.listClose.append(bar.close)
+        self.listHigh.append(bar.high)
+        self.listLow.append(bar.low)
         #self.listOpenInterest.append(oi)
-        self.num += 1
+
+        self.axisTime.update_xdict({self.barNum : bar.datetime})
+        self.barNum += 1
 
         # 调用画图函数
         self.plotKline()     # K线图
@@ -532,10 +578,10 @@ class CurveWidget(QtWidgets.QWidget):
 
             # 如果输入了读取TICK的最后日期
             if endDate:
-                cx = collection.find({'date': {'$gte': startDate.strftime('%Y-%m-%d'),
-                                               '$lte': endDate.strftime('%Y-%m-%d')}})
+                cx = collection.find({'date': {'$gte': startDate.strftime('%Y%m%d'),
+                                               '$lte': endDate.strftime('%Y%m%d')}})
             else:
-                cx = collection.find({'date': {'$gte': startDate.strftime('%Y-%m-%d')}})
+                cx = collection.find({'date': {'$gte': startDate.strftime('%Y%m%d')}})
             return cx
         else:
             return None
