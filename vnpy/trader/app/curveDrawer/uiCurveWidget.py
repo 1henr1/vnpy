@@ -93,7 +93,7 @@ class MyStringAxis(pg.AxisItem):
             vs = v * scale
             if vs in self.x_values:
                 vstr = self.x_strings[int(vs)]
-                vstr = vstr.strftime('%m%d %H:%M:%S')
+                vstr = vstr.strftime('%%H:%M:%S')
             else:
                 vstr = ""
             strings.append(vstr)
