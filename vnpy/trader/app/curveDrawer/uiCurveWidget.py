@@ -93,7 +93,7 @@ class MyStringAxis(pg.AxisItem):
             vs = v * scale
             if vs in self.x_values:
                 vstr = self.x_strings[int(vs)]
-                vstr = vstr.strftime('%H:%M:%S')
+                vstr = vstr.strftime('%H:%M')
             else:
                 vstr = ""
             strings.append(vstr)
@@ -281,7 +281,7 @@ class CurveWidget(QtWidgets.QWidget):
             else:
                 td = timedelta(days=1)     # 读取1天的历史数据
                 today = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-                cx = self.loadTick(vtSymbol, today-td, today)
+                cx = self.loadTick(vtSymbol, today-td)
 
             if cx:
                 for data in cx:
