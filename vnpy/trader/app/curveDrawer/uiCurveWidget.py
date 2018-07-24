@@ -265,7 +265,7 @@ class CurveWidget(QtWidgets.QWidget):
         self.vbl_2.addWidget(self.pw2)
         self.pw2.setDownsampling(mode='peak')
         self.pw2.setClipToView(True)
-        self.pw2.showGrid(x=True, y=True)
+        self.pw2.showGrid(x=False, y=True)
 
         self.candle = CandlestickItem(self.listBar)
         self.pw2.addItem(self.candle)
@@ -545,8 +545,12 @@ class CurveWidget(QtWidgets.QWidget):
         self.listLow.append(bar.low)
         #self.listOpenInterest.append(oi)
 
+        if bar.datetime.minute == 0:
+            self.pw2.addLine(x=self.barNum)
+
         self.axisTime.update_xdict({self.barNum : bar.datetime})
         self.barNum += 1
+
 
         # 调用画图函数
         self.plotKline()     # K线图

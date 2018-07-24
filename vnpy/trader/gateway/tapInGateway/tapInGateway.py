@@ -342,6 +342,7 @@ class TapMdApi(MdApi):
             err.gatewayName = self.gatewayName
             err.errorID = errorCode
             err.errorMsg = ""
+            print errorCode
             self.gateway.onError(err)
 
             ##if self.isApiReady:

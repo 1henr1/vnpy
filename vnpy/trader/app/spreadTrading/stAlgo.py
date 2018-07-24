@@ -35,7 +35,7 @@ class StAlgoGroup(object):
         self.spread = spread                # 价差对象
         self.algoGroupName = EMPTY_STRING   # 算法名称
         self.algoGroup = []                 # 算法列表
-        self.isTradingPeriod = False        # 标识是否处于可交易时间段
+        self.isTrading= False               # 标识是否处于可交易时间段
 
         self._initAlgoGroup()
 
@@ -58,12 +58,12 @@ class StAlgoGroup(object):
             return
 
         if spread.isTradingPeriod():
-            if not self.isTradingPeriod:
-                self.isTradingPeriod = True
+            if not self.isTrading:
+                self.isTrading = True
                 self.writeLog('已进入可交易时间， 请设置好策略参数 ')
         else:
-            if self.isTradingPeriod:
-                self.isTradingPeriod = False
+            if self.isTrading:
+                self.isTrading= False
                 self.writeLog('当前是非交易时间， 系统不再下单')
             return
 
@@ -799,6 +799,7 @@ class SniperAlgo(StAlgoTemplate):
             return
         
         for vtOrderID in orderList:
+            print("撤单对应的vtOrderID" + str(vtOrderID))
             self.algoEngine.cancelOrder(vtOrderID)
             
         self.writeLog(u'撤单%s的所有委托' %vtSymbol)

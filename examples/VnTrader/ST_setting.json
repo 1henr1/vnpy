@@ -6,7 +6,7 @@
             {
                 "vtSymbol": "SI 1809.COMEX",
                 "ratio": -1,
-                "multiplier": -205.7648,
+                "multiplier": -218.625,
                 "payup": 0
             },
 
@@ -22,10 +22,10 @@
 		"tradingPeriod": [
 			{
 				"startTime": "00:00:00",
-				"endTime": "02:30:00"
+				"endTime": "02:29:00"
 			},
 			{
-				"startTime": "09:00:00",
+				"startTime": "09:05:00",
 				"endTime": "11:30:00"
 			},
 			{
