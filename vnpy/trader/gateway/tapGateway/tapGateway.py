@@ -418,7 +418,7 @@ class TapMdApi(MdApi):
         tick.upperLimit = data['QLimitUpPrice']
         tick.lowerLimit = data['QLimitDownPrice']
 
-        if data['QBidPrice1'] < data['QImpliedBidPrice']:
+        if  data['QImpliedBidQty'] > 0  and  data['QBidPrice1'] < data['QImpliedBidPrice']:
             tick.bidPrice1 = data['QImpliedBidPrice']
             tick.bidVolume1 = data['QImpliedBidQty']
         elif data['QBidPrice1'] == data['QImpliedBidPrice']:
@@ -428,7 +428,7 @@ class TapMdApi(MdApi):
             tick.bidPrice1 = data['QBidPrice1']
             tick.bidVolume1 = data['QBidQty1']
 
-        if data['QAskPrice1'] > data['QImpliedAskPrice']:
+        if  data['QImpliedAskQty'] > 0  and  data['QAskPrice1'] > data['QImpliedAskPrice']:
             tick.askPrice1 = data['QImpliedAskPrice']
             tick.askVolume1 = data['QImpliedAskQty']
         elif data['QAskPrice1'] == data['QImpliedAskPrice']:
